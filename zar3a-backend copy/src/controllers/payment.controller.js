@@ -19,7 +19,8 @@ const startSimulation = (req, res, order, transaction, gateway) => {
   console.log(`    Total Amount: EGP ${order.totalAmount}`);
   console.log(`    Payment Method: ${transaction.paymentMethod}`);
 
-  const checkoutUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?success=true&gateway=${gateway.toLowerCase()}&orderId=${order.id}&simulator=true&transactionId=${transaction.id}`;
+  const clientUrl = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
+  const checkoutUrl = `${clientUrl}/payment?success=true&gateway=${gateway.toLowerCase()}&orderId=${order.id}&simulator=true&transactionId=${transaction.id}`;
 
   return res.json({
     checkoutUrl,
@@ -124,13 +125,16 @@ export const createOrderPayment = async (req, res) => {
 
     // ── Handle Payment Routing ──────────────────────────────────────────────────
 
+    const isSimulationMode = process.env.PAYMENT_SIMULATION_MODE === 'true';
+
     // 1. STRIPE Integration
     if (paymentMethod === 'STRIPE') {
       const stripe = getStripe();
-      if (!stripe) {
+      if (!stripe || isSimulationMode) {
         return startSimulation(req, res, order, transaction, 'STRIPE');
       }
 
+      const clientUrl = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: orderItemsData.map(item => ({
@@ -145,8 +149,8 @@ export const createOrderPayment = async (req, res) => {
           quantity: item.quantity,
         })),
         mode: 'payment',
-        success_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?success=true&gateway=stripe&session_id={CHECKOUT_SESSION_ID}&orderId=${order.id}&transactionId=${transaction.id}`,
-        cancel_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?cancel=true&gateway=stripe&orderId=${order.id}`,
+        success_url: `${clientUrl}/payment?success=true&gateway=stripe&session_id={CHECKOUT_SESSION_ID}&orderId=${order.id}&transactionId=${transaction.id}`,
+        cancel_url: `${clientUrl}/payment?cancel=true&gateway=stripe&orderId=${order.id}`,
         metadata: {
           orderId: String(order.id),
           userId: String(user.id),
@@ -165,7 +169,7 @@ export const createOrderPayment = async (req, res) => {
 
     // 2. PAYMOB CARD Integration
     if (paymentMethod === 'PAYMOB_CARD') {
-      if (!process.env.PAYMOB_API_KEY || !process.env.PAYMOB_CARD_INTEGRATION_ID || !process.env.PAYMOB_IFRAME_ID) {
+      if (!process.env.PAYMOB_API_KEY || !process.env.PAYMOB_CARD_INTEGRATION_ID || !process.env.PAYMOB_IFRAME_ID || isSimulationMode) {
         return startSimulation(req, res, order, transaction, 'PAYMOB_CARD');
       }
 
@@ -234,7 +238,7 @@ export const createOrderPayment = async (req, res) => {
         return res.status(400).json({ message: 'Mobile wallet phone number is required' });
       }
 
-      if (!process.env.PAYMOB_API_KEY || !process.env.PAYMOB_WALLET_INTEGRATION_ID) {
+      if (!process.env.PAYMOB_API_KEY || !process.env.PAYMOB_WALLET_INTEGRATION_ID || isSimulationMode) {
         return startSimulation(req, res, order, transaction, 'VODAFONE_CASH');
       }
 
@@ -307,7 +311,8 @@ export const createOrderPayment = async (req, res) => {
 
     // 4. CASH ON DELIVERY (COD) Integration
     if (paymentMethod === 'COD') {
-      const checkoutUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?success=true&gateway=cod&orderId=${order.id}&transactionId=${transaction.id}`;
+      const clientUrl = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
+      const checkoutUrl = `${clientUrl}/payment?success=true&gateway=cod&orderId=${order.id}&transactionId=${transaction.id}`;
       return res.json({
         checkoutUrl,
         orderId: order.id,
@@ -344,13 +349,16 @@ export const createSubscriptionPayment = async (req, res) => {
     }
 
     const stripe = getStripe();
-    if (!stripe) {
+    const isSimulationMode = process.env.PAYMENT_SIMULATION_MODE === 'true';
+    const clientUrl = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
+
+    if (!stripe || isSimulationMode) {
       console.log(`\n🌱 Zar3a Payments Simulator (Subscription Simulation Mode Activated)`);
       console.log(`    User ID: ${user.id}`);
       console.log(`    Tier: ${tier}`);
       console.log(`    Amount: EGP ${price}`);
 
-      const checkoutUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?success=true&gateway=stripe&simulator=true&type=subscription&tier=${tier}`;
+      const checkoutUrl = `${clientUrl}/payment?success=true&gateway=stripe&simulator=true&type=subscription&tier=${tier}`;
       return res.json({ checkoutUrl, isSimulation: true });
     }
 
@@ -370,8 +378,8 @@ export const createSubscriptionPayment = async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?success=true&gateway=stripe&session_id={CHECKOUT_SESSION_ID}&type=subscription&tier=${tier}`,
-      cancel_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/subscribe?cancel=true`,
+      success_url: `${clientUrl}/payment?success=true&gateway=stripe&session_id={CHECKOUT_SESSION_ID}&type=subscription&tier=${tier}`,
+      cancel_url: `${clientUrl}/subscribe?cancel=true`,
       metadata: {
         userId: String(user.id),
         type: 'subscription',
