@@ -1,0 +1,297 @@
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  LuBell,
+  LuUser,
+  LuSun,
+  LuMoon,
+  LuMenu,
+  LuX,
+  LuLayoutDashboard,
+  LuShoppingBag,
+  LuUsers,
+  LuMessageSquare,
+  LuSettings,
+  LuShield,
+  LuLogOut,
+  LuChevronDown,
+  LuLanguages,
+} from "react-icons/lu";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { useTheme } from "../../context/ThemeContext";
+import Logo from "../../assets/Logo.png";
+
+const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
+  const { user, logout, unreadCount } = useAuth();
+  const { t, toggleLang, lang } = useLanguage();
+  const { isDarkMode: isDark, toggleTheme } = useTheme();
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
+
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const chatPath = user?.role === 'ADMIN'
+    ? "/admin/chat"
+    : user?.role === 'AGRO_EXPERT'
+    ? "/consultations"
+    : "/messages";
+
+  const handleChatClick = (e) => {
+    e.preventDefault();
+    if (pathname === chatPath) {
+      navigate(-1);
+    } else {
+      navigate(chatPath);
+    }
+  };
+
+  const handleNotificationsClick = (e) => {
+    e.preventDefault();
+    if (pathname === "/notifications") {
+      navigate(-1);
+    } else {
+      navigate("/notifications");
+    }
+  };
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Get profile link based on user role
+  const getProfileLink = () => {
+    if (!user?.role && !user?.pendingRole) return null;
+    const roleToUse = user.role || user.pendingRole;
+    const profileMap = {
+      'FARMER': '/profile/farmer',
+      'BUYER': '/profile/buyer',
+      'SUPPLIER': '/profile/supplier',
+      'AGRO_EXPERT': '/profile/expert',
+      'ADMIN': '/profile/admin',
+    };
+    return profileMap[roleToUse] || null;
+  };
+
+  const profileLink = getProfileLink();
+
+  const navMap = {
+    ADMIN: [
+      { path: "/dashboard",          label: t("nav.dashboard"),        icon: <LuLayoutDashboard /> },
+      { path: "/products-dashboard", label: t("nav.productDashboard"), icon: <LuLayoutDashboard /> },
+      { path: "/crop-market",        label: t("nav.cropMarket"),       icon: <LuShoppingBag /> },
+      { path: "/agri-shop",          label: t("nav.agriShop"),         icon: <LuShoppingBag /> },
+      { path: "/experts",            label: t("nav.experts"),          icon: <LuUsers /> },
+      { path: "/chatbot",            label: t("nav.aiAssistant"),      icon: <LuMessageSquare /> },
+      { path: "/admin/chat",         label: t("admin.chatTitle") || "Messages", icon: <LuMessageSquare /> },
+      { path: "/track-orders",       label: t("nav.trackOrder"),       icon: <LuShoppingBag /> },
+      { path: "/admin",              label: t("nav.admin"),            icon: <LuShield /> },
+    ],
+    FARMER: [
+      { path: "/dashboard",          label: t("nav.smartFarming"),     icon: <LuLayoutDashboard /> },
+      { path: "/products-dashboard", label: t("nav.productDashboard"), icon: <LuLayoutDashboard /> },
+      { path: "/crop-market",        label: t("nav.cropMarket"),       icon: <LuShoppingBag /> },
+      { path: "/agri-shop",          label: t("nav.agriShop"),         icon: <LuShoppingBag /> },
+      { path: "/experts",            label: t("nav.experts"),          icon: <LuUsers /> },
+      { path: "/track-orders",       label: t("nav.trackOrder"),       icon: <LuShoppingBag /> },
+    ],
+    SUPPLIER: [
+      { path: "/products-dashboard", label: t("nav.productDashboard"), icon: <LuLayoutDashboard /> },
+      { path: "/crop-market",        label: t("nav.cropMarket"),       icon: <LuShoppingBag /> },
+      { path: "/agri-shop",          label: t("nav.agriShop"),         icon: <LuShoppingBag /> },
+      { path: "/experts",            label: t("nav.experts"),          icon: <LuUsers /> },
+      { path: "/track-orders",       label: t("nav.trackOrder"),       icon: <LuShoppingBag /> },
+    ],
+    BUYER: [
+      { path: "/crop-market", label: t("nav.cropMarket"), icon: <LuShoppingBag /> },
+      { path: "/agri-shop",   label: t("nav.agriShop"),   icon: <LuShoppingBag /> },
+      { path: "/track-orders", label: t("nav.trackOrder"), icon: <LuShoppingBag /> },
+    ],
+    AGRO_EXPERT: [
+      { path: "/crop-market",   label: t("nav.cropMarket"),       icon: <LuShoppingBag /> },
+      { path: "/agri-shop",     label: t("nav.agriShop"),         icon: <LuShoppingBag /> },
+      { path: "/chatbot",       label: t("nav.aiAssistant"),      icon: <LuMessageSquare /> },
+      { path: "/consultations", label: t("nav.consultations") || "Consultations", icon: <LuMessageSquare /> },
+      { path: "/track-orders",  label: t("nav.trackOrder"),       icon: <LuShoppingBag /> },
+    ],
+  };
+
+  const navItems = user
+    ? navMap[user?.role] || [{ path: "/marketplace", label: t("nav.marketplace"), icon: <LuShoppingBag /> }]
+    : [{ path: "/marketplace", label: t("nav.marketplace"), icon: <LuShoppingBag /> }];
+
+  const allNavItems = navItems;
+
+  return (
+    <>
+      <nav className="h-20 bg-surface-card/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-border-default dark:border-slate-800 px-4 md:px-8 flex justify-between items-center sticky top-0 z-[100] transition-all duration-500">
+
+        <div className="flex items-center gap-4">
+          {/* Menu Toggle Button */}
+          <button
+            onClick={onToggleSidebar}
+            className="p-2.5 text-text-subtle dark:text-slate-300 bg-surface-secondary dark:bg-slate-800 rounded-xl hover:bg-primary-light dark:hover:bg-emerald-900/20 transition-all cursor-pointer"
+            title="Toggle Menu"
+          >
+            {isSidebarOpen ? <LuX size={22} /> : <LuMenu size={22} />}
+          </button>
+
+          <Link to="/" className="group flex items-center gap-3">
+            <div className="relative w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary-light dark:bg-emerald-900/20 rounded-2xl overflow-hidden border border-primary-light dark:border-emerald-800 transition-transform group-hover:scale-105">
+              <img src={Logo} alt="Logo" className="w-full h-full object-contain transform scale-125" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-black text-text-main dark:text-white tracking-tighter leading-none uppercase">Zar3a</span>
+              <span className="hidden sm:block text-[9px] font-bold text-primary-base dark:text-emerald-400 uppercase tracking-widest mt-1">{t("nav.smartAgri")}</span>
+            </div>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-2 md:gap-3">
+
+          {/* 🌐 Language Toggle Button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleLang}
+            title={lang === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}
+            className="flex items-center gap-1.5 px-3 py-2.5 text-text-subtle dark:text-slate-300 bg-surface-secondary dark:bg-slate-800 rounded-2xl hover:text-primary-base hover:bg-primary-light dark:hover:bg-emerald-900/20 transition-all font-bold text-xs border border-border-default dark:border-slate-700"
+          >
+            <LuLanguages size={16} />
+            <span>{t("lang.toggle")}</span>
+          </motion.button>
+
+          {/* Subscribe Button (Farmer Only) */}
+          {(user?.role === 'FARMER' || user?.pendingRole === 'FARMER') && (
+            <Link 
+              to="/subscribe"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
+            >
+              <LuShield size={16} /> Subscribe
+            </Link>
+          )}
+
+          {/* Dark/Light Toggle */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleTheme}
+            className="p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-2xl hover:text-primary-base transition-all"
+          >
+            {isDark ? <LuSun size={20} className="text-yellow-400" /> : <LuMoon size={20} />}
+          </motion.button>
+
+          {/* Chat Icon (All logged-in users) */}
+          {user && (
+            <button 
+              onClick={handleChatClick}
+              className="flex p-2 sm:p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-2xl relative hover:text-primary-base transition-all cursor-pointer border-none outline-none" 
+              title={t("nav.chat") || "Chat"}
+            >
+              <LuMessageSquare size={20} />
+            </button>
+          )}
+
+          {user && (
+            <button 
+              onClick={handleNotificationsClick}
+              className="flex p-2 sm:p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-2xl relative hover:text-status-info transition-all cursor-pointer border-none outline-none"
+              title={t("nav.notifications") || "Notifications"}
+            >
+              <LuBell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 animate-pulse">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* User Profile Dropdown or Login Button */}
+          {user ? (
+            <div className="relative" ref={profileDropdownRef}>
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-3 bg-surface-secondary dark:bg-slate-800 text-text-subtle dark:text-slate-300 rounded-2xl hover:bg-border-default dark:hover:bg-slate-700 transition-all font-semibold text-sm"
+              >
+                <div className="w-6 h-6 bg-primary-base rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  {user.fullName?.charAt(0)}
+                </div>
+                <span className="hidden md:inline">{user.fullName?.split(" ")[0]}</span>
+                <LuChevronDown size={16} className={`transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              <AnimatePresence>
+                {isProfileDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute end-0 mt-2 w-48 bg-surface-card dark:bg-slate-800 rounded-2xl shadow-dropdown border border-border-default dark:border-slate-700 overflow-hidden z-50"
+                  >
+                    <div className="px-4 py-3 border-b border-border-default dark:border-slate-700">
+                      <p className="font-bold text-text-main dark:text-white">{user.fullName}</p>
+                      <p className="text-xs text-text-muted dark:text-text-disabled">{user.email}</p>
+                    </div>
+
+                    <nav className="py-2">
+                      {profileLink && (
+                        <Link
+                          to={profileLink}
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-text-subtle dark:text-slate-300 hover:bg-surface-secondary dark:hover:bg-slate-700 transition-all"
+                        >
+                          <LuUser size={18} />
+                          <span className="font-semibold">{t("nav.myProfile")}</span>
+                        </Link>
+                      )}
+
+                      <Link
+                        to="/settings"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-surface-secondary dark:hover:bg-slate-700 transition-all"
+                      >
+                        <LuSettings size={18} />
+                        <span className="font-semibold">{t("nav.settings")}</span>
+                      </Link>
+
+                      <div className="border-t border-border-default dark:border-slate-700 my-2" />
+
+                      <button
+                        onClick={async () => {
+                          await logout();
+                          setIsProfileDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all text-start"
+                      >
+                        <LuLogOut size={18} />
+                        <span className="font-semibold">{t("nav.logout")}</span>
+                      </button>
+                    </nav>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <Link to="/login" className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-900 dark:bg-primary-base text-white rounded-2xl hover:opacity-90 transition-all font-black text-[10px] sm:text-xs">
+              <LuUser size={16} />
+              <span className="hidden sm:inline">{t("nav.signIn")}</span>
+              <span className="sm:hidden">Login</span>
+            </Link>
+          )}
+        </div>
+      </nav>
+
+    </>
+  );
+};
+
+export default Navbar;
