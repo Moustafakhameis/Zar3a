@@ -12,6 +12,7 @@ build/
 *.swo
 *~
 .turbo/
-coverage/
 uploads/
 zar3a-backend copy/uploads/
+scratch/
+*.patch

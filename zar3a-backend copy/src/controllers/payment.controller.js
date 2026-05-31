@@ -11,6 +11,15 @@ const getStripe = () => {
   return new Stripe(key);
 };
 
+// Helper to get and sanitize frontend URL
+const getClientUrl = (req) => {
+  let url = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+  return url;
+};
+
 // Simulation Mode helper
 const startSimulation = (req, res, order, transaction, gateway) => {
   console.log(`\n🌱 Zar3a Payments Simulator (Simulation Mode Activated)`);
@@ -19,7 +28,7 @@ const startSimulation = (req, res, order, transaction, gateway) => {
   console.log(`    Total Amount: EGP ${order.totalAmount}`);
   console.log(`    Payment Method: ${transaction.paymentMethod}`);
 
-  const clientUrl = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
+  const clientUrl = getClientUrl(req);
   const checkoutUrl = `${clientUrl}/payment?success=true&gateway=${gateway.toLowerCase()}&orderId=${order.id}&simulator=true&transactionId=${transaction.id}`;
 
   return res.json({
@@ -134,7 +143,7 @@ export const createOrderPayment = async (req, res) => {
         return startSimulation(req, res, order, transaction, 'STRIPE');
       }
 
-      const clientUrl = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
+      const clientUrl = getClientUrl(req);
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: orderItemsData.map(item => ({
@@ -311,7 +320,7 @@ export const createOrderPayment = async (req, res) => {
 
     // 4. CASH ON DELIVERY (COD) Integration
     if (paymentMethod === 'COD') {
-      const clientUrl = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
+      const clientUrl = getClientUrl(req);
       const checkoutUrl = `${clientUrl}/payment?success=true&gateway=cod&orderId=${order.id}&transactionId=${transaction.id}`;
       return res.json({
         checkoutUrl,
@@ -350,7 +359,7 @@ export const createSubscriptionPayment = async (req, res) => {
 
     const stripe = getStripe();
     const isSimulationMode = process.env.PAYMENT_SIMULATION_MODE === 'true';
-    const clientUrl = req.headers.origin || req.get('origin') || process.env.CLIENT_URL || 'http://localhost:5173';
+    const clientUrl = getClientUrl(req);
 
     if (!stripe || isSimulationMode) {
       console.log(`\n🌱 Zar3a Payments Simulator (Subscription Simulation Mode Activated)`);
