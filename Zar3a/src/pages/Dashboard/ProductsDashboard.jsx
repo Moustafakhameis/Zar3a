@@ -397,6 +397,8 @@ export default function ProductsDashboard() {
                 const isDeletable = canDeleteProduct(product);
                 const isBoosted = boostedProducts.includes(product.id);
 
+                const isUserFarmerOrSupplier = user && (user.role === "FARMER" || user.role === "SUPPLIER");
+
                 return (
                   <motion.div
                     layout
@@ -406,7 +408,9 @@ export default function ProductsDashboard() {
                     key={product.id}
                     className={`bg-surface-card dark:bg-slate-900 rounded-[2.5rem] p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group ${
                       isBoosted
-                        ? "border-[3px] border-amber-400 dark:border-amber-500 shadow-amber-400/20"
+                        ? isUserFarmerOrSupplier
+                          ? "border-[3px] border-blue-500 dark:border-blue-500 shadow-lg shadow-blue-500/20"
+                          : "border-[3px] border-amber-400 dark:border-amber-500 shadow-amber-400/20"
                         : "border border-border-default dark:border-slate-800/80"
                     }`}
                   >
@@ -422,7 +426,11 @@ export default function ProductsDashboard() {
                             {isCrop ? `🌾 ${t("nav.cropMarket")}` : `📦 ${t("prodDash.agriShop")}`}
                           </span>
                           {isBoosted && (
-                            <span className="text-[9px] font-black w-fit uppercase tracking-wider px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-white shadow-md shadow-amber-500/20">
+                            <span className={`text-[9px] font-black w-fit uppercase tracking-wider px-3 py-1.5 rounded-full bg-gradient-to-r text-white shadow-md ${
+                              isUserFarmerOrSupplier
+                                ? "from-blue-500 to-cyan-500 shadow-blue-500/20"
+                                : "from-amber-400 to-yellow-500 shadow-amber-500/20"
+                            }`}>
                               ✨ PREMIUM BOOSTED
                             </span>
                           )}

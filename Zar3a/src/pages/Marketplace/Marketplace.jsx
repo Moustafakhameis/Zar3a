@@ -116,6 +116,7 @@ const normalizeProduct = (product) => {
     region: product.region || "-",
     image: product.imageUrl || "🛒",
     owner: product.User?.fullName || product.User?.username || "Unknown",
+    ownerId: product.userId || product.User?.id || product.ownerId,
     isVerified: product.isVerified,
     unit: product.unit || "unit",
     rating: product.rating || 4.5,
@@ -826,21 +827,42 @@ const Marketplace = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 relative z-10">
         <AnimatePresence mode="popLayout">
-          {filteredData.map((item) => (
-            <motion.div
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              key={`${item.id}-${item.title}`}
-              className="bg-surface-card dark:bg-slate-900 rounded-[2.5rem] p-5 border border-border-default dark:border-slate-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col relative"
-            >
-              <div
-                onClick={() => {
-                  setSelectedProduct(item);
-                }}
-                className="bg-surface-secondary dark:bg-slate-800 h-48 rounded-4xl mb-5 flex items-center justify-center text-7xl cursor-pointer group-hover:scale-[1.02] transition-transform relative overflow-hidden"
+          {filteredData.map((item) => {
+            const isOwnProduct = user && (user.role === "FARMER" || user.role === "SUPPLIER") && item.ownerId === user.id;
+            const isPremium = boostedIds.includes(item.id);
+
+            return (
+              <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                key={`${item.id}-${item.title}`}
+                className={`bg-surface-card dark:bg-slate-900 rounded-[2.5rem] p-5 transition-all duration-300 group flex flex-col relative ${
+                  isOwnProduct
+                    ? "border-[3px] border-blue-500 dark:border-blue-500 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1"
+                    : isPremium
+                    ? "border-[3px] border-amber-400 dark:border-amber-500 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-1 scale-[1.02]"
+                    : "border border-border-default dark:border-slate-800 hover:shadow-xl hover:-translate-y-1"
+                }`}
               >
+                {isPremium && (
+                  <div className="absolute -top-3 -right-3 z-20">
+                    <span className={`text-[10px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg bg-gradient-to-r text-white ${
+                      isOwnProduct
+                        ? "from-blue-500 to-cyan-500 shadow-blue-500/30"
+                        : "from-yellow-400 to-amber-600 shadow-amber-500/30"
+                    }`}>
+                      Premium Boosted ✨
+                    </span>
+                  </div>
+                )}
+                <div
+                  onClick={() => {
+                    setSelectedProduct(item);
+                  }}
+                  className="bg-surface-secondary dark:bg-slate-800 h-48 rounded-4xl mb-5 flex items-center justify-center text-7xl cursor-pointer group-hover:scale-[1.02] transition-transform relative overflow-hidden"
+                >
                 <div className="absolute top-3 left-3 bg-surface-card/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black text-text-subtle dark:text-gray-300 flex items-center gap-1 shadow-sm">
                   <LuMapPin size={12} className="text-primary-base" /> {item.region}
                 </div>
@@ -919,8 +941,9 @@ const Marketplace = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
-        </AnimatePresence>
+          );
+        })}
+      </AnimatePresence>
 
         {filteredData.length === 0 && !loadingProducts && (
           <div className="col-span-full py-20 text-center">

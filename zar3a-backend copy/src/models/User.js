@@ -56,6 +56,11 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  status: {
+    type: DataTypes.ENUM('pending', 'pending_sensor', 'pending_second_approval', 'approved'),
+    defaultValue: 'pending',
+    allowNull: false,
+  },
   subscriptionTier: {
     type: DataTypes.ENUM('FREE', 'STARTER', 'GROWTH', 'PRO'),
     defaultValue: 'FREE',

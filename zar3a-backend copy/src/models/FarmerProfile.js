@@ -15,7 +15,7 @@ const FarmerProfile = sequelize.define('FarmerProfile', {
   sensorId: {
     type: DataTypes.STRING(255),
     unique: true,
-    allowNull: false,
+    allowNull: true,
   },
   farmSize: {
     type: DataTypes.STRING(255),

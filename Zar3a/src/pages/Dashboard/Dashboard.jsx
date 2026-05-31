@@ -49,7 +49,7 @@ import LiveTicker from "./LiveTicker";
 
 const Dashboard = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
 
   const navigate = useNavigate();
 
@@ -633,8 +633,98 @@ const Dashboard = () => {
   };
   const aiRes = analyzeStatus();
 
-  // If farmer doesn't have an approved sensor, lock the dashboard
-  const isLocked = user?.role === "FARMER" && !user?.FarmerProfile?.sensorId;
+  const isLocked = user?.role === "FARMER" && user?.status !== "approved";
+
+  const [sensorInput, setSensorInput] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSensorSubmit = async (e) => {
+    e.preventDefault();
+    if (!sensorInput.trim()) {
+      setSubmitError("Sensor ID is required.");
+      return;
+    }
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
+      await updateProfile({ sensorId: sensorInput.trim() });
+    } catch (err) {
+      setSubmitError(err?.response?.data?.message || "Failed to submit Sensor ID. It may already be in use.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLocked) {
+    const isPendingSecondApproval = user?.status === "pending_second_approval";
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-100/30 dark:bg-emerald-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-100/30 dark:bg-blue-500/5 blur-[120px] pointer-events-none" />
+        
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-xl bg-surface-card/85 dark:bg-slate-900/80 backdrop-blur-xl border border-border-default dark:border-slate-800 rounded-[2.5rem] p-8 md:p-12 shadow-2xl text-center relative z-10"
+        >
+          <div className="w-20 h-20 bg-linear-to-br from-blue-500 to-indigo-600 rounded-[2rem] flex items-center justify-center text-white text-3xl mx-auto mb-8 shadow-lg shadow-indigo-500/20">
+            {isPendingSecondApproval ? "📡" : "🔒"}
+          </div>
+
+          <h2 className="text-3xl font-black text-text-main dark:text-white tracking-tight mb-3">
+            {isPendingSecondApproval ? "Sensor Pending Approval" : "Dashboard Locked"}
+          </h2>
+
+          <p className="text-text-subtle dark:text-text-disabled text-sm font-medium leading-relaxed mb-8">
+            {isPendingSecondApproval 
+              ? `Your Sensor ID (${user?.FarmerProfile?.sensorId || "submitted"}) is currently pending review by our administrator. Telemetry data will unlock once verified.`
+              : "Please submit your sensor ID to unlock dashboard access"}
+          </p>
+
+          {!isPendingSecondApproval ? (
+            <form onSubmit={handleSensorSubmit} className="space-y-4 text-left">
+              <div>
+                <label className="text-[10px] font-black text-text-disabled uppercase tracking-widest block mb-2">Smart Sensor ID</label>
+                <input 
+                  type="text"
+                  placeholder="e.g. ZAR3A-SENS-XXXX"
+                  value={sensorInput}
+                  onChange={(e) => setSensorInput(e.target.value)}
+                  className="w-full px-5 py-4 rounded-2xl border-2 bg-surface-secondary/30 dark:bg-slate-950/50 dark:text-white border-border-default dark:border-slate-800 focus:border-indigo-500 outline-none font-mono font-bold transition-all shadow-inner"
+                  disabled={isSubmitting}
+                />
+              </div>
+              {submitError && (
+                <p className="text-xs text-red-500 font-semibold">{submitError}</p>
+              )}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-500/20 transition active:scale-98 disabled:opacity-60"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Sensor ID"}
+              </button>
+            </form>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 font-bold rounded-2xl text-xs uppercase tracking-widest">
+              Status: Waiting for verification
+            </div>
+          )}
+
+          <div className="mt-8 pt-6 border-t border-border-default dark:border-slate-800 flex justify-center gap-4">
+            <Link to="/marketplace" className="text-xs font-black text-primary-base hover:underline uppercase tracking-wider">
+              Browse Marketplace
+            </Link>
+            <span className="text-text-disabled">•</span>
+            <Link to="/profile" className="text-xs font-black text-text-muted hover:underline uppercase tracking-wider">
+              Farmer Profile
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-16 px-4 text-left relative z-10">

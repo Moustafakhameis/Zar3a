@@ -309,6 +309,15 @@ export default function Admin() {
                           }`}>
                             {isFarmer ? "Farmer 🌾" : isSupplier ? "Supplier 📦" : "Expert 🎓"}
                           </span>
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                            item.status === 'pending_second_approval' ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400" :
+                            item.status === 'pending_sensor' ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400" :
+                            "bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400"
+                          }`}>
+                            {item.status === 'pending_second_approval' ? "Pending Sensor ID Approval 📡" :
+                             item.status === 'pending_sensor' ? "Waiting for Sensor ID 🔒" :
+                             "Pending Profile Approval ⏳"}
+                          </span>
                         </div>
                         <p className="text-sm text-text-muted dark:text-text-disabled">{item.email} | {item.phone}</p>
                         

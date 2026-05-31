@@ -47,6 +47,11 @@ export const requireDashboardAccess = (req, res, next) => {
     return res.status(403).json({ message: 'Buyers cannot access dashboard' });
   }
 
+  // Farmers must be approved to access the dashboard
+  if (req.user.role === 'FARMER' && req.user.status !== 'approved') {
+    return res.status(403).json({ message: 'Please submit your sensor ID to unlock dashboard access' });
+  }
+
   next();
 };
 
