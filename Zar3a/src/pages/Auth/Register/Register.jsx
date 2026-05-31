@@ -151,7 +151,7 @@ export default function Register() {
 
 
   // ── Validation ────────────────────────────────────────────────────────────
-  const validateStep1 = () => {
+  const validateStep1 = (phoneCleaned) => {
     const e = {};
     const nameTrimmed = form1.fullName.trim();
     if (!nameTrimmed) {
@@ -204,12 +204,6 @@ export default function Register() {
       }
     }
 
-    // Auto-normalize 11-digit Egyptian phone (01…) → 12-digit (201…)
-    let phoneCleaned = form1.phone.trim().replace(/^\+/, "");
-    if (/^01\d{9}$/.test(phoneCleaned)) {
-      phoneCleaned = "2" + phoneCleaned;
-      setForm1((prev) => ({ ...prev, phone: phoneCleaned }));
-    }
     if (!phoneCleaned) {
       e.phone = "Phone number is required";
     } else if (!/^\d{12}$/.test(phoneCleaned)) {
@@ -307,11 +301,21 @@ export default function Register() {
 
   // ── Step handlers ─────────────────────────────────────────────────────────
   const handleStep1 = async () => {
-    if (!validateStep1()) return;
+    let phoneCleaned = form1.phone.trim().replace(/^\+/, "");
+    if (/^01\d{9}$/.test(phoneCleaned)) {
+      phoneCleaned = "2" + phoneCleaned;
+    }
+
+    if (!validateStep1(phoneCleaned)) return;
+
+    if (phoneCleaned !== form1.phone) {
+      setForm1((prev) => ({ ...prev, phone: phoneCleaned }));
+    }
+
     setLoading(true);
     setApiError("");
     try {
-      const data = await registerUser(form1);
+      const data = await registerUser({ ...form1, phone: phoneCleaned });
       setUserId(data.userId);
       setStep(2);
     } catch (err) {
