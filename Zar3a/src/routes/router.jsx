@@ -71,6 +71,7 @@ import Settings from "../pages/Settings/Settings";
 import Admin from "../pages/Admin/Admin";
 // ✅ Import role-specific profile pages
 import FarmerProfile from "../pages/Profiles/FarmerProfile";
+import Subscription from "../pages/Subscription/Subscription";
 import BuyerProfile from "../pages/Profiles/BuyerProfile";
 import SupplierProfile from "../pages/Profiles/SupplierProfile";
 import ExpertProfile from "../pages/Profiles/ExpertProfile";
@@ -115,6 +116,7 @@ const router = createBrowserRouter([
       { path: "chat", element: <UserChat /> },
       { path: "chat/:expertId", element: <Chat /> },
       { path: "admin/chat", element: <AdminChat /> },
+      { path: "subscribe", element: <Subscription /> },
       { path: "messages", element: <UserChat /> },
       { path: "notifications", element: <Notifications /> },
       { path: "track-orders", element: <TrackOrders /> },
