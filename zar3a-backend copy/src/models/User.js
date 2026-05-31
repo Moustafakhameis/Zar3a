@@ -56,6 +56,15 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  subscriptionTier: {
+    type: DataTypes.ENUM('FREE', 'STARTER', 'GROWTH', 'PRO'),
+    defaultValue: 'FREE',
+    allowNull: false,
+  },
+  subscriptionExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   cv: {
     type: DataTypes.STRING(255),
     allowNull: true,

@@ -324,13 +324,116 @@ export const createOrderPayment = async (req, res) => {
 
 /**
  * ─────────────────────────────────────────────────────────
+ * CREATE SUBSCRIPTION PAYMENT
+ * ─────────────────────────────────────────────────────────
+ */
+export const createSubscriptionPayment = async (req, res) => {
+  try {
+    const user = req.user;
+    const { tier } = req.body;
+
+    const prices = {
+      STARTER: 500,
+      GROWTH: 1000,
+      PRO: 2000,
+    };
+
+    const price = prices[tier];
+    if (!price) {
+      return res.status(400).json({ message: 'Invalid subscription tier selected' });
+    }
+
+    const stripe = getStripe();
+    if (!stripe) {
+      console.log(`\n🌱 Zar3a Payments Simulator (Subscription Simulation Mode Activated)`);
+      console.log(`    User ID: ${user.id}`);
+      console.log(`    Tier: ${tier}`);
+      console.log(`    Amount: EGP ${price}`);
+
+      const checkoutUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?success=true&gateway=stripe&simulator=true&type=subscription&tier=${tier}`;
+      return res.json({ checkoutUrl, isSimulation: true });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'egp',
+            product_data: {
+              name: `Zar3a Subscription - ${tier} Plan`,
+              description: `Access to Zar3a ${tier} features for 30 days.`,
+            },
+            unit_amount: Math.round(price * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?success=true&gateway=stripe&session_id={CHECKOUT_SESSION_ID}&type=subscription&tier=${tier}`,
+      cancel_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/subscribe?cancel=true`,
+      metadata: {
+        userId: String(user.id),
+        type: 'subscription',
+        tier,
+      },
+    });
+
+    return res.json({ checkoutUrl: session.url });
+  } catch (err) {
+    console.error('createSubscriptionPayment error:', err);
+    return res.status(500).json({ message: 'Subscription initialization failed', error: err.message });
+  }
+};
+
+/**
+ * ─────────────────────────────────────────────────────────
  * CONFIRM PAYMENT (Called on return callback redirect)
  * ─────────────────────────────────────────────────────────
  */
 export const confirmPayment = async (req, res) => {
   try {
     const user = req.user;
-    const { orderId, transactionId, gateway, sessionId, paymobTxnId, simulator } = req.body;
+    const { orderId, transactionId, gateway, sessionId, paymobTxnId, simulator, type, tier } = req.body;
+
+    // ── Handle Subscription Confirmation ──────────────────────────────────────
+    if (type === 'subscription') {
+      let paymentVerified = false;
+
+      // 1. Simulation Verification
+      if (simulator === true || String(simulator) === 'true') {
+        paymentVerified = true;
+      } 
+      // 2. Stripe Verification
+      else if (gateway === 'stripe' && sessionId) {
+        const stripe = getStripe();
+        if (stripe) {
+          const session = await stripe.checkout.sessions.retrieve(sessionId);
+          if (session && session.payment_status === 'paid') {
+            paymentVerified = true;
+          }
+        } else {
+          paymentVerified = true; // Fallback
+        }
+      }
+
+      if (!paymentVerified) {
+        return res.status(400).json({ message: 'Subscription payment verification failed' });
+      }
+
+      // Update User subscription
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+      await user.update({
+        subscriptionTier: tier || 'STARTER',
+        subscriptionExpiresAt: expiresAt,
+      });
+
+      return res.json({
+        message: 'Subscription activated successfully',
+        subscriptionTier: user.subscriptionTier,
+        subscriptionExpiresAt: user.subscriptionExpiresAt,
+      });
+    }
 
     if (!orderId) {
       return res.status(400).json({ message: 'orderId is required' });

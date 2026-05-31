@@ -117,6 +117,10 @@ export const paymentsAPI = {
   // Check payment status
   getPaymentStatus: (orderId) =>
     api.get(`/payments/${orderId}/status`),
+
+  // Initialize subscription payment session
+  subscribe: (data) =>
+    api.post('/payments/subscribe', data),
 };
 
 /**

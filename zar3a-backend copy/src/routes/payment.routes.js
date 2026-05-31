@@ -2,6 +2,7 @@ import { Router } from 'express';
 import authenticate from '../middlewares/authenticate.js';
 import {
   createOrderPayment,
+  createSubscriptionPayment,
   confirmPayment,
   getPaymentStatus,
   paymentWebhook,
@@ -19,6 +20,10 @@ router.use(authenticate);
 // New standard checkout & payment session creation
 // POST /payments/create-order
 router.post('/create-order', createOrderPayment);
+
+// Create subscription payment session
+// POST /payments/subscribe
+router.post('/subscribe', createSubscriptionPayment);
 
 // Confirm payment after gateway redirect/success
 // POST /payments/confirm

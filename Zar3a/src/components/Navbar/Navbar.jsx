@@ -169,6 +169,16 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
             <span>{t("lang.toggle")}</span>
           </motion.button>
 
+          {/* Subscribe Button (Farmer Only) */}
+          {(user?.role === 'FARMER' || user?.pendingRole === 'FARMER') && (
+            <Link 
+              to="/subscribe"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
+            >
+              <LuShield size={16} /> Subscribe
+            </Link>
+          )}
+
           {/* Dark/Light Toggle */}
           <motion.button
             whileTap={{ scale: 0.9 }}

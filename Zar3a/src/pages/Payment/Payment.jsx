@@ -19,7 +19,7 @@ import api, { paymentsAPI } from '../../API/axiosInstance';
 
 const Payment = () => {
   const { t, isArabic } = useLanguage();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const { cart, initialized, clearCart } = useCart(user?.id);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -45,14 +45,18 @@ const Payment = () => {
     const sessionId = searchParams.get('session_id');
     const paymobTxnId = searchParams.get('id'); // Paymob uses 'id' for txn id
     const isSimulator = searchParams.get('simulator');
+    const type = searchParams.get('type');
+    const tier = searchParams.get('tier');
 
-    if (isSuccess === 'true' && orderId) {
+    if (isSuccess === 'true' && (orderId || type === 'subscription')) {
       handlePaymentConfirmation({
-        orderId: Number(orderId),
+        orderId: orderId ? Number(orderId) : null,
         gateway,
         sessionId,
         paymobTxnId,
-        simulator: isSimulator === 'true'
+        simulator: isSimulator === 'true',
+        type,
+        tier
       });
     } else if (isCancel === 'true' || isSuccess === 'false') {
       setConfirmStatus('failed');
@@ -87,14 +91,31 @@ const Payment = () => {
     try {
       await paymentsAPI.confirmPayment(data);
       
-      // Clear local cart storage since the order is successfully finalized
-      clearCart();
-      setConfirmStatus('success');
-      setSuccess(t("pay.paymentSuccess"));
+      // Clear local cart storage only if it's an order checkout
+      if (data.type !== 'subscription') {
+        clearCart();
+      }
 
-      // Auto redirect to order tracking after a short delay
+      // Refresh user details (especially for subscription updates)
+      if (typeof refreshUser === 'function') {
+        try {
+          await refreshUser();
+        } catch (e) {
+          console.warn("Failed to refresh user context:", e);
+        }
+      }
+
+      setConfirmStatus('success');
+      setSuccess(data.type === 'subscription' 
+        ? (isArabic ? 'تم تفعيل اشتراكك بنجاح!' : 'Your subscription has been activated successfully!')
+        : t("pay.paymentSuccess")
+      );
+
+      // Auto redirect to order tracking/marketplace after a short delay
       setTimeout(() => {
-        if (user?.role === 'BUYER' || user?.role === 'AGRO_EXPERT' || !user?.role) {
+        if (data.type === 'subscription') {
+          navigate('/marketplace');
+        } else if (user?.role === 'BUYER' || user?.role === 'AGRO_EXPERT' || !user?.role) {
           navigate('/marketplace');
         } else {
           navigate('/track-orders');
