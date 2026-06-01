@@ -39,9 +39,25 @@ app.use("/payments", paymentRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/cart", cartRoutes);
 
-app.get("/", (_req, res) =>
-  res.json({ status: "ok", project: "Zar3a API 🌱", version: "2.0.0 (Refactored)" })
-);
+app.get("/", (_req, res) => {
+  const brevoKey = process.env.BREVO_API_KEY || 
+                   process.env.brevo_api_key || 
+                   process.env.Brevo_Api_Key || 
+                   process.env.BERVO_API_KEY || 
+                   process.env.bervo_api_key ||
+                   process.env.SENDINBLUE_API_KEY ||
+                   process.env.sendinblue_api_key;
+  
+  res.json({ 
+    status: "ok", 
+    project: "Zar3a API 🌱", 
+    version: "2.0.0 (Refactored)",
+    diagnostics: {
+      brevoKeyLoaded: !!brevoKey,
+      brevoKeyMasked: brevoKey ? `${brevoKey.trim().replace(/^["']|["']$/g, '').slice(0, 12)}...` : null
+    }
+  });
+});
 
 // ── Error handler ─────────────────────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
