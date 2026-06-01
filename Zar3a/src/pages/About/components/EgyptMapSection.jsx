@@ -293,12 +293,12 @@ const EgyptMapSection = () => {
     const resizeTimeout = setTimeout(() => map.invalidateSize(), 500);
     activeTimeouts.push(resizeTimeout);
 
-    // Stealth blur patch to wipe the specific label
+    // Stealth blur patch to wipe the specific label with feathered edges
     const wipeIcon = L.divIcon({
       className: 'stealth-wipe-patch',
-      html: `<div style="width: 120px; height: 35px; backdrop-filter: blur(12px) brightness(0.95); border-radius: 8px; pointer-events: none;"></div>`,
-      iconSize: [120, 35],
-      iconAnchor: [60, 17]
+      html: `<div style="width: 140px; height: 50px; backdrop-filter: blur(10px); -webkit-mask-image: radial-gradient(ellipse, black 20%, transparent 70%); mask-image: radial-gradient(ellipse, black 20%, transparent 70%); pointer-events: none;"></div>`,
+      iconSize: [140, 50],
+      iconAnchor: [70, 25]
     });
     L.marker([30.9, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
 
