@@ -293,21 +293,26 @@ const EgyptMapSection = () => {
     const resizeTimeout = setTimeout(() => map.invalidateSize(), 500);
     activeTimeouts.push(resizeTimeout);
 
-    // Huge stealth patch to guarantee coverage, using webkit backdrop-filter and an invisible background for browser compatibility
+    // Massive stealth patch to completely wipe out any underlying text labels in the region
     const wipeIcon = L.divIcon({
       className: 'stealth-wipe-patch',
-      html: `
-        <div style="position: relative; width: 200px; height: 80px; pointer-events: none; display: flex; align-items: center; justify-content: center;">
-          <div style="position: absolute; inset: 0; background-color: rgba(128,128,128,0.02); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); -webkit-mask-image: radial-gradient(ellipse, black 40%, transparent 70%); mask-image: radial-gradient(ellipse, black 40%, transparent 70%);"></div>
-          <div style="position: relative; color: #888888; font-family: 'Open Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; z-index: 10;">
-            PALESTINE
-          </div>
-        </div>
-      `,
-      iconSize: [200, 80],
-      iconAnchor: [100, 40]
+      html: `<div style="position: relative; width: 300px; height: 200px; pointer-events: none; background-color: rgba(128,128,128,0.02); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); -webkit-mask-image: radial-gradient(ellipse, black 30%, transparent 70%); mask-image: radial-gradient(ellipse, black 30%, transparent 70%); z-index: 1;"></div>`,
+      iconSize: [300, 200],
+      iconAnchor: [150, 100]
     });
-    L.marker([31.1, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
+    // Centered around 31.0, 34.8 to ensure both potential label locations are covered
+    L.marker([31.0, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
+
+    // SVG Overlay for scalable text (zooms natively with the map)
+    const latLngBounds = L.latLngBounds([[31.5, 34.3], [30.5, 35.3]]);
+    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svgElement.setAttribute('viewBox', '0 0 200 200');
+    svgElement.innerHTML = `
+        <text x="100" y="80" font-family="'Open Sans', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="4" fill="#888888" text-anchor="middle">ISRAEL</text>
+        <text x="100" y="130" font-family="'Open Sans', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="4" fill="#888888" text-anchor="middle">PALESTINE</text>
+    `;
+    L.svgOverlay(svgElement, latLngBounds, { interactive: false }).addTo(map);
 
     return () => {
       // Clear all pending animations if the user navigates away before they finish
