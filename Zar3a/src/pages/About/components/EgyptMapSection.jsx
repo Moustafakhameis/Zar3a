@@ -293,14 +293,21 @@ const EgyptMapSection = () => {
     const resizeTimeout = setTimeout(() => map.invalidateSize(), 500);
     activeTimeouts.push(resizeTimeout);
 
-    // Stealth blur patch to wipe the specific label with feathered edges
+    // Huge stealth patch to guarantee coverage, using webkit backdrop-filter and an invisible background for browser compatibility
     const wipeIcon = L.divIcon({
       className: 'stealth-wipe-patch',
-      html: `<div style="width: 160px; height: 45px; backdrop-filter: blur(20px); -webkit-mask-image: radial-gradient(ellipse, black 50%, transparent 100%); mask-image: radial-gradient(ellipse, black 50%, transparent 100%); pointer-events: none;"></div>`,
-      iconSize: [160, 45],
-      iconAnchor: [80, 22]
+      html: `
+        <div style="position: relative; width: 200px; height: 80px; pointer-events: none; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: 0; background-color: rgba(128,128,128,0.02); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); -webkit-mask-image: radial-gradient(ellipse, black 40%, transparent 70%); mask-image: radial-gradient(ellipse, black 40%, transparent 70%);"></div>
+          <div style="position: relative; color: #888888; font-family: 'Open Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; z-index: 10;">
+            PALESTINE
+          </div>
+        </div>
+      `,
+      iconSize: [200, 80],
+      iconAnchor: [100, 40]
     });
-    L.marker([31.0, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
+    L.marker([31.1, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
 
     return () => {
       // Clear all pending animations if the user navigates away before they finish
