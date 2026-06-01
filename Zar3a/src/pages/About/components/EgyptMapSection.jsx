@@ -297,8 +297,8 @@ const EgyptMapSection = () => {
     const palestineIcon = L.divIcon({
       className: 'palestine-label',
       html: `
-        <div style="position: relative; width: 95px; height: 22px; display: flex; align-items: center; justify-content: center; pointer-events: none;">
-          <!-- Precise blur patch exactly the size of the text -->
+        <div style="position: relative; width: 95px; height: 30px; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+          <!-- Precise blur patch exactly the size of the text with a bit of vertical padding -->
           <div style="position: absolute; inset: 0; background-color: rgba(128,128,128,0.02); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 4px;"></div>
           <!-- Native-styled CartoDB replacement text -->
           <div style="position: relative; color: #888888; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; z-index: 10; margin-left: 2px;">
@@ -306,10 +306,10 @@ const EgyptMapSection = () => {
           </div>
         </div>
       `,
-      iconSize: [95, 22],
-      iconAnchor: [47, 11]
+      iconSize: [95, 30],
+      iconAnchor: [47, 15]
     });
-    L.marker([31.0, 34.8], { icon: palestineIcon, interactive: false }).addTo(map);
+    L.marker([30.85, 34.8], { icon: palestineIcon, interactive: false }).addTo(map);
 
     return () => {
       // Clear all pending animations if the user navigates away before they finish
