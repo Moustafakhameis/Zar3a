@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LuUsers, LuShoppingCart, LuCpu, LuShieldCheck, LuActivity, LuWifi, LuDroplets, LuLeaf } from 'react-icons/lu';
+import { LuUsers, LuShoppingCart, LuCpu, LuShieldCheck, LuActivity, LuWifi, LuDroplets, LuLeaf, LuPlus, LuMinus, LuArrowUp, LuArrowDown, LuArrowLeft, LuArrowRight } from 'react-icons/lu';
 
 const NODES = [
   { id: 'alex', lat: 31.20, lng: 29.91, name: 'Alexandria Hub', status: 'Optimal', type: 'pulse', farmers: '1,200+', market: 'High', experts: '45', iot: '98%' },
@@ -21,8 +21,18 @@ const LINKS = [
 ];
 
 const NILE_PATH = [
-  [31.4, 31.8], [30.1, 31.2], [29.3, 31.1],
-  [27.1, 31.3], [25.7, 32.6], [24.0, 32.9]
+  // Main Nile (South to Cairo)
+  [
+    [24.0, 32.9], [25.7, 32.6], [27.1, 31.3], [29.3, 31.1], [30.16, 31.23]
+  ],
+  // Rosetta Branch (West)
+  [
+    [30.16, 31.23], [30.8, 30.8], [31.40, 30.42]
+  ],
+  // Damietta Branch (East)
+  [
+    [30.16, 31.23], [30.9, 31.3], [31.41, 31.81]
+  ]
 ];
 
 const CustomStyles = () => (
@@ -152,6 +162,17 @@ const EgyptMapSection = () => {
   const mapInstance = useRef(null);
   const [isLeafletLoaded, setIsLeafletLoaded] = useState(false);
 
+  const handleZoom = (delta) => {
+    if (!mapInstance.current) return;
+    const currentZoom = mapInstance.current.getZoom();
+    mapInstance.current.setZoom(currentZoom + delta, { animate: true, duration: 0.5 });
+  };
+
+  const handlePan = (dx, dy) => {
+    if (!mapInstance.current) return;
+    mapInstance.current.panBy([dx, dy], { animate: true, duration: 0.5 });
+  };
+
   useEffect(() => {
     if (window.L) {
       setIsLeafletLoaded(true);
@@ -181,7 +202,8 @@ const EgyptMapSection = () => {
     const map = L.map(mapRef.current, {
       zoomControl: false,
       attributionControl: false,
-      scrollWheelZoom: false, // Prevent accidental scrolling while reading page
+      scrollWheelZoom: 'center', // Allow zooming with mouse wheel smoothly
+      dragging: true,
     }).setView([29.5, 31.0], 6.5);
     
     mapInstance.current = map;
@@ -229,10 +251,10 @@ const EgyptMapSection = () => {
         
         const customIcon = L.divIcon({
           className: 'custom-marker-wrapper',
-          html: `<div class="glowing-node ${pulseClass}"></div>`,
-          iconSize: [14, 14],
-          iconAnchor: [7, 7],
-          popupAnchor: [0, -12]
+          html: `<div class="w-8 h-8 flex items-center justify-center cursor-pointer pointer-events-auto group"><div class="glowing-node ${pulseClass}"></div></div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
         });
 
         const statusColor = node.status === 'Optimal' ? 'bg-emerald-500' : node.status === 'Warning' ? 'bg-yellow-500' : 'bg-blue-500';
@@ -406,6 +428,43 @@ const EgyptMapSection = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Custom Map Controls */}
+            <div className="absolute bottom-6 right-6 z-[400] flex flex-col gap-4 animate-float-in" style={{animationDelay: '1.2s'}}>
+              {/* Pan Controls */}
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-900/10 dark:shadow-black/50 border border-slate-200 dark:border-gray-700/50 p-2 grid grid-cols-3 grid-rows-3 gap-1">
+                <div />
+                <button onClick={() => handlePan(0, -150)} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-center" title="Pan Up">
+                  <LuArrowUp size={18} strokeWidth={2.5} />
+                </button>
+                <div />
+                <button onClick={() => handlePan(-150, 0)} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-center" title="Pan Left">
+                  <LuArrowLeft size={18} strokeWidth={2.5} />
+                </button>
+                <button onClick={() => { if(mapInstance.current) mapInstance.current.setView([29.5, 31.0], 6.5, { animate: true, duration: 1 }) }} className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all duration-300 flex items-center justify-center group" title="Reset View">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 group-hover:bg-white transition-colors duration-300"></div>
+                </button>
+                <button onClick={() => handlePan(150, 0)} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-center" title="Pan Right">
+                  <LuArrowRight size={18} strokeWidth={2.5} />
+                </button>
+                <div />
+                <button onClick={() => handlePan(0, 150)} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-center" title="Pan Down">
+                  <LuArrowDown size={18} strokeWidth={2.5} />
+                </button>
+                <div />
+              </div>
+
+              {/* Zoom Controls */}
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-900/10 dark:shadow-black/50 border border-slate-200 dark:border-gray-700/50 p-2 flex flex-col gap-1">
+                <button onClick={() => handleZoom(1)} className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-center">
+                  <LuPlus size={20} strokeWidth={2.5} />
+                </button>
+                <div className="w-full h-px bg-slate-200 dark:bg-slate-700/50 my-1" />
+                <button onClick={() => handleZoom(-1)} className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-center">
+                  <LuMinus size={20} strokeWidth={2.5} />
+                </button>
               </div>
             </div>
             
