@@ -42,24 +42,19 @@ const ComparisonSection = () => {
           
           {/* Traditional Farming */}
           <motion.div
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, x: -50, rotateY: 10 }}
+            whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              hidden: { opacity: 0, x: -50, rotateY: 10 },
-              visible: { 
-                opacity: 1, 
-                x: 0, 
-                rotateY: 0,
-                transition: { duration: 0.6, staggerChildren: 0.15, ease: "easeOut" }
-              }
-            }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             whileHover={{ scale: 1.02, y: -5, boxShadow: "0 25px 50px -12px rgba(239, 68, 68, 0.15)" }}
             className="bg-surface-card dark:bg-slate-900 border border-red-500/20 p-10 rounded-[3rem] shadow-lg relative cursor-default transition-shadow duration-300"
           >
             <div className="absolute inset-0 bg-red-500/5 rounded-[3rem]" />
             <motion.h3 
-              variants={{ hidden: { opacity: 0, y: -20 }, visible: { opacity: 1, y: 0 } }}
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
               className="text-3xl font-black text-text-main dark:text-slate-900 dark:text-white mb-8 relative z-10 flex items-center gap-4"
             >
               Traditional Farming
@@ -68,12 +63,11 @@ const ComparisonSection = () => {
               {traditional.map((item, idx) => (
                 <motion.li 
                   key={idx}
-                  variants={{
-                    hidden: { opacity: 0, x: -20 },
-                    visible: { opacity: 1, x: 0 }
-                  }}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 + (idx * 0.1), type: "spring", stiffness: 300 }}
                   whileHover={{ x: 10, color: "#ef4444" }}
-                  transition={{ type: "spring", stiffness: 300 }}
                   className="flex items-center gap-4 text-lg font-bold text-slate-500 dark:text-slate-400 transition-colors"
                 >
                   <motion.div 
@@ -90,29 +84,24 @@ const ComparisonSection = () => {
 
           {/* Zar3a */}
           <motion.div
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, x: 50, rotateY: -10 }}
+            whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              hidden: { opacity: 0, x: 50, rotateY: -10 },
-              visible: { 
-                opacity: 1, 
-                x: 0, 
-                rotateY: 0,
-                transition: { duration: 0.6, delayChildren: 0.3, staggerChildren: 0.15, ease: "easeOut" }
-              }
-            }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             whileHover={{ scale: 1.02, y: -5, boxShadow: "0 25px 50px -12px rgba(16, 185, 129, 0.3)" }}
             className="bg-emerald-500/10 dark:bg-emerald-900/20 border border-emerald-500/30 p-10 rounded-[3rem] shadow-2xl relative overflow-hidden cursor-default transition-shadow duration-300"
           >
             <motion.div 
               animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.3, 0.15] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500 blur-3xl rounded-full" 
+              className="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500 blur-3xl rounded-full pointer-events-none" 
             />
             
             <motion.h3 
-              variants={{ hidden: { opacity: 0, y: -20 }, visible: { opacity: 1, y: 0 } }}
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
               className="text-3xl font-black text-text-main dark:text-slate-900 dark:text-white mb-8 relative z-10 flex items-center gap-4"
             >
               The Zar3a Way
@@ -121,12 +110,11 @@ const ComparisonSection = () => {
               {zar3a.map((item, idx) => (
                 <motion.li 
                   key={idx} 
-                  variants={{
-                    hidden: { opacity: 0, x: 20 },
-                    visible: { opacity: 1, x: 0 }
-                  }}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5 + (idx * 0.1), type: "spring", stiffness: 300 }}
                   whileHover={{ x: -10, color: "#10b981" }}
-                  transition={{ type: "spring", stiffness: 300 }}
                   className="flex items-center gap-4 text-lg font-black text-emerald-700 dark:text-emerald-300 transition-colors"
                 >
                   <motion.div 
