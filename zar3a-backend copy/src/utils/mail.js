@@ -1,8 +1,18 @@
 import axios from 'axios';
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
+let rawKey = process.env.BREVO_API_KEY || 
+             process.env.brevo_api_key || 
+             process.env.Brevo_Api_Key || 
+             process.env.BERVO_API_KEY || 
+             process.env.bervo_api_key ||
+             process.env.SENDINBLUE_API_KEY ||
+             process.env.sendinblue_api_key;
+if (rawKey) {
+  rawKey = rawKey.trim().replace(/^["']|["']$/g, '');
+}
+const BREVO_API_KEY = rawKey;
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
-
+console.log("🚨 BREVO_API_KEY loaded:", BREVO_API_KEY ? `${BREVO_API_KEY.slice(0, 12)}...` : "undefined");
 if (!BREVO_API_KEY) {
   console.warn('Warning: BREVO_API_KEY environment variable is not set');
 }
