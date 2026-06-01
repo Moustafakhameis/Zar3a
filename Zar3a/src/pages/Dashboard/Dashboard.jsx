@@ -51,6 +51,7 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const { user, updateProfile } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedAiCrop, setSelectedAiCrop] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -87,6 +88,9 @@ const Dashboard = () => {
       info: "Requires deep soil preparation.",
       plantingDates: "March - May",
       whyPlanted: "Major cash crop in Egypt, known globally for its high-quality long-staple fibers.",
+      difficulty: "Hard",
+      funFact: "Egyptian cotton is considered the finest in the world due to its extra-long staples!",
+      tools: ["Hand trowel", "Pruning shears", "Drip irrigation kit"],
     },
     Wheat: {
       icon: "🌾",
@@ -104,6 +108,9 @@ const Dashboard = () => {
       info: "Critical moisture needed during flowering.",
       plantingDates: "November - December",
       whyPlanted: "Essential food security crop; Egypt's most critical strategic staple for bread.",
+      difficulty: "Medium",
+      funFact: "Wheat was one of the first crops ever cultivated by humans, dating back over 10,000 years!",
+      tools: ["Seed drill", "Sickle", "Harvester"],
     },
     "Sugar Cane": {
       icon: "🎋",
@@ -121,6 +128,9 @@ const Dashboard = () => {
       info: "Requires excellent drainage.",
       plantingDates: "February - March",
       whyPlanted: "Primary source of sugar production in Upper Egypt, highly profitable for local farmers.",
+      difficulty: "Medium",
+      funFact: "Sugar cane is a giant grass that can grow up to 20 feet tall!",
+      tools: ["Machete", "Tractor", "Drip irrigation line"],
     },
     Tomato: {
       icon: "🍅",
@@ -138,6 +148,9 @@ const Dashboard = () => {
       info: "Consistent moisture prevents fruit cracking.",
       plantingDates: "Multiple (Feb-Mar, Sep-Oct)",
       whyPlanted: "Extremely high local demand year-round; versatile crop for fresh market and processing.",
+      difficulty: "Moderate",
+      funFact: "Did you know tomatoes are technically berries?",
+      tools: ["Hand trowel", "Pruning shears", "Tomato cages"],
     },
     Citrus: {
       icon: "🍊",
@@ -155,6 +168,9 @@ const Dashboard = () => {
       info: "Prefers sandy-loamy Delta soils.",
       plantingDates: "February - April (Saplings)",
       whyPlanted: "Major export crop; Egypt is one of the world's leading exporters of oranges.",
+      difficulty: "Hard",
+      funFact: "Citrus trees can live and produce fruit for over 50 years!",
+      tools: ["Pruning saws", "Harvesting bags", "Sprayers"],
     },
     Rice: {
       icon: "🍚",
@@ -172,6 +188,9 @@ const Dashboard = () => {
       info: "Requires clayey soils retaining water.",
       plantingDates: "April - May",
       whyPlanted: "Crucial summer staple crop that helps reclaim saline soils in the Northern Delta.",
+      difficulty: "Hard",
+      funFact: "Rice provides more than one-fifth of the calories consumed worldwide by humans!",
+      tools: ["Transplanter", "Water pump", "Sickle"],
     },
     Maize: {
       icon: "🌽",
@@ -189,6 +208,9 @@ const Dashboard = () => {
       info: "Highly sensitive to drought during pollination.",
       plantingDates: "May - June",
       whyPlanted: "Dual-purpose crop used for human consumption and vital livestock feed.",
+      difficulty: "Easy",
+      funFact: "An average ear of corn has 800 kernels arranged in 16 rows!",
+      tools: ["Planter", "Hoe", "Sprinkler"],
     },
     Potato: {
       icon: "🥔",
@@ -206,6 +228,9 @@ const Dashboard = () => {
       info: "Prefers well-drained sandy-loam soils.",
       plantingDates: "Jan-Feb (Summer), Sep-Oct (Winter)",
       whyPlanted: "High-value export commodity and fundamental local vegetable.",
+      difficulty: "Moderate",
+      funFact: "Potatoes were the first vegetable to be grown in space!",
+      tools: ["Spade", "Hoe", "Potato fork"],
     },
     Clover: {
       icon: "☘️",
@@ -223,6 +248,9 @@ const Dashboard = () => {
       info: "Primary animal feed crop in Egypt (Berseem).",
       plantingDates: "September - November",
       whyPlanted: "The most important forage crop for livestock; excellent for nitrogen fixation in soil.",
+      difficulty: "Easy",
+      funFact: "Clover is not just animal feed; its flowers make some of the best honey!",
+      tools: ["Seed spreader", "Scythe", "Rake"],
     },
     Onion: {
       icon: "🧅",
@@ -240,6 +268,9 @@ const Dashboard = () => {
       info: "Dry harvest period is crucial for storage.",
       plantingDates: "August - October",
       whyPlanted: "Key ingredient in local cuisine and a highly demanded export crop to Europe and Arab nations.",
+      difficulty: "Moderate",
+      funFact: "Onions make you cry because they release a sulfur gas when cut!",
+      tools: ["Hand trowel", "Dibber", "Hoe"],
     },
   };
 
@@ -1193,7 +1224,10 @@ const Dashboard = () => {
               </div>
 
               {/* Premium Glassmorphic AI Pill */}
-              <div className="bg-surface-card/10 hover:bg-surface-card/20 transition-all cursor-default border border-white/20 px-4 py-2.5 rounded-2xl backdrop-blur-md flex items-center gap-3 shadow-xl">
+              <div 
+                className="bg-surface-card/10 hover:bg-surface-card/20 transition-all cursor-pointer border border-white/20 px-4 py-2.5 rounded-2xl backdrop-blur-md flex items-center gap-3 shadow-xl"
+                onClick={() => setSelectedAiCrop(weather.bestCrop)}
+              >
                 <div className="flex flex-col text-right">
                   <span className="text-[8px] font-black uppercase tracking-widest text-indigo-200">
                     {t("dash.aiSuggested")}
@@ -1793,6 +1827,106 @@ const Dashboard = () => {
                 </form>
               </motion.div>
             </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* AI Suggested Popup Modal */}
+      {createPortal(
+        <AnimatePresence>
+          {selectedAiCrop && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+              onClick={() => setSelectedAiCrop(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 20 }}
+                className="bg-surface-card/95 dark:bg-slate-900/95 backdrop-blur-3xl border border-white/20 dark:border-slate-700 p-6 sm:p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setSelectedAiCrop(null)}
+                  className="absolute top-6 right-6 p-2 bg-surface-secondary dark:bg-slate-800 rounded-full hover:bg-red-500 hover:text-white transition-colors z-10"
+                >
+                  <LuX size={20} />
+                </button>
+
+                <div className="flex items-center gap-4 mb-6 border-b border-border-default dark:border-slate-700 pb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/30 dark:to-purple-500/30 rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-white/10 dark:border-slate-600">
+                    {cropsData[selectedAiCrop]?.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-[0.2em]">
+                      {t("dash.aiSuggested") || "AI SUGGESTED"}
+                    </h3>
+                    <h2 className="text-3xl font-black text-text-main dark:text-white">
+                      {t("crop." + selectedAiCrop) || selectedAiCrop}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                  {/* Style 1: Why AI Approach */}
+                  <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl">
+                    <h4 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                      <LuActivity /> Why AI Chose This
+                    </h4>
+                    <p className="text-sm text-text-main dark:text-slate-200 leading-relaxed font-bold">
+                      Based on real-time soil moisture sensors and current regional weather patterns, <span className="text-blue-600 dark:text-blue-400">{t("crop." + selectedAiCrop) || selectedAiCrop}</span> offers the highest yield and profitability for your exact location today!
+                    </p>
+                  </div>
+
+                  {/* Style 2: Quick Facts Card */}
+                  <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-2xl border border-border-default dark:border-slate-700 shadow-inner">
+                    <h4 className="text-[10px] font-black text-text-muted dark:text-slate-400 uppercase tracking-widest mb-3">
+                      Quick Facts
+                    </h4>
+                    <ul className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs font-bold text-text-main dark:text-slate-200">
+                      <li className="flex items-center gap-1.5">🌱 <span className="text-text-muted">Duration:</span> <span className="truncate">{cropsData[selectedAiCrop]?.duration}</span></li>
+                      <li className="flex items-center gap-1.5">☀️ <span className="text-text-muted">Sunlight:</span> <span className="truncate">{cropsData[selectedAiCrop]?.sunlight}</span></li>
+                      <li className="flex items-center gap-1.5">💧 <span className="text-text-muted">Watering:</span> <span className="truncate">{cropsData[selectedAiCrop]?.irrigation?.split(' ')[0]}</span></li>
+                      <li className="flex items-center gap-1.5">💪 <span className="text-text-muted">Difficulty:</span> <span className="truncate">{cropsData[selectedAiCrop]?.difficulty}</span></li>
+                    </ul>
+                  </div>
+
+                  {/* Tools & Fertilizers */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-2xl">
+                      <h4 className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                        <LuSettings2 size={12} /> Tools Needed
+                      </h4>
+                      <ul className="list-disc list-inside text-xs font-bold text-text-main dark:text-slate-300 space-y-1">
+                        {cropsData[selectedAiCrop]?.tools.map((t, i) => <li key={i}>{t}</li>)}
+                      </ul>
+                    </div>
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl">
+                      <h4 className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                        <LuFlaskConical size={12} /> Fertilizers
+                      </h4>
+                      <p className="text-xs font-bold text-text-main dark:text-slate-300 leading-snug">
+                        {cropsData[selectedAiCrop]?.nutrients}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Style 3: Fun Fact */}
+                  <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 p-4 rounded-2xl text-center shadow-inner mt-2">
+                    <p className="text-sm font-black text-purple-700 dark:text-purple-300 italic">
+                      "{cropsData[selectedAiCrop]?.funFact}"
+                    </p>
+                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mt-3 opacity-80">
+                      Plant seeds now & track growth!
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>,
         document.body
