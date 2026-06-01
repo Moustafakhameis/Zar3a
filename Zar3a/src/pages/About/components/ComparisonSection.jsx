@@ -64,15 +64,28 @@ const ComparisonSection = () => {
                 <motion.li 
                   key={idx}
                   initial={{ opacity: 0, x: -20, filter: "blur(8px)" }}
-                  whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  whileInView={{ 
+                    opacity: 1, 
+                    x: 0, 
+                    filter: "blur(0px)",
+                    transition: { delay: 0.3 + (idx * 0.1), type: "spring", stiffness: 300, damping: 24 }
+                  }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.3 + (idx * 0.1), type: "spring", stiffness: 300, damping: 24 }}
-                  whileHover={{ x: 5, color: "#ef4444" }}
-                  className="flex items-center gap-4 text-lg font-bold text-slate-500 dark:text-slate-400 transition-colors cursor-default"
+                  whileHover={{ 
+                    x: 5, 
+                    color: "#ef4444",
+                    transition: { type: "spring", stiffness: 400, damping: 15 }
+                  }}
+                  className="flex items-center gap-4 text-lg font-bold text-slate-500 dark:text-slate-400 cursor-default"
                 >
                   <motion.div 
-                    whileHover={{ rotate: 90, scale: 1.2, backgroundColor: "rgba(239, 68, 68, 0.2)" }}
-                    className="w-8 h-8 rounded-full bg-red-500/10 dark:bg-red-500/10 flex items-center justify-center text-red-500 flex-shrink-0 transition-colors"
+                    whileHover={{ 
+                      rotate: 90, 
+                      scale: 1.2, 
+                      backgroundColor: "rgba(239, 68, 68, 0.2)",
+                      transition: { duration: 0.2 }
+                    }}
+                    className="w-8 h-8 rounded-full bg-red-500/10 dark:bg-red-500/10 flex items-center justify-center text-red-500 flex-shrink-0"
                   >
                     <LuX size={16} strokeWidth={3} />
                   </motion.div>
@@ -111,16 +124,30 @@ const ComparisonSection = () => {
                 <motion.li 
                   key={idx} 
                   initial={{ opacity: 0, x: 20, filter: "blur(8px)" }}
-                  whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  whileInView={{ 
+                    opacity: 1, 
+                    x: 0, 
+                    filter: "blur(0px)",
+                    transition: { delay: 0.5 + (idx * 0.1), type: "spring", stiffness: 300, damping: 24 }
+                  }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.5 + (idx * 0.1), type: "spring", stiffness: 300, damping: 24 }}
-                  whileHover={{ x: 5, color: "#10b981" }}
-                  className="flex items-center gap-4 text-lg font-black text-emerald-700 dark:text-emerald-300 transition-colors cursor-default"
+                  whileHover={{ 
+                    x: 5, 
+                    color: "#10b981",
+                    transition: { type: "spring", stiffness: 400, damping: 15 }
+                  }}
+                  className="flex items-center gap-4 text-lg font-black text-emerald-700 dark:text-emerald-300 cursor-default"
                 >
                   <motion.div 
-                    animate={{ boxShadow: ["0px 0px 0px 0px rgba(16,185,129,0.6)", "0px 0px 0px 10px rgba(16,185,129,0)"] }}
-                    transition={{ duration: 1.5, repeat: Infinity, delay: idx * 0.2 }}
-                    whileHover={{ scale: 1.2, rotate: [0, -15, 15, -15, 0] }}
+                    animate={{ 
+                      boxShadow: ["0px 0px 0px 0px rgba(16,185,129,0.6)", "0px 0px 0px 10px rgba(16,185,129,0)"],
+                      transition: { duration: 1.5, repeat: Infinity, delay: idx * 0.2 }
+                    }}
+                    whileHover={{ 
+                      scale: 1.2, 
+                      rotate: [0, -15, 15, -15, 0],
+                      transition: { duration: 0.4 }
+                    }}
                     className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white flex-shrink-0"
                   >
                     <LuCheck size={16} strokeWidth={3} />
