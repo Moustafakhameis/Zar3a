@@ -293,23 +293,23 @@ const EgyptMapSection = () => {
     const resizeTimeout = setTimeout(() => map.invalidateSize(), 500);
     activeTimeouts.push(resizeTimeout);
 
-    // Precise stealth patch designed to tightly cover only the original text, with native-styled replacement text
-    const palestineIcon = L.divIcon({
-      className: 'palestine-label',
-      html: `
-        <div style="position: relative; width: 90px; height: 18px; display: flex; align-items: center; justify-content: center; pointer-events: none;">
-          <!-- Precise blur patch exactly the size of the text -->
-          <div style="position: absolute; inset: 0; background-color: rgba(128,128,128,0.02); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 4px;"></div>
-          <!-- Native-styled CartoDB replacement text -->
-          <div style="position: relative; color: #888888; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; z-index: 10; margin-left: 2px;">
-            PALESTINE
-          </div>
-        </div>
-      `,
+    // Precise stealth patch to tightly cover the original text
+    const wipeIcon = L.divIcon({
+      className: 'wipe-label',
+      html: `<div style="width: 90px; height: 18px; background-color: rgba(128,128,128,0.02); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 4px; pointer-events: none;"></div>`,
       iconSize: [90, 18],
       iconAnchor: [45, 9]
     });
-    L.marker([30.75, 34.8], { icon: palestineIcon, interactive: false }).addTo(map);
+    L.marker([30.75, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
+
+    // Native-styled replacement text placed slightly higher
+    const palestineIcon = L.divIcon({
+      className: 'palestine-label',
+      html: `<div style="color: #888888; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; white-space: nowrap; pointer-events: none; margin-left: 2px;">PALESTINE</div>`,
+      iconSize: [90, 18],
+      iconAnchor: [45, 9]
+    });
+    L.marker([31.25, 34.8], { icon: palestineIcon, interactive: false }).addTo(map);
 
     return () => {
       // Clear all pending animations if the user navigates away before they finish
