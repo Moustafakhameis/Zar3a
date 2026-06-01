@@ -448,6 +448,9 @@ const translations = {
   "dash.ventilationActive": { en: "Current State",           ar: "الحالة الحالية" },
   "dash.fertilizerConsumption": { en: "Usage & Consumption Trends", ar: "اتجاهات الاستخدام والاستهلاك" },
   "dash.soilAcidity":       { en: "Soil Acidity Monitoring", ar: "مراقبة حموضة التربة" },
+  "dash.cropInsights":      { en: "Crop Insights",           ar: "رؤى المحاصيل" },
+  "dash.plantingDates":     { en: "Planting Window",         ar: "مواعيد الزراعة" },
+  "dash.whyPlanted":        { en: "Strategic Importance",    ar: "الأهمية الاستراتيجية" },
 
   // Crops
   "crop.Cotton":            { en: "Cotton",                  ar: "القطن" },
@@ -472,6 +475,23 @@ const translations = {
   "loc.Fayoum, Oasis":       { en: "Fayoum, Oasis",           ar: "الفيوم، الواحات" },
   "loc.Gharbia, Central Delta": { en: "Gharbia, Central Delta", ar: "الغربية، وسط الدلتا" },
   "loc.Kafr El Sheikh, North Delta": { en: "Kafr El Sheikh, North Delta", ar: "كفر الشيخ، شمال الدلتا" },
+  "loc.Monufia, Delta": { en: "Monufia, Delta", ar: "المنوفية، الدلتا" },
+  "loc.Qalyubia, Delta": { en: "Qalyubia, Delta", ar: "القليوبية، الدلتا" },
+  "loc.Damietta, North Coast": { en: "Damietta, North Coast", ar: "دمياط، الساحل الشمالي" },
+  "loc.Ismailia, Canal": { en: "Ismailia, Canal", ar: "الإسماعيلية، القناة" },
+  "loc.Port Said, Canal": { en: "Port Said, Canal", ar: "بورسعيد، القناة" },
+  "loc.Suez, Canal": { en: "Suez, Canal", ar: "السويس، القناة" },
+  "loc.Giza, Greater Cairo": { en: "Giza, Greater Cairo", ar: "الجيزة، القاهرة الكبرى" },
+  "loc.Beni Suef, Middle Egypt": { en: "Beni Suef, Middle Egypt", ar: "بني سويف، مصر الوسطى" },
+  "loc.Asyut, Upper Egypt": { en: "Asyut, Upper Egypt", ar: "أسيوط، صعيد مصر" },
+  "loc.Sohag, Upper Egypt": { en: "Sohag, Upper Egypt", ar: "سوهاج، صعيد مصر" },
+  "loc.Qena, Upper Egypt": { en: "Qena, Upper Egypt", ar: "قنا، صعيد مصر" },
+  "loc.Luxor, Upper Egypt": { en: "Luxor, Upper Egypt", ar: "الأقصر، صعيد مصر" },
+  "loc.New Valley, Western Desert": { en: "New Valley, Western Desert", ar: "الوادي الجديد، الصحراء الغربية" },
+  "loc.Matrouh, North Coast": { en: "Matrouh, North Coast", ar: "مطروح، الساحل الشمالي" },
+  "loc.North Sinai, Sinai": { en: "North Sinai, Sinai", ar: "شمال سيناء، سيناء" },
+  "loc.South Sinai, Sinai": { en: "South Sinai, Sinai", ar: "جنوب سيناء، سيناء" },
+  "loc.Red Sea, Coast": { en: "Red Sea, Coast", ar: "البحر الأحمر، الساحل" },
 
   "reg.Capital":            { en: "Capital",                 ar: "العاصمة" },
   "reg.Delta":              { en: "Delta",                   ar: "الدلتا" },
@@ -483,6 +503,9 @@ const translations = {
   "reg.Central Delta":      { en: "Central Delta",           ar: "وسط الدلتا" },
   "reg.North Delta":        { en: "North Delta",             ar: "شمال الدلتا" },
   "reg.Egypt":              { en: "Egypt",                   ar: "مصر" },
+  "reg.Canal Zone":         { en: "Canal Zone",            ar: "منطقة القناة" },
+  "reg.Upper Egypt":        { en: "Upper Egypt",           ar: "صعيد مصر" },
+  "reg.Sinai":              { en: "Sinai",                 ar: "سيناء" },
 
   // Weather conditions
   "weather.Clear Sky":      { en: "Clear Sky",               ar: "سماء صافية" },

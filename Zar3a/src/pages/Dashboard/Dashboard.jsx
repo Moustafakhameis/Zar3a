@@ -50,6 +50,12 @@ import LiveTicker from "./LiveTicker";
 const Dashboard = () => {
   const { t } = useLanguage();
   const { user, updateProfile } = useAuth();
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const navigate = useNavigate();
 
@@ -79,6 +85,8 @@ const Dashboard = () => {
       sunlight: "Full Sun",
       diseases: "Boll Rot",
       info: "Requires deep soil preparation.",
+      plantingDates: "March - May",
+      whyPlanted: "Major cash crop in Egypt, known globally for its high-quality long-staple fibers.",
     },
     Wheat: {
       icon: "🌾",
@@ -94,6 +102,8 @@ const Dashboard = () => {
       sunlight: "Full Sun",
       diseases: "Rust",
       info: "Critical moisture needed during flowering.",
+      plantingDates: "November - December",
+      whyPlanted: "Essential food security crop; Egypt's most critical strategic staple for bread.",
     },
     "Sugar Cane": {
       icon: "🎋",
@@ -109,6 +119,8 @@ const Dashboard = () => {
       sunlight: "Full Sun",
       diseases: "Smut",
       info: "Requires excellent drainage.",
+      plantingDates: "February - March",
+      whyPlanted: "Primary source of sugar production in Upper Egypt, highly profitable for local farmers.",
     },
     Tomato: {
       icon: "🍅",
@@ -124,6 +136,8 @@ const Dashboard = () => {
       sunlight: "Full Sun",
       diseases: "Blight",
       info: "Consistent moisture prevents fruit cracking.",
+      plantingDates: "Multiple (Feb-Mar, Sep-Oct)",
+      whyPlanted: "Extremely high local demand year-round; versatile crop for fresh market and processing.",
     },
     Citrus: {
       icon: "🍊",
@@ -139,6 +153,8 @@ const Dashboard = () => {
       sunlight: "Full/Partial Sun",
       diseases: "Citrus Canker",
       info: "Prefers sandy-loamy Delta soils.",
+      plantingDates: "February - April (Saplings)",
+      whyPlanted: "Major export crop; Egypt is one of the world's leading exporters of oranges.",
     },
     Rice: {
       icon: "🍚",
@@ -154,6 +170,8 @@ const Dashboard = () => {
       sunlight: "Full Sun",
       diseases: "Blast",
       info: "Requires clayey soils retaining water.",
+      plantingDates: "April - May",
+      whyPlanted: "Crucial summer staple crop that helps reclaim saline soils in the Northern Delta.",
     },
     Maize: {
       icon: "🌽",
@@ -169,6 +187,8 @@ const Dashboard = () => {
       sunlight: "Full Sun",
       diseases: "Late Wilt",
       info: "Highly sensitive to drought during pollination.",
+      plantingDates: "May - June",
+      whyPlanted: "Dual-purpose crop used for human consumption and vital livestock feed.",
     },
     Potato: {
       icon: "🥔",
@@ -184,6 +204,8 @@ const Dashboard = () => {
       sunlight: "Full Sun",
       diseases: "Late Blight",
       info: "Prefers well-drained sandy-loam soils.",
+      plantingDates: "Jan-Feb (Summer), Sep-Oct (Winter)",
+      whyPlanted: "High-value export commodity and fundamental local vegetable.",
     },
     Clover: {
       icon: "☘️",
@@ -199,6 +221,8 @@ const Dashboard = () => {
       sunlight: "Full/Partial Sun",
       diseases: "Root Rot",
       info: "Primary animal feed crop in Egypt (Berseem).",
+      plantingDates: "September - November",
+      whyPlanted: "The most important forage crop for livestock; excellent for nitrogen fixation in soil.",
     },
     Onion: {
       icon: "🧅",
@@ -214,6 +238,8 @@ const Dashboard = () => {
       sunlight: "Full Sun",
       diseases: "Downy Mildew",
       info: "Dry harvest period is crucial for storage.",
+      plantingDates: "August - October",
+      whyPlanted: "Key ingredient in local cuisine and a highly demanded export crop to Europe and Arab nations.",
     },
   };
 
@@ -277,6 +303,108 @@ const Dashboard = () => {
       lng: 30.9416,
       bestCrop: "Rice",
       region: "North Delta",
+    },
+    "Monufia, Delta": {
+      lat: 30.5972,
+      lng: 30.9876,
+      bestCrop: "Wheat",
+      region: "Delta",
+    },
+    "Qalyubia, Delta": {
+      lat: 30.3292,
+      lng: 31.2168,
+      bestCrop: "Maize",
+      region: "Delta",
+    },
+    "Damietta, North Coast": {
+      lat: 31.4175,
+      lng: 31.8111,
+      bestCrop: "Tomato",
+      region: "Coastal",
+    },
+    "Ismailia, Canal": {
+      lat: 30.5965,
+      lng: 32.2715,
+      bestCrop: "Citrus",
+      region: "Canal Zone",
+    },
+    "Port Said, Canal": {
+      lat: 31.2653,
+      lng: 32.3019,
+      bestCrop: "Tomato",
+      region: "Canal Zone",
+    },
+    "Suez, Canal": {
+      lat: 29.9668,
+      lng: 32.5498,
+      bestCrop: "Tomato",
+      region: "Canal Zone",
+    },
+    "Giza, Greater Cairo": {
+      lat: 30.0131,
+      lng: 31.2089,
+      bestCrop: "Potato",
+      region: "Capital",
+    },
+    "Beni Suef, Middle Egypt": {
+      lat: 29.0661,
+      lng: 31.0994,
+      bestCrop: "Onion",
+      region: "Middle Egypt",
+    },
+    "Asyut, Upper Egypt": {
+      lat: 27.1783,
+      lng: 31.1859,
+      bestCrop: "Cotton",
+      region: "Upper Egypt",
+    },
+    "Sohag, Upper Egypt": {
+      lat: 26.5591,
+      lng: 31.6957,
+      bestCrop: "Sugar Cane",
+      region: "Upper Egypt",
+    },
+    "Qena, Upper Egypt": {
+      lat: 26.1551,
+      lng: 32.7160,
+      bestCrop: "Sugar Cane",
+      region: "Upper Egypt",
+    },
+    "Luxor, Upper Egypt": {
+      lat: 25.6872,
+      lng: 32.6396,
+      bestCrop: "Sugar Cane",
+      region: "Upper Egypt",
+    },
+    "New Valley, Western Desert": {
+      lat: 25.4390,
+      lng: 30.5586,
+      bestCrop: "Wheat",
+      region: "Oasis",
+    },
+    "Matrouh, North Coast": {
+      lat: 31.3525,
+      lng: 27.2453,
+      bestCrop: "Wheat",
+      region: "Coastal",
+    },
+    "North Sinai, Sinai": {
+      lat: 30.2824,
+      lng: 33.6845,
+      bestCrop: "Citrus",
+      region: "Sinai",
+    },
+    "South Sinai, Sinai": {
+      lat: 28.9715,
+      lng: 33.6265,
+      bestCrop: "Tomato",
+      region: "Sinai",
+    },
+    "Red Sea, Coast": {
+      lat: 26.9654,
+      lng: 33.8225,
+      bestCrop: "Tomato",
+      region: "Coastal",
     },
   };
 
@@ -970,6 +1098,31 @@ const Dashboard = () => {
               </button>
             </div>
           </div>
+
+          {/* Crop Insights Card */}
+          <div className="bg-surface-card dark:bg-slate-900 p-6 rounded-[2.5rem] border border-border-default dark:border-slate-800 shadow-sm">
+            <h4 className="font-black dark:text-white flex items-center gap-2 mb-4">
+              <LuSprout className="text-primary-base" /> {t("dash.cropInsights")}
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
+                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                  <LuCalendar size={12} className="text-status-info" /> {t("dash.plantingDates")}
+                </p>
+                <p className="font-bold text-sm text-text-main dark:text-white">
+                  {cropsData[activeSector.crop].plantingDates}
+                </p>
+              </div>
+              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
+                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                  <LuInfo size={12} className="text-primary-base" /> {t("dash.whyPlanted")}
+                </p>
+                <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
+                  {cropsData[activeSector.crop].whyPlanted}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 🌟 NEW: PREMIUM WEATHER CARD 🌟 */}
@@ -999,19 +1152,33 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Middle Row: Big Temp */}
-            <div className="relative z-10 flex-1 flex flex-col justify-center">
-              <div className="flex items-start gap-1">
-                <h4 className="text-[5.5rem] font-black tracking-tighter leading-none drop-shadow-lg">
-                  {weather.temp}
-                </h4>
-                <div className="flex flex-col pt-2">
-                  <span className="text-4xl font-black text-white/80">°C</span>
+            {/* Middle Row: Big Temp & Live Clock */}
+            <div className="relative z-10 flex-1 flex items-center justify-between">
+              <div className="flex flex-col justify-center">
+                <div className="flex items-start gap-1">
+                  <h4 className="text-[5.5rem] font-black tracking-tighter leading-none drop-shadow-lg">
+                    {weather.temp}
+                  </h4>
+                  <div className="flex flex-col pt-2">
+                    <span className="text-4xl font-black text-white/80">°C</span>
+                  </div>
                 </div>
+                <p className="text-sm font-bold text-indigo-100 uppercase tracking-widest mt-2">
+                  {t("weather." + weather.condition) || weather.condition}
+                </p>
               </div>
-              <p className="text-sm font-bold text-indigo-100 uppercase tracking-widest mt-2">
-                {t("weather." + weather.condition) || weather.condition}
-              </p>
+
+              <div className="flex flex-col items-end text-right">
+                <h4 className="text-4xl font-black tracking-tighter drop-shadow-md">
+                  {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </h4>
+                <p className="text-sm font-bold text-indigo-100 uppercase tracking-widest mt-1">
+                  {currentTime.toLocaleDateString([], { weekday: 'long' })}
+                </p>
+                <p className="text-[10px] font-black text-blue-200/80 uppercase tracking-widest mt-0.5">
+                  {currentTime.toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                </p>
+              </div>
             </div>
 
             {/* Bottom Row: Location & Bento AI Pill */}
