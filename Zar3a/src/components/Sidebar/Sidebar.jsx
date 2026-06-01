@@ -64,25 +64,22 @@ const Sidebar = ({ isOpen, onClose }) => {
     menuItems.push({ path: "/dashboard", label: t("nav.dashboard"), icon: <FcDataSheet /> });
   }
 
+  // Marketplace: Everyone (including unregistered)
+  menuItems.push({ path: "/marketplace", label: t("nav.marketplace"), icon: <FcShop /> });
+
   // Track Orders: For all registered users
   if (user?.role) {
     menuItems.push({ path: "/track-orders", label: t("nav.trackOrders"), icon: <FcShipped /> });
   }
 
-  // Marketplace: Everyone (including unregistered)
-  menuItems.push({ path: "/marketplace", label: t("nav.marketplace"), icon: <FcShop /> });
-
-  // About Us: Everyone
-  menuItems.push({ path: "/about", label: t("nav.aboutUs") || "About Us", icon: <FcAbout /> });
+  // AI Assistant: Hide from unregistered users and AGRO_EXPERT
+  if (user?.role && user.role !== 'AGRO_EXPERT') {
+    menuItems.push({ path: "/chatbot", label: t("nav.aiAssistant"), icon: <FcAssistant /> });
+  }
 
   // Experts: Hide from BUYER and unregistered users
   if (user?.role && user.role !== 'BUYER') {
     menuItems.push({ path: "/experts", label: t("nav.experts"), icon: <FcConferenceCall /> });
-  }
-
-  // AI Assistant: Hide from unregistered users and AGRO_EXPERT
-  if (user?.role && user.role !== 'AGRO_EXPERT') {
-    menuItems.push({ path: "/chatbot", label: t("nav.aiAssistant"), icon: <FcAssistant /> });
   }
 
   // Notifications: Hide from unregistered users
@@ -94,6 +91,9 @@ const Sidebar = ({ isOpen, onClose }) => {
   if (user?.role === 'ADMIN') {
     menuItems.push({ path: "/admin", label: t("nav.adminPanel"), icon: <FcPrivacy /> });
   }
+
+  // About Us: Everyone
+  menuItems.push({ path: "/about", label: t("nav.aboutUs") || "About Us", icon: <FcAbout /> });
 
   // Animation variants
   const mobileVariants = {
