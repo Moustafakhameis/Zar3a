@@ -208,7 +208,7 @@ const EgyptMapSection = () => {
     
     mapInstance.current = map;
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 20,
       attribution: '© OpenStreetMap © CartoDB'
     }).addTo(map);
@@ -292,6 +292,15 @@ const EgyptMapSection = () => {
 
     const resizeTimeout = setTimeout(() => map.invalidateSize(), 500);
     activeTimeouts.push(resizeTimeout);
+
+    // Stealth blur patch to wipe the specific label
+    const wipeIcon = L.divIcon({
+      className: 'stealth-wipe-patch',
+      html: `<div style="width: 120px; height: 35px; backdrop-filter: blur(12px) brightness(0.95); border-radius: 8px; pointer-events: none;"></div>`,
+      iconSize: [120, 35],
+      iconAnchor: [60, 17]
+    });
+    L.marker([30.8, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
 
     return () => {
       // Clear all pending animations if the user navigates away before they finish
