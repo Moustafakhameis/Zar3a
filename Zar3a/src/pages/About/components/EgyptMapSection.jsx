@@ -296,11 +296,11 @@ const EgyptMapSection = () => {
     // Stealth blur patch to wipe the specific label with feathered edges
     const wipeIcon = L.divIcon({
       className: 'stealth-wipe-patch',
-      html: `<div style="width: 140px; height: 50px; backdrop-filter: blur(10px); -webkit-mask-image: radial-gradient(ellipse, black 20%, transparent 70%); mask-image: radial-gradient(ellipse, black 20%, transparent 70%); pointer-events: none;"></div>`,
-      iconSize: [140, 50],
-      iconAnchor: [70, 25]
+      html: `<div style="width: 160px; height: 45px; backdrop-filter: blur(20px); -webkit-mask-image: radial-gradient(ellipse, black 50%, transparent 100%); mask-image: radial-gradient(ellipse, black 50%, transparent 100%); pointer-events: none;"></div>`,
+      iconSize: [160, 45],
+      iconAnchor: [80, 22]
     });
-    L.marker([30.9, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
+    L.marker([31.0, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
 
     return () => {
       // Clear all pending animations if the user navigates away before they finish
