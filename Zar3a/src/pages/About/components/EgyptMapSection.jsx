@@ -293,26 +293,23 @@ const EgyptMapSection = () => {
     const resizeTimeout = setTimeout(() => map.invalidateSize(), 500);
     activeTimeouts.push(resizeTimeout);
 
-    // Massive stealth patch to completely wipe out any underlying text labels in the region
-    const wipeIcon = L.divIcon({
-      className: 'stealth-wipe-patch',
-      html: `<div style="position: relative; width: 300px; height: 200px; pointer-events: none; background-color: rgba(128,128,128,0.02); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); -webkit-mask-image: radial-gradient(ellipse, black 30%, transparent 70%); mask-image: radial-gradient(ellipse, black 30%, transparent 70%); z-index: 1;"></div>`,
-      iconSize: [300, 200],
-      iconAnchor: [150, 100]
+    // Precise stealth patch designed to tightly cover only the original text, with native-styled replacement text
+    const palestineIcon = L.divIcon({
+      className: 'palestine-label',
+      html: `
+        <div style="position: relative; width: 90px; height: 18px; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+          <!-- Precise blur patch exactly the size of the text -->
+          <div style="position: absolute; inset: 0; background-color: rgba(128,128,128,0.02); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 4px;"></div>
+          <!-- Native-styled CartoDB replacement text -->
+          <div style="position: relative; color: #888888; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; z-index: 10; margin-left: 2px;">
+            PALESTINE
+          </div>
+        </div>
+      `,
+      iconSize: [90, 18],
+      iconAnchor: [45, 9]
     });
-    // Centered around 31.0, 34.8 to ensure both potential label locations are covered
-    L.marker([31.0, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
-
-    // SVG Overlay for scalable text (zooms natively with the map)
-    const latLngBounds = L.latLngBounds([[31.5, 34.3], [30.5, 35.3]]);
-    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svgElement.setAttribute('viewBox', '0 0 200 200');
-    svgElement.innerHTML = `
-        <text x="100" y="80" font-family="'Open Sans', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="4" fill="#888888" text-anchor="middle">ISRAEL</text>
-        <text x="100" y="130" font-family="'Open Sans', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="4" fill="#888888" text-anchor="middle">PALESTINE</text>
-    `;
-    L.svgOverlay(svgElement, latLngBounds, { interactive: false }).addTo(map);
+    L.marker([30.75, 34.8], { icon: palestineIcon, interactive: false }).addTo(map);
 
     return () => {
       // Clear all pending animations if the user navigates away before they finish
