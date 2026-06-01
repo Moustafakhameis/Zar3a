@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-let rawKey = process.env.BREVO_API_KEY || process.env.brevo_api_key || process.env.Brevo_Api_Key;
+let rawKey = process.env.BREVO_API_KEY || 
+             process.env.brevo_api_key || 
+             process.env.Brevo_Api_Key || 
+             process.env.BERVO_API_KEY || 
+             process.env.bervo_api_key ||
+             process.env.SENDINBLUE_API_KEY ||
+             process.env.sendinblue_api_key;
 if (rawKey) {
   rawKey = rawKey.trim().replace(/^["']|["']$/g, '');
 }
