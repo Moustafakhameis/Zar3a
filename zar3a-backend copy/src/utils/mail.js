@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+console.log("🚨 BREVO_API_KEY:", process.env.BREVO_API_KEY);
 
 if (!BREVO_API_KEY) {
   console.warn('Warning: BREVO_API_KEY environment variable is not set');
