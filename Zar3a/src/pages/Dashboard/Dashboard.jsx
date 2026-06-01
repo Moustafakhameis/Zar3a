@@ -46,17 +46,12 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import LiveTicker from "./LiveTicker";
+import LiveClock from "../../components/LiveClock/LiveClock";
 
 const Dashboard = () => {
   const { t } = useLanguage();
   const { user, updateProfile } = useAuth();
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedAiCrop, setSelectedAiCrop] = useState(null);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const navigate = useNavigate();
 
@@ -209,7 +204,7 @@ const Dashboard = () => {
       plantingDates: "May - June",
       whyPlanted: "Dual-purpose crop used for human consumption and vital livestock feed.",
       difficulty: "Easy",
-      funFact: "An average ear of corn has 800 kernels arranged in 16 rows!",
+      funFact: "An average ear of maize has 800 kernels arranged in 16 rows!",
       tools: ["Planter", "Hoe", "Sprinkler"],
     },
     Potato: {
@@ -249,7 +244,7 @@ const Dashboard = () => {
       plantingDates: "September - November",
       whyPlanted: "The most important forage crop for livestock; excellent for nitrogen fixation in soil.",
       difficulty: "Easy",
-      funFact: "Clover is not just animal feed; its flowers make some of the best honey!",
+      funFact: "Don't mistake clover for just livestock feed; its blossoms are the secret behind exceptional honey.",
       tools: ["Seed spreader", "Scythe", "Rake"],
     },
     Onion: {
@@ -1200,15 +1195,9 @@ const Dashboard = () => {
               </div>
 
               <div className="flex flex-col items-end text-right">
-                <h4 className="text-4xl font-black tracking-tighter drop-shadow-md">
-                  {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </h4>
-                <p className="text-sm font-bold text-indigo-100 uppercase tracking-widest mt-1">
-                  {currentTime.toLocaleDateString([], { weekday: 'long' })}
-                </p>
-                <p className="text-[10px] font-black text-blue-200/80 uppercase tracking-widest mt-0.5">
-                  {currentTime.toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                </p>
+                <LiveClock format="time" className="text-4xl font-black tracking-tighter drop-shadow-md" />
+                <LiveClock format="weekday" className="text-sm font-bold text-indigo-100 uppercase tracking-widest mt-1" />
+                <LiveClock format="date" className="text-[10px] font-black text-blue-200/80 uppercase tracking-widest mt-0.5" />
               </div>
             </div>
 
@@ -1301,7 +1290,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-96 min-h-[400px] w-full">
-                  <ResponsiveContainer width="100%" height={400} minWidth={1}>
+                  <ResponsiveContainer width="100%" height={400} minWidth={1} debounce={50}>
                     <AreaChart data={data}>
                       <defs>
                         <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
@@ -1339,7 +1328,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-96 min-h-[400px] w-full mt-4">
-                  <ResponsiveContainer width="100%" height={400} minWidth={1}>
+                  <ResponsiveContainer width="100%" height={400} minWidth={1} debounce={50}>
                     <BarChart data={data}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
                       <XAxis dataKey="time" stroke="#94a3b8" fontSize={10} tickLine={false} />
@@ -1369,7 +1358,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-96 min-h-[400px] w-full mt-4">
-                  <ResponsiveContainer width="100%" height={400} minWidth={1}>
+                  <ResponsiveContainer width="100%" height={400} minWidth={1} debounce={50}>
                     <LineChart data={data}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
                       <XAxis dataKey="time" stroke="#94a3b8" fontSize={10} tickLine={false} />
@@ -1400,7 +1389,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-96 min-h-[400px] w-full mt-4">
-                  <ResponsiveContainer width="100%" height={400} minWidth={1}>
+                  <ResponsiveContainer width="100%" height={400} minWidth={1} debounce={50}>
                     <AreaChart data={data}>
                       <defs>
                         <linearGradient id="phGradient" x1="0" y1="0" x2="0" y2="1">
@@ -1526,7 +1515,7 @@ const Dashboard = () => {
                 </button>
               </div>
               <div className="p-8 pt-4 h-[60vh] min-h-[400px]">
-                <ResponsiveContainer width="99%" height="100%" minHeight={400}>
+                <ResponsiveContainer width="99%" height="100%" minHeight={400} debounce={50}>
                   {activeModalChart === 'moisture' ? (
                     <AreaChart data={data}>
                       <defs>

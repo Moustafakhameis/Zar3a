@@ -14,16 +14,11 @@ import {
   LuCpu,
   LuCalendar,
 } from "react-icons/lu";
+import LiveClock from "../../components/LiveClock/LiveClock";
 
 const Home = () => {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -67,14 +62,14 @@ const Home = () => {
           <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 px-4 py-2 rounded-full bg-slate-900 dark:bg-surface-card/5 text-white dark:text-slate-300 font-bold text-[10px] sm:text-xs mb-8 border border-white/10 shadow-xl">
             <div className="flex items-center gap-2 sm:border-e border-white/20 sm:pe-4">
               <LuCalendar size={14} className="text-emerald-400" />
-              {currentTime.toLocaleDateString(locale, { month: "short", day: "numeric" })}
+              <LiveClock format="date" />
             </div>
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              {currentTime.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+              <LiveClock format="time-with-seconds" />
             </div>
           </div>
 
@@ -188,6 +183,7 @@ const Home = () => {
               <h3 className="text-2xl font-black text-text-main dark:text-white mb-3 tracking-tight">
                 {t("home.telemetry.title")}
               </h3>
+              <LiveClock className="block mb-2 text-xl sm:text-2xl font-black text-slate-800 dark:text-white font-mono tracking-tight" />
               <p className="text-text-muted dark:text-text-disabled font-medium text-sm leading-relaxed">
                 {t("home.telemetry.desc")}
               </p>

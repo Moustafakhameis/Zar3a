@@ -428,7 +428,12 @@ const Marketplace = () => {
   };
 
   const activeData = products.filter((item) => item.marketType === activeTab);
-  const categories = ["All", ...new Set(activeData.map((item) => item.category))];
+  const categoriesRaw = [...new Set(activeData.map((item) => item.category))];
+  const categories = [
+    "All", 
+    ...categoriesRaw.filter(c => c !== "OTHER" && c !== "Other"), 
+    ...categoriesRaw.filter(c => c === "OTHER" || c === "Other")
+  ];
 
   const filteredData = activeData
     .filter(
@@ -800,15 +805,15 @@ const Marketplace = () => {
               <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-3 flex items-center gap-2">
                 <LuSlidersHorizontal /> {t("market.sortBy")}
               </p>
-              <select
+              <CustomSelect
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full p-4 bg-surface-secondary dark:bg-slate-800 border-none rounded-2xl font-bold dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-green-500 text-sm"
-              >
-                <option>{t("experts.reviews") === "reviews" ? "Top Rated" : "Top Rated"}</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-              </select>
+                options={[
+                  { label: t("experts.reviews") === "reviews" ? "Top Rated" : "Top Rated", value: "Top Rated" },
+                  { label: "Price: Low to High", value: "Price: Low to High" },
+                  { label: "Price: High to Low", value: "Price: High to Low" }
+                ]}
+              />
             </div>
             <div>
               <div className="flex justify-between items-end mb-3">

@@ -169,8 +169,8 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
             <span className="hidden sm:inline">{t("lang.toggle")}</span>
           </motion.button>
 
-          {/* Subscribe Button (Farmer Only) */}
-          {(user?.role === 'FARMER' || user?.pendingRole === 'FARMER') && (
+          {/* Subscribe Button (Farmer & Admin) */}
+          {(['FARMER', 'ADMIN'].includes(user?.role) || user?.pendingRole === 'FARMER') && (
             <Link 
               to="/subscribe"
               className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
@@ -266,8 +266,8 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
                       <div className="border-t border-border-default dark:border-slate-700 my-2" />
 
                       <button
-                        onClick={async () => {
-                          await logout();
+                        onClick={() => {
+                          logout();
                           setIsProfileDropdownOpen(false);
                         }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all text-start"

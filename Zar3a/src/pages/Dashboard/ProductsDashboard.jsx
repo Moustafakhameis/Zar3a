@@ -426,17 +426,18 @@ export default function ProductsDashboard() {
                             {isCrop ? `🌾 ${t("nav.cropMarket")}` : `📦 ${t("prodDash.agriShop")}`}
                           </span>
                           {isBoosted && (
-                            <span className={`text-[9px] font-black w-fit uppercase tracking-wider px-3 py-1.5 rounded-full bg-gradient-to-r text-white shadow-md ${
+                            <div className={`flex items-center gap-1.5 text-[10px] font-black w-fit uppercase tracking-widest px-3 py-1.5 rounded-full bg-gradient-to-r text-white shadow-lg whitespace-nowrap border border-white/20 backdrop-blur-md ${
                               isUserFarmerOrSupplier
-                                ? "from-blue-500 to-cyan-500 shadow-blue-500/20"
-                                : "from-amber-400 to-yellow-500 shadow-amber-500/20"
+                                ? "from-blue-500 to-cyan-500 shadow-blue-500/30"
+                                : "from-amber-400 to-orange-500 shadow-amber-500/30"
                             }`}>
-                              ✨ PREMIUM BOOSTED
-                            </span>
+                              <span className="text-xs">✨</span>
+                              <span>Premium Boosted</span>
+                            </div>
                           )}
                         </div>
                         <span className="text-xs font-black text-text-disabled uppercase tracking-widest bg-surface-secondary dark:bg-slate-800/60 px-3 py-1 rounded-lg">
-                          {t("market.category." + product.category) || product.category || "OTHER"}
+                          {product.category || "OTHER"}
                         </span>
                       </div>
 

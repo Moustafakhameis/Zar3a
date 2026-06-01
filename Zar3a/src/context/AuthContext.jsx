@@ -141,18 +141,20 @@ export function AuthProvider({ children }) {
   };
 
   /** Logout: revokes refresh token on server, clears local state, redirects to home. */
-  const logout = async () => {
+  const logout = () => {
     const refreshToken = localStorage.getItem("refreshToken");
-    try {
-      await api.post("/auth/logout", { refreshToken });
-    } catch {
-      // ignore server errors on logout
+    if (refreshToken) {
+      // Fire and forget logout to avoid freezing the UI
+      api.post("/auth/logout", { refreshToken }).catch(() => {});
     }
+    
+    // Instantly clear local state for immediate UI feedback
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     setUser(null);
-    // Redirect to home page
-    window.location.href = '/';
+    
+    // Redirect to login page instantly
+    window.location.href = '/login';
   };
 
   /** Re-fetch the current user from the server. */

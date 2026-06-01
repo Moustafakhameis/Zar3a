@@ -51,6 +51,7 @@ import MainLayout from "../layouts/MainLayout/MainLayout";
 
 // Pages
 import Home from "../pages/Home/Home";
+import About from "../pages/About/About";
 import Login from "../pages/Auth/Login/Login";
 import Register from "../pages/Auth/Register/Register";
 import ForgotPassword from "../pages/Auth/ForgotPassword/ForgotPassword";
@@ -106,6 +107,7 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { index: true, element: <Home /> },
+      { path: "about", element: <About /> },
       { path: "dashboard", element: <Dashboard /> },
       // { path: "sensors", element: <Sensors /> },
       { path: "marketplace", element: <Marketplace /> },

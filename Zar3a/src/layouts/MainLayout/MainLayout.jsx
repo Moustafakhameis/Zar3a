@@ -7,15 +7,17 @@ import Footer from "../../components/Footer/Footer";
 const MainLayout = () => {
   const { pathname } = useLocation();
   const mainRef = useRef(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Hidden by default on all screens
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768); // Open by default on tablet/desktop
 
-  // Scroll to top and auto-close sidebar on route change (especially for mobile)
+  // Scroll to top and auto-close sidebar on route change (ONLY for mobile)
   useEffect(() => {
     window.scrollTo(0, 0);
     if (mainRef.current) {
       mainRef.current.scrollTo(0, 0);
     }
-    setIsSidebarOpen(false);
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
   }, [pathname]);
 
   return (
