@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY || process.env.brevo_api_key || process.env.Brevo_Api_Key;
+let rawKey = process.env.BREVO_API_KEY || process.env.brevo_api_key || process.env.Brevo_Api_Key;
+if (rawKey) {
+  rawKey = rawKey.trim().replace(/^["']|["']$/g, '');
+}
+const BREVO_API_KEY = rawKey;
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 console.log("🚨 BREVO_API_KEY loaded:", BREVO_API_KEY ? `${BREVO_API_KEY.slice(0, 12)}...` : "undefined");
 if (!BREVO_API_KEY) {
