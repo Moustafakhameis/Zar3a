@@ -18,7 +18,7 @@ const Counter = ({ from = 0, to, duration = 2, suffix = "" }) => {
   }, [from, to, duration, inView]);
 
   return (
-    <div ref={ref} className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-teal-600 mb-4 drop-shadow-xl">
+    <div ref={ref} className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-teal-600 mb-2 drop-shadow-xl py-2 leading-normal">
       {count}{suffix}
     </div>
   );
