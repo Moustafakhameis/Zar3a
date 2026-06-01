@@ -443,6 +443,11 @@ const translations = {
   "dash.careThreats":       { en: "Care & Threats",          ar: "الرعاية والتهديدات" },
   "dash.nutrients":         { en: "Nutrients",               ar: "المغذيات" },
   "dash.commonDiseases":    { en: "Common Diseases",         ar: "الأمراض الشائعة" },
+  "dash.phPump":            { en: "pH Mod",                  ar: "تعديل الحموضة" },
+  "dash.phLevelTelemetry":  { en: "pH Level Telemetry",      ar: "بيانات مستوى الحموضة" },
+  "dash.ventilationActive": { en: "Current State",           ar: "الحالة الحالية" },
+  "dash.fertilizerConsumption": { en: "Usage & Consumption Trends", ar: "اتجاهات الاستخدام والاستهلاك" },
+  "dash.soilAcidity":       { en: "Soil Acidity Monitoring", ar: "مراقبة حموضة التربة" },
 
   // Crops
   "crop.Cotton":            { en: "Cotton",                  ar: "القطن" },

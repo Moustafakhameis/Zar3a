@@ -794,34 +794,32 @@ const Dashboard = () => {
             {/* Location Search */}
             <div
               ref={searchRef}
-              className="relative z-40 bg-surface-card dark:bg-slate-900 rounded-[2.5rem] shadow-sm border border-border-default dark:border-slate-800 flex items-center p-3"
+              onClick={() => setShowSuggestions(!showSuggestions)}
+              className="relative z-40 bg-surface-card dark:bg-slate-900 rounded-[2.5rem] shadow-sm border border-border-default dark:border-slate-800 flex items-center p-3 cursor-pointer hover:bg-surface-secondary dark:hover:bg-slate-800 transition-colors"
             >
               <div className="p-3 bg-primary-light text-primary-base rounded-3xl">
                 <LuMapPin size={22} />
               </div>
-              <div className="flex-1 px-4">
+              <div className="flex-1 px-4 flex flex-col justify-center">
                 <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest">
                   {t("dash.zoneLocation")}
                 </p>
-                <input
-                  value={t("loc." + searchQuery) || searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowSuggestions(true);
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                  className="bg-transparent border-none outline-none font-black text-lg w-full dark:text-white"
-                />
+                <div className="flex items-center justify-between mt-0.5">
+                  <span className="font-black text-lg truncate dark:text-white">
+                    {t("loc." + activeSector.location) || activeSector.location}
+                  </span>
+                  <LuChevronDown className={`text-text-disabled transition-transform ${showSuggestions ? "rotate-180" : ""}`} />
+                </div>
               </div>
               <AnimatePresence>
-                {showSuggestions && filteredLocs.length > 0 && (
+                {showSuggestions && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-[110%] left-0 w-full bg-surface-card/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/40 dark:border-slate-700/50 rounded-[2.5rem] shadow-2xl z-50 p-2 max-h-75 overflow-y-auto custom-scrollbar"
+                    className="absolute top-[110%] left-0 w-full bg-surface-card/95 dark:bg-slate-900/95 backdrop-blur-xl border border-border-default dark:border-slate-700/50 rounded-[2.5rem] shadow-2xl z-50 p-2 max-h-75 overflow-y-auto custom-scrollbar"
                   >
-                    {filteredLocs.map((loc) => (
+                    {Object.keys(locationDB).map((loc) => (
                       <div
                         key={loc}
                         onClick={() => handleSelectLocation(loc)}
@@ -1102,7 +1100,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-96 min-h-[400px] w-full">
-                  <ResponsiveContainer width="99%" height="100%" minHeight={400}>
+                  <ResponsiveContainer width="100%" height={400} minWidth={1}>
                     <AreaChart data={data}>
                       <defs>
                         <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
@@ -1140,7 +1138,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-96 min-h-[400px] w-full mt-4">
-                  <ResponsiveContainer width="99%" height="100%" minHeight={400}>
+                  <ResponsiveContainer width="100%" height={400} minWidth={1}>
                     <BarChart data={data}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
                       <XAxis dataKey="time" stroke="#94a3b8" fontSize={10} tickLine={false} />
@@ -1170,7 +1168,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-96 min-h-[400px] w-full mt-4">
-                  <ResponsiveContainer width="99%" height="100%" minHeight={400}>
+                  <ResponsiveContainer width="100%" height={400} minWidth={1}>
                     <LineChart data={data}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
                       <XAxis dataKey="time" stroke="#94a3b8" fontSize={10} tickLine={false} />
@@ -1201,7 +1199,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-96 min-h-[400px] w-full mt-4">
-                  <ResponsiveContainer width="99%" height="100%" minHeight={400}>
+                  <ResponsiveContainer width="100%" height={400} minWidth={1}>
                     <AreaChart data={data}>
                       <defs>
                         <linearGradient id="phGradient" x1="0" y1="0" x2="0" y2="1">

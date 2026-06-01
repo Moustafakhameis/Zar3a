@@ -135,38 +135,38 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
     <>
       <nav className="h-20 bg-surface-card/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-border-default dark:border-slate-800 px-4 md:px-8 flex justify-between items-center sticky top-0 z-[100] transition-all duration-500">
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Menu Toggle Button */}
           <button
             onClick={onToggleSidebar}
-            className="p-2.5 text-text-subtle dark:text-slate-300 bg-surface-secondary dark:bg-slate-800 rounded-xl hover:bg-primary-light dark:hover:bg-emerald-900/20 transition-all cursor-pointer"
+            className="p-2 sm:p-2.5 text-text-subtle dark:text-slate-300 bg-surface-secondary dark:bg-slate-800 rounded-xl hover:bg-primary-light dark:hover:bg-emerald-900/20 transition-all cursor-pointer"
             title="Toggle Menu"
           >
-            {isSidebarOpen ? <LuX size={22} /> : <LuMenu size={22} />}
+            {isSidebarOpen ? <LuX size={20} className="sm:w-[22px] sm:h-[22px]" /> : <LuMenu size={20} className="sm:w-[22px] sm:h-[22px]" />}
           </button>
 
-          <Link to="/" className="group flex items-center gap-3">
-            <div className="relative w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary-light dark:bg-emerald-900/20 rounded-2xl overflow-hidden border border-primary-light dark:border-emerald-800 transition-transform group-hover:scale-105">
+          <Link to="/" className="group flex items-center gap-2 sm:gap-3">
+            <div className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary-light dark:bg-emerald-900/20 rounded-xl sm:rounded-2xl overflow-hidden border border-primary-light dark:border-emerald-800 transition-transform group-hover:scale-105">
               <img src={Logo} alt="Logo" className="w-full h-full object-contain transform scale-125" />
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col hidden sm:flex">
               <span className="text-xl md:text-2xl font-black text-text-main dark:text-white tracking-tighter leading-none uppercase">Zar3a</span>
               <span className="hidden sm:block text-[9px] font-bold text-primary-base dark:text-emerald-400 uppercase tracking-widest mt-1">{t("nav.smartAgri")}</span>
             </div>
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
 
           {/* 🌐 Language Toggle Button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={toggleLang}
             title={lang === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}
-            className="flex items-center gap-1.5 px-3 py-2.5 text-text-subtle dark:text-slate-300 bg-surface-secondary dark:bg-slate-800 rounded-2xl hover:text-primary-base hover:bg-primary-light dark:hover:bg-emerald-900/20 transition-all font-bold text-xs border border-border-default dark:border-slate-700"
+            className="flex items-center gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 text-text-subtle dark:text-slate-300 bg-surface-secondary dark:bg-slate-800 rounded-xl sm:rounded-2xl hover:text-primary-base hover:bg-primary-light dark:hover:bg-emerald-900/20 transition-all font-bold text-xs border border-border-default dark:border-slate-700"
           >
-            <LuLanguages size={16} />
-            <span>{t("lang.toggle")}</span>
+            <LuLanguages size={18} className="sm:w-[16px] sm:h-[16px]" />
+            <span className="hidden sm:inline">{t("lang.toggle")}</span>
           </motion.button>
 
           {/* Subscribe Button (Farmer Only) */}
@@ -183,31 +183,31 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={toggleTheme}
-            className="p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-2xl hover:text-primary-base transition-all"
+            className="p-2 sm:p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-xl sm:rounded-2xl hover:text-primary-base transition-all"
           >
-            {isDark ? <LuSun size={20} className="text-yellow-400" /> : <LuMoon size={20} />}
+            {isDark ? <LuSun size={18} className="sm:w-[20px] sm:h-[20px] text-yellow-400" /> : <LuMoon size={18} className="sm:w-[20px] sm:h-[20px]" />}
           </motion.button>
 
           {/* Chat Icon (All logged-in users) */}
           {user && (
             <button 
               onClick={handleChatClick}
-              className="flex p-2 sm:p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-2xl relative hover:text-primary-base transition-all cursor-pointer border-none outline-none" 
+              className="flex p-2 sm:p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-xl sm:rounded-2xl relative hover:text-primary-base transition-all cursor-pointer border-none outline-none" 
               title={t("nav.chat") || "Chat"}
             >
-              <LuMessageSquare size={20} />
+              <LuMessageSquare size={18} className="sm:w-[20px] sm:h-[20px]" />
             </button>
           )}
 
           {user && (
             <button 
               onClick={handleNotificationsClick}
-              className="flex p-2 sm:p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-2xl relative hover:text-status-info transition-all cursor-pointer border-none outline-none"
+              className="flex p-2 sm:p-3 text-text-muted dark:text-text-disabled bg-surface-secondary dark:bg-slate-800 rounded-xl sm:rounded-2xl relative hover:text-status-info transition-all cursor-pointer border-none outline-none"
               title={t("nav.notifications") || "Notifications"}
             >
-              <LuBell size={20} />
+              <LuBell size={18} className="sm:w-[20px] sm:h-[20px]" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 animate-pulse">
+                <span className="absolute -top-1 -right-1 min-w-4 sm:min-w-5 h-4 sm:h-5 px-1 bg-red-500 text-white text-[9px] sm:text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 animate-pulse">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
@@ -219,13 +219,13 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
             <div className="relative" ref={profileDropdownRef}>
               <button
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-3 bg-surface-secondary dark:bg-slate-800 text-text-subtle dark:text-slate-300 rounded-2xl hover:bg-border-default dark:hover:bg-slate-700 transition-all font-semibold text-sm"
+                className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-3 bg-surface-secondary dark:bg-slate-800 text-text-subtle dark:text-slate-300 rounded-xl sm:rounded-2xl hover:bg-border-default dark:hover:bg-slate-700 transition-all font-semibold text-sm"
               >
-                <div className="w-6 h-6 bg-primary-base rounded-full flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-7 h-7 sm:w-6 sm:h-6 bg-primary-base rounded-full flex items-center justify-center text-white text-xs font-bold">
                   {user.fullName?.charAt(0)}
                 </div>
                 <span className="hidden md:inline">{user.fullName?.split(" ")[0]}</span>
-                <LuChevronDown size={16} className={`transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                <LuChevronDown size={16} className={`transition-transform hidden sm:block ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Profile Dropdown Menu */}
