@@ -300,7 +300,7 @@ const EgyptMapSection = () => {
       iconSize: [120, 35],
       iconAnchor: [60, 17]
     });
-    L.marker([30.8, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
+    L.marker([30.9, 34.8], { icon: wipeIcon, interactive: false }).addTo(map);
 
     return () => {
       // Clear all pending animations if the user navigates away before they finish
