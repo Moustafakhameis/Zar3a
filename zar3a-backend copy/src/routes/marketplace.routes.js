@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
-import { uploadProductImage } from '../middlewares/upload.js';
+import { uploadProductImage, uploadExpertImage } from '../middlewares/upload.js';
 import authenticate from '../middlewares/authenticate.js';
 import { requireApproved } from '../middlewares/roleBasedAccess.js';
 import {
@@ -163,6 +163,7 @@ router.post(
   '/expert-listings',
   authenticate,
   requireApproved,
+  uploadExpertImage,
   [
     body('title').trim().notEmpty().withMessage('Title is required'),
     body('specialty').trim().notEmpty().withMessage('Specialty is required'),

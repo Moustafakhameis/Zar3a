@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Float, Cylinder, Sphere, Environment, RoundedBox, Box } from '@react-three/drei';
+import { OrbitControls, Html, Float, Cylinder, Sphere, RoundedBox, Box } from '@react-three/drei';
 import { motion } from 'framer-motion';
 
 const SmartNode = () => {
@@ -176,7 +176,6 @@ const TechnologySection = () => {
             <ambientLight intensity={1.5} />
             <directionalLight position={[10, 10, 5]} intensity={2.5} />
             <directionalLight position={[-10, -10, -5]} intensity={1} color="#38bdf8" />
-            <Environment preset="city" />
             <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={2} maxPolarAngle={Math.PI / 2 + 0.2} minPolarAngle={Math.PI / 3} />
             <SmartNode />
           </Canvas>

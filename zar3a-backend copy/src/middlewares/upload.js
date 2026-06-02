@@ -71,3 +71,25 @@ export const uploadChatAttachment = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
 }).single("file");
 
+const expertImageDir = "uploads/experts";
+fs.mkdirSync(expertImageDir, { recursive: true });
+
+const expertImageStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, expertImageDir),
+  filename:    (_req, file,  cb) => cb(null, `${uuidv4()}${path.extname(file.originalname)}`),
+});
+
+const expertImageFilter = (_req, file, cb) => {
+  const allowed = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".heic", ".heif"];
+  if (allowed.includes(path.extname(file.originalname).toLowerCase()))
+    cb(null, true);
+  else
+    cb(new Error("Only images (png, jpg, jpeg, webp, gif, heic) are accepted"));
+};
+
+export const uploadExpertImage = multer({
+  storage: expertImageStorage,
+  fileFilter: expertImageFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+}).single("imageFile");
+

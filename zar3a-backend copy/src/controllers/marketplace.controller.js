@@ -283,6 +283,11 @@ export const createExpertListing = async (req, res) => {
       });
     }
 
+    let finalImageUrl = imageUrl || '';
+    if (req.file) {
+      finalImageUrl = `/uploads/experts/${req.file.filename}`;
+    }
+
     const listing = await ExpertListing.create({
       userId: user.id,
       title,
@@ -290,7 +295,7 @@ export const createExpertListing = async (req, res) => {
       description,
       hourlyRate: Number(hourlyRate),
       location: location || '',
-      imageUrl: imageUrl || '',
+      imageUrl: finalImageUrl,
       isVerified: true,
     });
 

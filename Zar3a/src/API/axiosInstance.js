@@ -69,7 +69,7 @@ export const marketplaceAPI = {
 
   // EXPERT LISTINGS
   getExpertListings: () => api.get('/marketplace/expert-listings'),
-  createExpertListing: (data) => api.post('/marketplace/expert-listings', data),
+  createExpertListing: (data) => api.post('/marketplace/expert-listings', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
 };
 
 /**

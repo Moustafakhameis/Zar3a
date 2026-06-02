@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import DualImageUpload from "../../components/DualImageUpload";
 
 const normalizeListing = (listing) => {
   const name = listing.name || listing.User?.fullName || listing.User?.username || "Expert";
@@ -44,6 +45,8 @@ const Experts = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "" });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
@@ -101,7 +104,7 @@ const Experts = () => {
     else if (l_.length > 50) fe.location = "Location must be at most 50 characters";
 
     const img_ = createForm.imageUrl.trim();
-    if (img_ && !/^https?:\/\/.+/.test(img_)) {
+    if (!imageFile && img_ && !/^https?:\/\/.+/.test(img_)) {
       fe.imageUrl = "Image URL must start with http:// or https://";
     }
 
@@ -112,11 +115,25 @@ const Experts = () => {
   const handleCreateListing = async () => {
     if (!validateCreateForm()) return;
     try {
-      const newListing = await createExpertListing({ ...createForm, hourlyRate: Number(createForm.hourlyRate) });
+      let newListing;
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("title", createForm.title);
+        formData.append("specialty", createForm.specialty);
+        formData.append("description", createForm.description);
+        formData.append("hourlyRate", Number(createForm.hourlyRate));
+        formData.append("location", createForm.location);
+        formData.append("imageFile", imageFile);
+        newListing = await createExpertListing(formData);
+      } else {
+        newListing = await createExpertListing({ ...createForm, hourlyRate: Number(createForm.hourlyRate) });
+      }
       setExpertCards((prev) => [normalizeListing(newListing), ...prev]);
       setSuccessMessage(t("experts.created"));
       setShowCreateModal(false);
       setCreateForm({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "" });
+      setImageFile(null);
+      setImagePreview("");
       setFieldErrors({});
     } catch (err) {
       console.error(err);
@@ -346,9 +363,20 @@ const Experts = () => {
                   </div>
                 </div>
                 <div>
-                  <input type="text" name="imageUrl" value={createForm.imageUrl} onChange={handleCreateInput}
-                    placeholder={t("experts.imageUrl")}
-                    className={`w-full bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.imageUrl ? 'border-red-400 dark:border-red-500' : 'border-border-default dark:border-slate-700'} rounded-3xl px-5 py-4 text-sm font-bold text-text-main dark:text-white outline-none`} />
+                  <DualImageUpload
+                    label={t("experts.imageUrl")}
+                    value={createForm.imageUrl}
+                    onChange={(e) => { handleCreateInput(e); setImageFile(null); setImagePreview(""); }}
+                    previewImage={imagePreview}
+                    onFileChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setImageFile(file);
+                        setImagePreview(URL.createObjectURL(file));
+                        setCreateForm(prev => ({ ...prev, imageUrl: "" }));
+                      }
+                    }}
+                  />
                   {fieldErrors.imageUrl && <p className="text-xs text-red-500 font-semibold mt-1 ml-2">{fieldErrors.imageUrl}</p>}
                 </div>
                 {formError && <p className="text-red-600 font-bold">{formError}</p>}

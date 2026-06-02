@@ -154,10 +154,6 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
               <span className="hidden sm:block text-[9px] font-bold text-primary-base dark:text-emerald-400 uppercase tracking-widest mt-1">{t("nav.smartAgri")}</span>
             </div>
           </Link>
-
-          <Link to="/about" className="hidden md:inline-block text-xs font-black text-text-subtle dark:text-slate-300 hover:text-primary-base dark:hover:text-emerald-400 transition-all uppercase tracking-widest ml-4 bg-surface-secondary dark:bg-slate-800 px-4 py-2.5 rounded-xl border border-border-default dark:border-slate-700">
-            {t("nav.aboutUs")}
-          </Link>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
@@ -179,7 +175,7 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
               to="/subscribe"
               className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
             >
-              <LuShield size={16} /> Subscribe
+              <LuShield size={16} /> {t("nav.subscribe")}
             </Link>
           )}
 
