@@ -702,26 +702,36 @@ const translations = {
 const LanguageContext = createContext(null);
 
 export const LanguageProvider = ({ children }) => {
-  const lang = "en"; // STRICT ENGLISH CONSTRAINT
+  const [lang, setLang] = useState(() => {
+    const saved = localStorage.getItem("lang");
+    return saved === "ar" || saved === "en" ? saved : "en";
+  });
 
   useEffect(() => {
     const html = document.documentElement;
-    html.setAttribute("dir", "ltr");
-    html.setAttribute("lang", "en");
-    localStorage.setItem("lang", "en");
-  }, []);
+    if (lang === "ar") {
+      html.setAttribute("dir", "rtl");
+      html.setAttribute("lang", "ar");
+    } else {
+      html.setAttribute("dir", "ltr");
+      html.setAttribute("lang", "en");
+    }
+    localStorage.setItem("lang", lang);
+  }, [lang]);
 
   const toggleLang = useCallback(() => {
-    // Disabled as per strict English constraint
+    setLang((prev) => (prev === "en" ? "ar" : "en"));
   }, []);
 
   const t = useCallback(
-    (key) => translations[key]?.["en"] ?? key,
-    []
+    (key) => translations[key]?.[lang] ?? translations[key]?.["en"] ?? key,
+    [lang]
   );
 
+  const isArabic = lang === "ar";
+
   return (
-    <LanguageContext.Provider value={{ lang, toggleLang, t, isArabic: false }}>
+    <LanguageContext.Provider value={{ lang, toggleLang, t, isArabic }}>
       {children}
     </LanguageContext.Provider>
   );

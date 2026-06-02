@@ -9,7 +9,8 @@ import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
 const normalizeListing = (listing) => {
-  let imgUrl = listing.imageUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=Expert";
+  const name = listing.name || listing.User?.fullName || listing.User?.username || "Expert";
+  let imgUrl = listing.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D9488&color=fff&size=128`;
   if (imgUrl && !imgUrl.startsWith("http://") && !imgUrl.startsWith("https://")) {
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5002";
     imgUrl = imgUrl.startsWith("/") ? `${backendUrl}${imgUrl}` : `${backendUrl}/${imgUrl}`;
@@ -175,7 +176,15 @@ const Experts = () => {
             onClick={() => setSelectedExpert(expert)}>
             <div className="relative mb-6">
               <div className="w-28 h-28 rounded-full bg-primary-light dark:bg-green-900/20 p-1">
-                <img src={expert.image} className="w-full h-full rounded-full" alt="" />
+                <img 
+                  src={expert.image} 
+                  className="w-full h-full rounded-full object-cover" 
+                  alt={expert.name} 
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(expert.name)}&background=0D9488&color=fff&size=128`;
+                  }}
+                />
               </div>
               <div className="absolute -bottom-2 -end-2 bg-surface-card dark:bg-slate-900 p-2 rounded-xl shadow-lg border border-gray-50 dark:border-slate-800">
                 <LuAward className="text-yellow-500" size={20} />
@@ -223,7 +232,15 @@ const Experts = () => {
               </button>
 
               <div className="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-start">
-                <img src={selectedExpert.image} className="w-40 h-40 rounded-[2.5rem] bg-primary-light dark:bg-green-900/20" alt="" />
+                <img 
+                  src={selectedExpert.image} 
+                  className="w-40 h-40 rounded-[2.5rem] bg-primary-light dark:bg-green-900/20 object-cover" 
+                  alt={selectedExpert.name} 
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedExpert.name)}&background=0D9488&color=fff&size=128`;
+                  }}
+                />
                 <div className="flex-1 space-y-4 pt-4">
                   <div>
                     <h2 className="text-3xl font-black dark:text-white">{selectedExpert.title}</h2>

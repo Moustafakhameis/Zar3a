@@ -154,6 +154,10 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
               <span className="hidden sm:block text-[9px] font-bold text-primary-base dark:text-emerald-400 uppercase tracking-widest mt-1">{t("nav.smartAgri")}</span>
             </div>
           </Link>
+
+          <Link to="/about" className="hidden md:inline-block text-xs font-black text-text-subtle dark:text-slate-300 hover:text-primary-base dark:hover:text-emerald-400 transition-all uppercase tracking-widest ml-4 bg-surface-secondary dark:bg-slate-800 px-4 py-2.5 rounded-xl border border-border-default dark:border-slate-700">
+            {t("nav.aboutUs")}
+          </Link>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3">

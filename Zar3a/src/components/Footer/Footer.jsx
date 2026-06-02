@@ -200,6 +200,15 @@ const Footer = () => {
 
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <Link
+              to="/about"
+              onClick={scrollToTop}
+              className="text-sm font-black text-text-muted hover:text-text-main dark:hover:text-white transition-colors"
+            >
+              {t("nav.aboutUs")}
+            </Link>
+
+            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <Link
               to="/settings"
               onClick={scrollToTop}
               className="text-sm font-black text-text-muted hover:text-text-main dark:hover:text-white transition-colors"
