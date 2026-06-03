@@ -155,11 +155,11 @@ const Footer = () => {
           <motion.div variants={itemVariants} className="lg:col-span-4">
             <h3 className="text-text-main dark:text-white font-black text-lg mb-6 uppercase tracking-wider">{t("footer.contact")}</h3>
             <div className="space-y-5">
-              <div className="flex items-start gap-4 text-text-muted dark:text-text-disabled hover:text-primary-base group cursor-pointer">
+              <div className="flex items-center gap-4 text-text-muted dark:text-text-disabled hover:text-primary-base group cursor-pointer">
                 <div className="p-2 bg-surface-secondary dark:bg-slate-800 rounded-lg group-hover:bg-primary-light dark:group-hover:bg-emerald-900/30 transition-colors">
                   <LuMapPin size={20} className="shrink-0" />
                 </div>
-                <div className="pt-1">
+                <div>
                   <p className="font-bold text-slate-700 dark:text-slate-300">Zamalek, Cairo</p>
                   <p className="text-sm">BIS Program - Foreign Trade</p>
                 </div>
