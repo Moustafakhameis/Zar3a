@@ -561,6 +561,10 @@ const Dashboard = () => {
 
   const [weather, setWeather] = useState({
     temp: "--",
+    tempMax: "--",
+    tempMin: "--",
+    humidity: "--",
+    windspeed: "--",
     condition: "Loading...",
     bestCrop: "Tomato",
     region: "Egypt",
@@ -1265,80 +1269,71 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Middle Row: Big Temp, Icon & Live Clock Combined */}
-            <div className="relative z-10 flex flex-col justify-center mb-auto pt-2">
+            {/* Middle Row: Centered Big Temp & Data */}
+            <div className="relative z-10 flex flex-col items-center justify-center mb-auto pt-4 pb-4">
               
               {/* Temperature & Weather Condition */}
-              <div className="flex flex-wrap items-center gap-6 lg:gap-8">
-                {/* Temperature */}
-                <div className="flex items-start">
-                  <h4 className="text-[7rem] lg:text-[8rem] font-black tracking-tighter leading-none drop-shadow-xl dark:drop-shadow-2xl text-slate-900 dark:text-white">
-                    {weather.temp}
-                  </h4>
-                  <span className="text-4xl lg:text-5xl font-black text-slate-400 dark:text-white/60 mt-3 ml-2">°C</span>
+              <div className="flex flex-col items-center gap-1">
+                {/* Weather Condition */}
+                <div className="flex items-center gap-2 bg-white/40 dark:bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.12)] mb-2 transition-transform hover:scale-105 cursor-default">
+                  <LuCloudSun className="text-2xl text-yellow-500 dark:text-yellow-300 drop-shadow-md" />
+                  <p className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-[0.15em] drop-shadow-sm">
+                    {t("weather." + weather.condition) || weather.condition}
+                  </p>
                 </div>
 
-                {/* Weather Condition */}
-                <div className="flex items-center gap-3">
-                  <LuCloudSun className="text-4xl text-yellow-500 dark:text-yellow-300 drop-shadow-md" />
-                  <div className="flex flex-col">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-white/50 mb-0.5">Current Weather</p>
-                    <p className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-[0.1em] drop-shadow-sm leading-none">
-                      {t("weather." + weather.condition) || weather.condition}
-                    </p>
-                  </div>
+                {/* Temperature */}
+                <div className="flex items-start">
+                  <h4 className="text-[8rem] lg:text-[10rem] font-black tracking-tighter leading-none drop-shadow-2xl dark:drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-slate-900 dark:text-white ml-6">
+                    {weather.temp}
+                  </h4>
+                  <span className="text-4xl lg:text-6xl font-black text-slate-400 dark:text-white/40 mt-6 ml-2">°C</span>
                 </div>
               </div>
 
-              {/* Extended Data & Clock Row */}
-              <div className="flex flex-wrap items-center gap-6 mt-4 pl-2">
+              {/* Extended Data & Clock Stack */}
+              <div className="flex flex-col items-center gap-8 mt-8 w-full">
                 
                 {/* Time & Date */}
-                <div className="flex items-center gap-3">
-                  <LuClock className="text-indigo-600 dark:text-indigo-400 drop-shadow-sm" size={24} />
-                  <div className="flex flex-col justify-center">
-                    <LiveClock format="time" className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none drop-shadow-sm" />
-                    <div className="flex gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 dark:text-indigo-300 mt-1.5">
-                      <LiveClock format="weekday" />
-                      <span className="text-slate-400 dark:text-white/30">•</span>
-                      <LiveClock format="date" />
-                    </div>
+                <div className="flex flex-col items-center justify-center gap-1.5">
+                  <LiveClock format="time" className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white leading-none drop-shadow-md" />
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-300 drop-shadow-sm">
+                    <LiveClock format="weekday" />
+                    <span className="text-slate-400 dark:text-white/30">•</span>
+                    <LiveClock format="date" />
                   </div>
                 </div>
 
-                {/* Divider */}
-                <div className="w-px h-8 bg-slate-300 dark:bg-white/20 hidden sm:block"></div>
-
                 {/* Actual Weather Metrics */}
-                <div className="flex items-center gap-5 bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-2xl px-4 py-2 shadow-sm">
+                <div className="flex items-center justify-center gap-6 bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-2xl px-6 py-4 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-fit transition-all hover:scale-[1.02]">
                   
                   {/* High/Low */}
                   <div className="flex flex-col items-center">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-white/50 mb-0.5">H / L</p>
-                    <p className="text-sm font-black text-slate-800 dark:text-white">
-                      {weather.tempMax}° <span className="text-slate-400 dark:text-white/40 font-bold">/</span> {weather.tempMin}°
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/50 mb-1.5">H / L</p>
+                    <p className="text-base font-black text-slate-800 dark:text-white drop-shadow-sm">
+                      {weather.tempMax}° <span className="text-slate-400 dark:text-white/40 font-bold mx-1">/</span> {weather.tempMin}°
                     </p>
                   </div>
 
-                  <div className="w-px h-6 bg-slate-300 dark:bg-white/10"></div>
+                  <div className="w-px h-10 bg-slate-300 dark:bg-white/10"></div>
 
                   {/* Humidity */}
                   <div className="flex flex-col items-center">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-white/50 mb-0.5">Humidity</p>
-                    <div className="flex items-center gap-1 text-sm font-black text-blue-600 dark:text-blue-400">
-                      <LuDroplet size={12} />
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/50 mb-1.5">Humidity</p>
+                    <div className="flex items-center gap-1.5 text-base font-black text-blue-600 dark:text-blue-400 drop-shadow-sm">
+                      <LuDroplet size={16} />
                       {weather.humidity}%
                     </div>
                   </div>
 
-                  <div className="w-px h-6 bg-slate-300 dark:bg-white/10"></div>
+                  <div className="w-px h-10 bg-slate-300 dark:bg-white/10"></div>
 
                   {/* Wind */}
                   <div className="flex flex-col items-center">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-white/50 mb-0.5">Wind</p>
-                    <div className="flex items-center gap-1 text-sm font-black text-teal-600 dark:text-teal-400">
-                      <LuWind size={12} />
-                      {weather.windspeed} <span className="text-[10px]">km/h</span>
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/50 mb-1.5">Wind</p>
+                    <div className="flex items-center gap-1 text-base font-black text-teal-600 dark:text-teal-400 drop-shadow-sm">
+                      <LuWind size={16} />
+                      {weather.windspeed} <span className="text-[10px] ml-0.5">km/h</span>
                     </div>
                   </div>
 
