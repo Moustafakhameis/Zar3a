@@ -1131,44 +1131,79 @@ const Dashboard = () => {
             <h4 className="font-black dark:text-white flex items-center gap-2 mb-4">
               <LuSprout className="text-primary-base" /> {t("dash.cropInsights")}
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
-                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                  <LuCalendar size={12} className="text-status-info" /> {t("dash.plantingDates")}
-                </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Planting Window */}
+              <div className="bg-linear-to-br from-surface-secondary to-surface-card dark:from-slate-800 dark:to-slate-900 p-5 rounded-3xl flex flex-col justify-center border border-border-default dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                    <LuCalendar size={18} />
+                  </div>
+                  <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest">
+                    {t("dash.plantingDates")}
+                  </p>
+                </div>
                 <p className="font-bold text-sm text-text-main dark:text-white">
                   {cropsData[activeSector.crop].plantingDates}
                 </p>
               </div>
-              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
-                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                  <LuInfo size={12} className="text-primary-base" /> {t("dash.whyPlanted")}
-                </p>
-                <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
+
+              {/* Strategic Importance - Spans 2 columns */}
+              <div className="md:col-span-2 bg-linear-to-br from-surface-secondary to-surface-card dark:from-slate-800 dark:to-slate-900 p-5 rounded-3xl flex flex-col justify-center border border-border-default dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-green-500/10 dark:bg-green-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div className="flex items-center gap-3 mb-3 relative z-10">
+                  <div className="p-2.5 bg-green-100 dark:bg-green-900/30 rounded-xl text-green-600 dark:text-green-400">
+                    <LuInfo size={18} />
+                  </div>
+                  <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest">
+                    {t("dash.whyPlanted")}
+                  </p>
+                </div>
+                <p className="font-bold text-sm sm:text-base text-text-main dark:text-white leading-relaxed relative z-10">
                   {cropsData[activeSector.crop].whyPlanted}
                 </p>
               </div>
-              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
-                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                  <LuWrench size={12} className="text-amber-500" /> {t("dash.tools")}
-                </p>
-                <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
+
+              {/* Tools Needed */}
+              <div className="bg-linear-to-br from-surface-secondary to-surface-card dark:from-slate-800 dark:to-slate-900 p-5 rounded-3xl flex flex-col justify-center border border-border-default dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-xl text-amber-600 dark:text-amber-400">
+                    <LuWrench size={18} />
+                  </div>
+                  <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest">
+                    {t("dash.tools")}
+                  </p>
+                </div>
+                <p className="font-bold text-sm text-text-main dark:text-white leading-tight">
                   {cropsData[activeSector.crop].tools?.join(", ") || "None specified"}
                 </p>
               </div>
-              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
-                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                  <LuFlaskConical size={12} className="text-purple-500" /> {t("dash.fertilizer")}
-                </p>
-                <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
+
+              {/* Fertilizer */}
+              <div className="bg-linear-to-br from-surface-secondary to-surface-card dark:from-slate-800 dark:to-slate-900 p-5 rounded-3xl flex flex-col justify-center border border-border-default dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400">
+                    <LuFlaskConical size={18} />
+                  </div>
+                  <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest">
+                    {t("dash.fertilizer")}
+                  </p>
+                </div>
+                <p className="font-bold text-sm text-text-main dark:text-white leading-tight">
                   {cropsData[activeSector.crop].nutrients}
                 </p>
               </div>
-              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
-                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                  <LuDroplet size={12} className="text-blue-500" /> {t("dash.irrigation")}
-                </p>
-                <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
+
+              {/* Water / Irrigation */}
+              <div className="bg-linear-to-br from-surface-secondary to-surface-card dark:from-slate-800 dark:to-slate-900 p-5 rounded-3xl flex flex-col justify-center border border-border-default dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2.5 bg-cyan-100 dark:bg-cyan-900/30 rounded-xl text-cyan-600 dark:text-cyan-400">
+                    <LuDroplet size={18} />
+                  </div>
+                  <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest">
+                    {t("dash.irrigation")}
+                  </p>
+                </div>
+                <p className="font-bold text-sm text-text-main dark:text-white leading-tight">
                   {cropsData[activeSector.crop].irrigation}
                 </p>
               </div>
