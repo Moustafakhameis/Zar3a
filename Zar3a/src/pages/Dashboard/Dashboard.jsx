@@ -1517,140 +1517,143 @@ const Dashboard = () => {
 
       
       {/* --- CHART EXPAND MODAL --- */}
-      <AnimatePresence>
-        {activeModalChart && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActiveModalChart(null)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed top-[100px] left-1/2 -translate-x-1/2 w-11/12 max-w-5xl max-h-[calc(100vh-120px)] bg-surface-card dark:bg-slate-900 rounded-[3.5rem] shadow-2xl z-[100] border border-border-default dark:border-slate-800 overflow-y-auto flex flex-col"
-            >
-              <div className="p-10 md:p-12 pb-4 flex justify-between items-start">
-                <div>
-                  <h3 className="text-3xl font-black dark:text-white tracking-tight">
-                    {activeModalChart === 'moisture' && (t("dash.moistureTelemetry") || "Moisture Telemetry")}
-                    {activeModalChart === 'vent' && (t("dash.ventilationTelemetry") || "Ventilation Telemetry")}
-                    {activeModalChart === 'fertilizer' && (t("dash.fertilizerTelemetry") || "Fertilizer Telemetry")}
-                    {activeModalChart === 'ph' && (t("dash.phLevelTelemetry") !== "dash.phLevelTelemetry" ? t("dash.phLevelTelemetry") : "pH Level Telemetry")}
-                  </h3>
-                  <div className="text-sm font-medium mt-4 max-w-3xl leading-relaxed space-y-2">
-                    {activeModalChart === 'moisture' && (
-                      <div className="space-y-3">
-                        <p className="text-base font-bold text-gray-700 dark:text-gray-300">Tracks real-time soil moisture percentage relative to the crop's ideal hydration zone.</p>
-                        <ul className="list-disc pl-5 space-y-1 text-text-muted dark:text-text-disabled">
-                          <li><strong>Green Zone:</strong> The optimal moisture range between the Min and Max lines.</li>
-                          <li><strong>Impact:</strong> Keeps roots healthy, preventing dehydration or fungal rot from overwatering.</li>
-                          <li><strong>Automation:</strong> Zar3a AI automatically activates water pumps if levels drop below the threshold.</li>
-                        </ul>
-                      </div>
-                    )}
-                    {activeModalChart === 'vent' && (
-                      <div className="space-y-3">
-                        <p className="text-base font-bold text-gray-700 dark:text-gray-300">Monitors greenhouse ventilation fan activity over time to maintain optimal airflow.</p>
-                        <ul className="list-disc pl-5 space-y-1 text-text-muted dark:text-text-disabled">
-                          <li><strong>Bar Height:</strong> A value of 1 means active (running), while 0 means idle.</li>
-                          <li><strong>Impact:</strong> Proper airflow reduces trapped humidity, preventing airborne diseases.</li>
-                          <li><strong>Automation:</strong> Zar3a AI turns on the vent if the temperature or humidity spikes inside the facility.</li>
-                        </ul>
-                      </div>
-                    )}
-                    {activeModalChart === 'fertilizer' && (
-                      <div className="space-y-3">
-                        <p className="text-base font-bold text-gray-700 dark:text-gray-300">Displays automated fertilizer dosage (kg) applied alongside overall water consumption (L).</p>
-                        <ul className="list-disc pl-5 space-y-1 text-text-muted dark:text-text-disabled">
-                          <li><strong>Nutrient Balance:</strong> Balancing fertilizer with irrigation volume ensures safe absorption.</li>
-                          <li><strong>Impact:</strong> Prevents nutrient lockout and root burn, significantly maximizing crop yield.</li>
-                          <li><strong>Efficiency:</strong> Tracks overall farm consumption to minimize waste and reduce operational costs.</li>
-                        </ul>
-                      </div>
-                    )}
-                    {activeModalChart === 'ph' && (
-                      <div className="space-y-3">
-                        <p className="text-base font-bold text-gray-700 dark:text-gray-300">Monitors the soil pH levels, indicating acidity or alkalinity of the planting environment.</p>
-                        <ul className="list-disc pl-5 space-y-1 text-text-muted dark:text-text-disabled">
-                          <li><strong>Ideal Range:</strong> A slightly acidic to neutral pH (typically 6.0 to 7.5) is ideal for most crops.</li>
-                          <li><strong>Impact:</strong> Correct pH maximizes the availability of essential macro and micro-nutrients in the soil.</li>
-                          <li><strong>Correction:</strong> If pH leaves the optimal zone, immediate soil amendment is recommended to restore balance.</li>
-                        </ul>
-                      </div>
-                    )}
+      {createPortal(
+        <AnimatePresence>
+          {activeModalChart && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setActiveModalChart(null)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="fixed top-[100px] left-1/2 -translate-x-1/2 w-11/12 max-w-5xl max-h-[calc(100vh-120px)] bg-surface-card dark:bg-slate-900 rounded-[3.5rem] shadow-2xl z-[100] border border-border-default dark:border-slate-800 overflow-y-auto flex flex-col"
+              >
+                <div className="p-10 md:p-12 pb-4 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-3xl font-black dark:text-white tracking-tight">
+                      {activeModalChart === 'moisture' && (t("dash.moistureTelemetry") || "Moisture Telemetry")}
+                      {activeModalChart === 'vent' && (t("dash.ventilationTelemetry") || "Ventilation Telemetry")}
+                      {activeModalChart === 'fertilizer' && (t("dash.fertilizerTelemetry") || "Fertilizer Telemetry")}
+                      {activeModalChart === 'ph' && (t("dash.phLevelTelemetry") !== "dash.phLevelTelemetry" ? t("dash.phLevelTelemetry") : "pH Level Telemetry")}
+                    </h3>
+                    <div className="text-sm font-medium mt-4 max-w-3xl leading-relaxed space-y-2">
+                      {activeModalChart === 'moisture' && (
+                        <div className="space-y-3">
+                          <p className="text-base font-bold text-gray-700 dark:text-gray-300">Tracks real-time soil moisture percentage relative to the crop's ideal hydration zone.</p>
+                          <ul className="list-disc pl-5 space-y-1 text-text-muted dark:text-text-disabled">
+                            <li><strong>Green Zone:</strong> The optimal moisture range between the Min and Max lines.</li>
+                            <li><strong>Impact:</strong> Keeps roots healthy, preventing dehydration or fungal rot from overwatering.</li>
+                            <li><strong>Automation:</strong> Zar3a AI automatically activates water pumps if levels drop below the threshold.</li>
+                          </ul>
+                        </div>
+                      )}
+                      {activeModalChart === 'vent' && (
+                        <div className="space-y-3">
+                          <p className="text-base font-bold text-gray-700 dark:text-gray-300">Monitors greenhouse ventilation fan activity over time to maintain optimal airflow.</p>
+                          <ul className="list-disc pl-5 space-y-1 text-text-muted dark:text-text-disabled">
+                            <li><strong>Bar Height:</strong> A value of 1 means active (running), while 0 means idle.</li>
+                            <li><strong>Impact:</strong> Proper airflow reduces trapped humidity, preventing airborne diseases.</li>
+                            <li><strong>Automation:</strong> Zar3a AI turns on the vent if the temperature or humidity spikes inside the facility.</li>
+                          </ul>
+                        </div>
+                      )}
+                      {activeModalChart === 'fertilizer' && (
+                        <div className="space-y-3">
+                          <p className="text-base font-bold text-gray-700 dark:text-gray-300">Displays automated fertilizer dosage (kg) applied alongside overall water consumption (L).</p>
+                          <ul className="list-disc pl-5 space-y-1 text-text-muted dark:text-text-disabled">
+                            <li><strong>Nutrient Balance:</strong> Balancing fertilizer with irrigation volume ensures safe absorption.</li>
+                            <li><strong>Impact:</strong> Prevents nutrient lockout and root burn, significantly maximizing crop yield.</li>
+                            <li><strong>Efficiency:</strong> Tracks overall farm consumption to minimize waste and reduce operational costs.</li>
+                          </ul>
+                        </div>
+                      )}
+                      {activeModalChart === 'ph' && (
+                        <div className="space-y-3">
+                          <p className="text-base font-bold text-gray-700 dark:text-gray-300">Monitors the soil pH levels, indicating acidity or alkalinity of the planting environment.</p>
+                          <ul className="list-disc pl-5 space-y-1 text-text-muted dark:text-text-disabled">
+                            <li><strong>Ideal Range:</strong> A slightly acidic to neutral pH (typically 6.0 to 7.5) is ideal for most crops.</li>
+                            <li><strong>Impact:</strong> Correct pH maximizes the availability of essential macro and micro-nutrients in the soil.</li>
+                            <li><strong>Correction:</strong> If pH leaves the optimal zone, immediate soil amendment is recommended to restore balance.</li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  <button
+                    onClick={() => setActiveModalChart(null)}
+                    className="w-12 h-12 bg-surface-secondary dark:bg-slate-800 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 rounded-full flex items-center justify-center transition-colors shrink-0 text-text-muted"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <button
-                  onClick={() => setActiveModalChart(null)}
-                  className="w-12 h-12 bg-surface-secondary dark:bg-slate-800 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 rounded-full flex items-center justify-center transition-colors shrink-0 text-text-muted"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="p-10 md:p-12 pt-4 h-[60vh] min-h-[400px]">
-                <ResponsiveContainer width="99%" height="100%" minHeight={400} debounce={50}>
-                  {activeModalChart === 'moisture' ? (
-                    <AreaChart data={data}>
-                      <defs>
-                        <linearGradient id="gModal" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                      <XAxis dataKey="time" stroke="#94a3b8" />
-                      <YAxis domain={[0, 100]} stroke="#94a3b8" />
-                      <Tooltip contentStyle={{ borderRadius: "20px", border: "none" }} />
-                      <ReferenceLine y={crop.min} stroke="#94a3b8" strokeDasharray="5 5" label={{ value: "Min", position: "left", fill: "#94a3b8" }} />
-                      <ReferenceLine y={crop.max} stroke="#94a3b8" strokeDasharray="5 5" label={{ value: "Max", position: "left", fill: "#94a3b8" }} />
-                      <Area type="monotone" dataKey="moisture" stroke="#10b981" strokeWidth={5} fill="url(#gModal)" animationDuration={500} />
-                    </AreaChart>
-                  ) : activeModalChart === 'vent' ? (
-                    <BarChart data={data}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                      <XAxis dataKey="time" stroke="#94a3b8" />
-                      <YAxis stroke="#94a3b8" />
-                      <Tooltip contentStyle={{ borderRadius: "20px", border: "none" }} />
-                      <Legend />
-                      <Bar name="Vent State" dataKey="ventState" fill="#06b6d4" radius={[10, 10, 0, 0]} maxBarSize={60} />
-                    </BarChart>
-                  ) : activeModalChart === 'fertilizer' ? (
-                    <LineChart data={data}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                      <XAxis dataKey="time" stroke="#94a3b8" />
-                      <YAxis stroke="#94a3b8" />
-                      <Tooltip contentStyle={{ borderRadius: "20px", border: "none" }} />
-                      <Legend />
-                      <Line name="Dosage (kg)" type="monotone" dataKey="dosage" stroke="#10b981" strokeWidth={5} />
-                      <Line name="Consumption (L)" type="monotone" dataKey="consumption" stroke="#8b5cf6" strokeWidth={5} />
-                    </LineChart>
-                  ) : activeModalChart === 'ph' ? (
-                    <AreaChart data={data}>
-                      <defs>
-                        <linearGradient id="phModal" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#eab308" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                      <XAxis dataKey="time" stroke="#94a3b8" />
-                      <YAxis domain={[4, 9]} stroke="#94a3b8" />
-                      <Tooltip contentStyle={{ borderRadius: "20px", border: "none" }} />
-                      <ReferenceLine y={6.0} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'insideTopLeft', value: 'Min', fill: '#ef4444' }} />
-                      <ReferenceLine y={7.5} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'insideBottomLeft', value: 'Max', fill: '#ef4444' }} />
-                      <Area name="pH Level" type="monotone" dataKey="ph" stroke="#eab308" strokeWidth={5} fill="url(#phModal)" />
-                    </AreaChart>
-                  ) : null}
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                <div className="p-10 md:p-12 pt-4 h-[60vh] min-h-[400px]">
+                  <ResponsiveContainer width="99%" height="100%" minHeight={400} debounce={50}>
+                    {activeModalChart === 'moisture' ? (
+                      <AreaChart data={data}>
+                        <defs>
+                          <linearGradient id="gModal" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
+                        <XAxis dataKey="time" stroke="#94a3b8" />
+                        <YAxis domain={[0, 100]} stroke="#94a3b8" />
+                        <Tooltip contentStyle={{ borderRadius: "20px", border: "none" }} />
+                        <ReferenceLine y={crop.min} stroke="#94a3b8" strokeDasharray="5 5" label={{ value: "Min", position: "left", fill: "#94a3b8" }} />
+                        <ReferenceLine y={crop.max} stroke="#94a3b8" strokeDasharray="5 5" label={{ value: "Max", position: "left", fill: "#94a3b8" }} />
+                        <Area type="monotone" dataKey="moisture" stroke="#10b981" strokeWidth={5} fill="url(#gModal)" animationDuration={500} />
+                      </AreaChart>
+                    ) : activeModalChart === 'vent' ? (
+                      <BarChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
+                        <XAxis dataKey="time" stroke="#94a3b8" />
+                        <YAxis stroke="#94a3b8" />
+                        <Tooltip contentStyle={{ borderRadius: "20px", border: "none" }} />
+                        <Legend />
+                        <Bar name="Vent State" dataKey="ventState" fill="#06b6d4" radius={[10, 10, 0, 0]} maxBarSize={60} />
+                      </BarChart>
+                    ) : activeModalChart === 'fertilizer' ? (
+                      <LineChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
+                        <XAxis dataKey="time" stroke="#94a3b8" />
+                        <YAxis stroke="#94a3b8" />
+                        <Tooltip contentStyle={{ borderRadius: "20px", border: "none" }} />
+                        <Legend />
+                        <Line name="Dosage (kg)" type="monotone" dataKey="dosage" stroke="#10b981" strokeWidth={5} />
+                        <Line name="Consumption (L)" type="monotone" dataKey="consumption" stroke="#8b5cf6" strokeWidth={5} />
+                      </LineChart>
+                    ) : activeModalChart === 'ph' ? (
+                      <AreaChart data={data}>
+                        <defs>
+                          <linearGradient id="phModal" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#eab308" stopOpacity={0.4} />
+                            <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
+                        <XAxis dataKey="time" stroke="#94a3b8" />
+                        <YAxis domain={[4, 9]} stroke="#94a3b8" />
+                        <Tooltip contentStyle={{ borderRadius: "20px", border: "none" }} />
+                        <ReferenceLine y={6.0} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'insideTopLeft', value: 'Min', fill: '#ef4444' }} />
+                        <ReferenceLine y={7.5} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'insideBottomLeft', value: 'Max', fill: '#ef4444' }} />
+                        <Area name="pH Level" type="monotone" dataKey="ph" stroke="#eab308" strokeWidth={5} fill="url(#phModal)" />
+                      </AreaChart>
+                    ) : null}
+                  </ResponsiveContainer>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* --- NOTIFICATIONS --- */}
       <AnimatePresence>
