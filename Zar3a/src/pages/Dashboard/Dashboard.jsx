@@ -680,6 +680,10 @@ const Dashboard = () => {
         const lastConsumption = prev[prev.length - 1]?.consumption || 150;
 
         const cropMin = cropsData[activeSector.crop].min;
+        const [minPhStr, maxPhStr] = cropsData[activeSector.crop].soilPh.split(" - ");
+        const minPh = parseFloat(minPhStr);
+        const maxPh = parseFloat(maxPhStr);
+
         let change = 0;
         let phChange = (Math.random() * 0.2) - 0.1;
         let dosageChange = hardware.fertilizer ? (Math.random() * 2) : -(Math.random() * 1);
@@ -708,11 +712,24 @@ const Dashboard = () => {
           } else if (lastDosage > 30) {
              setHardware((h) => ({ ...h, fertilizer: false }));
           }
+          // Auto pH modifier
+          if (lastPh < minPh || lastPh > maxPh) {
+             setHardware((h) => ({ ...h, ph: true }));
+             phChange = lastPh < minPh ? 0.2 : -0.2;
+          } else {
+             setHardware((h) => ({ ...h, ph: false }));
+          }
         } else {
           if (hardware.pump) change = 5;
           else change = Math.random() * 4 - 2.5;
           if (hardware.fertilizer) phChange += 0.05; // Fertilizer makes soil slightly basic or acidic
           if (hardware.vent) change -= 1; // Venting dries out slightly
+          if (hardware.ph) {
+             // If manual pH mod is ON, try to correct the pH based on the optimal range
+             if (lastPh > maxPh) phChange = -0.3;
+             else if (lastPh < minPh) phChange = 0.3;
+             else phChange = lastPh > 7 ? -0.2 : 0.2; // Default correction
+          }
         }
 
         const newVal = Math.round(Math.max(10, Math.min(95, lastVal + change)));
@@ -738,7 +755,7 @@ const Dashboard = () => {
       });
     }, 3000);
     return () => clearInterval(interval);
-  }, [activeSector.isAuto, activeSector.crop, hardware.pump, hardware.fertilizer, hardware.vent]);
+  }, [activeSector.isAuto, activeSector.crop, hardware.pump, hardware.fertilizer, hardware.vent, hardware.ph]);
 
   const currentMoisture = data[data.length - 1]?.moisture || 0;
   const currentPh = data[data.length - 1]?.ph || 7.0;
