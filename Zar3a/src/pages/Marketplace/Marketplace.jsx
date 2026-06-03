@@ -756,7 +756,14 @@ const Marketplace = () => {
           )}
           {canCreate && (
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setCreateForm({ 
+                  title: "", description: "", category: "", price: "", unit: "unit", region: "", imageUrl: "", 
+                  marketplaceType: activeTab === "sensors" ? "SENSOR_MARKET" : activeTab === "shop" ? "AGRI_MARKET" : "CROP_MARKET", 
+                  productSource: "MANUAL", status: "AVAILABLE" 
+                });
+                setShowCreateModal(true);
+              }}
               className="flex items-center justify-center gap-2 bg-primary-base text-white px-8 py-4 rounded-full font-black hover:bg-primary-hover transition-transform shadow-xl w-full sm:w-auto"
             >
               <LuPlus size={20} /> {t("market.addProduct")}
@@ -1395,11 +1402,22 @@ const Marketplace = () => {
                     onChange={handleCreateInput}
                     placeholder={t("market.category") || "Category"}
                     options={[
-                      ...(user?.role !== "SUPPLIER" ? [{ label: "PRODUCE", value: "PRODUCE", name: "category" }] : []),
-                      ...(user?.role !== "FARMER" ? [
+                      ...(createForm.marketplaceType === "CROP_MARKET" ? [
+                        { label: "VEGETABLES", value: "VEGETABLES", name: "category" },
+                        { label: "FRUITS", value: "FRUITS", name: "category" },
+                        { label: "GRAINS", value: "GRAINS", name: "category" },
+                        { label: "HERBS", value: "HERBS", name: "category" },
+                        { label: "FIBERS", value: "FIBERS", name: "category" },
+                        { label: "PRODUCE", value: "PRODUCE", name: "category" }
+                      ] : createForm.marketplaceType === "AGRI_MARKET" ? [
+                        { label: "PESTICIDES", value: "PESTICIDES", name: "category" },
                         { label: "SEEDS", value: "SEEDS", name: "category" },
                         { label: "FERTILIZERS", value: "FERTILIZERS", name: "category" },
                         { label: "TOOLS", value: "TOOLS", name: "category" },
+                        { label: "EQUIPMENT", value: "EQUIPMENT", name: "category" }
+                      ] : createForm.marketplaceType === "SENSOR_MARKET" ? [
+                        { label: "SENSORS", value: "SENSORS", name: "category" },
+                        { label: "IOT DEVICES", value: "IOT DEVICES", name: "category" },
                         { label: "EQUIPMENT", value: "EQUIPMENT", name: "category" }
                       ] : []),
                       { label: "OTHER", value: "OTHER", name: "category" }
