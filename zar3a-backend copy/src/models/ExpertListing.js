@@ -31,7 +31,7 @@ const ExpertListing = sequelize.define('ExpertListings', {
     type: DataTypes.STRING(150),
   },
   imageUrl: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.TEXT,
   },
   isVerified: {
     type: DataTypes.BOOLEAN,

@@ -2,10 +2,12 @@ import React, { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, Float, Cylinder, Sphere, RoundedBox, Box } from '@react-three/drei';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../../../context/LanguageContext';
 
 const SmartNode = () => {
   const groupRef = useRef(null);
   const [hoveredPart, setHoveredPart] = useState(null);
+  const { t } = useLanguage();
 
   return (
     <group ref={groupRef}>
@@ -35,8 +37,8 @@ const SmartNode = () => {
           {hoveredPart === 'core' && (
             <Html position={[1.5, 0, 0]} center>
               <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-emerald-500/50 p-4 rounded-2xl shadow-2xl text-slate-900 dark:text-white text-xs font-bold whitespace-nowrap z-50">
-                <div className="text-emerald-500 mb-1 uppercase tracking-widest text-[10px]">Main Brain</div>
-                Edge AI Data Processing
+                <div className="text-emerald-500 mb-1 uppercase tracking-widest text-[10px]">{t("about.tech.mainBrain")}</div>
+                {t("about.tech.edgeAI")}
               </div>
             </Html>
           )}
@@ -59,8 +61,8 @@ const SmartNode = () => {
           {hoveredPart === 'solar' && (
             <Html position={[1.5, 0.5, 0]} center>
               <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-yellow-500/50 p-4 rounded-2xl shadow-2xl text-slate-900 dark:text-white text-xs font-bold whitespace-nowrap z-50">
-                <div className="text-yellow-500 mb-1 uppercase tracking-widest text-[10px]">Power Source</div>
-                Continuous Solar Charging
+                <div className="text-yellow-500 mb-1 uppercase tracking-widest text-[10px]">{t("about.tech.powerSource")}</div>
+                {t("about.tech.solar")}
               </div>
             </Html>
           )}
@@ -82,8 +84,8 @@ const SmartNode = () => {
           {hoveredPart === 'antenna' && (
             <Html position={[0.5, 0.5, 0]} center>
               <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-red-500/50 p-4 rounded-2xl shadow-2xl text-slate-900 dark:text-white text-xs font-bold whitespace-nowrap z-50">
-                <div className="text-red-500 mb-1 uppercase tracking-widest text-[10px]">Connectivity</div>
-                Long-range LoRaWAN
+                <div className="text-red-500 mb-1 uppercase tracking-widest text-[10px]">{t("about.tech.connectivity")}</div>
+                {t("about.tech.lora")}
               </div>
             </Html>
           )}
@@ -105,8 +107,8 @@ const SmartNode = () => {
           {hoveredPart === 'probe' && (
             <Html position={[-1.5, -1, 0]} center>
               <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-blue-500/50 p-4 rounded-2xl shadow-2xl text-slate-900 dark:text-white text-xs font-bold whitespace-nowrap z-50">
-                <div className="text-blue-500 mb-1 uppercase tracking-widest text-[10px]">Sensors</div>
-                Moisture, NPK & Temp
+                <div className="text-blue-500 mb-1 uppercase tracking-widest text-[10px]">{t("about.tech.sensors")}</div>
+                {t("about.tech.sensorData")}
               </div>
             </Html>
           )}
@@ -118,6 +120,15 @@ const SmartNode = () => {
 };
 
 const TechnologySection = () => {
+  const { t } = useLanguage();
+
+  const techItems = [
+    t("about.tech.probe1"),
+    t("about.tech.probe2"),
+    t("about.tech.probe3"),
+    t("about.tech.probe4")
+  ];
+
   return (
     <section className="py-32 relative overflow-hidden">
       {/* Background Glows */}
@@ -135,18 +146,13 @@ const TechnologySection = () => {
           transition={{ duration: 0.8 }}
         >
           <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-400 dark:to-teal-500 mb-6 tracking-tighter">
-            Meet The Technology Behind Zar3a
+            {t("about.tech.title")}
           </h2>
           <p className="text-xl text-slate-700 dark:text-slate-300 font-medium mb-8 leading-relaxed">
-            Our custom-built IoT hardware is designed specifically for Egyptian agriculture. It continuously monitors soil health, climate conditions, and crop status in real-time.
+            {t("about.tech.desc")}
           </p>
           <div className="space-y-6">
-            {[
-              "Military-grade soil moisture probes",
-              "Real-time temperature & humidity tracking",
-              "Edge AI processing for immediate alerts",
-              "Solar-powered for continuous operation"
-            ].map((item, idx) => (
+            {techItems.map((item, idx) => (
               <div key={idx} className="flex items-center gap-4 text-slate-800 dark:text-slate-200 font-bold text-lg">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse" />
                 {item}
@@ -154,7 +160,7 @@ const TechnologySection = () => {
             ))}
           </div>
           <p className="mt-12 text-sm font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-[0.2em] animate-bounce">
-            Hover over the model to explore →
+            {t("about.tech.hover")}
           </p>
         </motion.div>
 

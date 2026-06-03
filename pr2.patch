@@ -1,0 +1,23 @@
+From 0f9d3fb8fcc9ab8f7d59da0c8a6691ed112a940c Mon Sep 17 00:00:00 2001
+From: "railway-app[bot]" <68434857+railway-app[bot]@users.noreply.github.com>
+Date: Sat, 30 May 2026 11:05:53 +0000
+Subject: [PATCH] fix: change RefreshToken token column from STRING(255) to
+ TEXT
+
+---
+ zar3a-backend copy/src/models/RefreshToken.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/zar3a-backend copy/src/models/RefreshToken.js b/zar3a-backend copy/src/models/RefreshToken.js
+index 05175c5..32a79e7 100644
+--- a/zar3a-backend copy/src/models/RefreshToken.js	
++++ b/zar3a-backend copy/src/models/RefreshToken.js	
+@@ -12,7 +12,7 @@ const RefreshToken = sequelize.define('RefreshToken', {
+     allowNull: false,
+   },
+   token: {
+-    type: DataTypes.STRING(255),
++    type: DataTypes.TEXT,
+     unique: true,
+     allowNull: false,
+   },

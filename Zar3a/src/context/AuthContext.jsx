@@ -114,12 +114,7 @@ export function AuthProvider({ children }) {
     // formData is a FormData object (includes CV file)
     const { data } = await api.post(
       `/auth/complete/expert/${userId}`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      formData
     );
     return data;
   };
@@ -283,11 +278,7 @@ export function AuthProvider({ children }) {
       formData.append('receiverId', receiverId);
       formData.append('message', message || '');
       formData.append('file', file);
-      const { data } = await api.post('/chat/messages/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const { data } = await api.post('/chat/messages/upload', formData);
       return data;
     }
     // Otherwise use the standard JSON endpoint
@@ -442,7 +433,10 @@ export function AuthProvider({ children }) {
 
 
   const createExpertListing = async (listingData) => {
-    const { data } = await api.post("/marketplace/expert-listings", listingData);
+    const { data } = await api.post(
+      "/marketplace/expert-listings",
+      listingData
+    );
     return data;
   };
 

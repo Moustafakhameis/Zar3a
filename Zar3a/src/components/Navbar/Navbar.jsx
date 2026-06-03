@@ -33,6 +33,12 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
+  const handleLinkClick = () => {
+    if (isSidebarOpen) {
+      onToggleSidebar();
+    }
+  };
+
   const chatPath = user?.role === 'ADMIN'
     ? "/admin/chat"
     : user?.role === 'AGRO_EXPERT'
@@ -145,7 +151,7 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
             {isSidebarOpen ? <LuX size={20} className="sm:w-[22px] sm:h-[22px]" /> : <LuMenu size={20} className="sm:w-[22px] sm:h-[22px]" />}
           </button>
 
-          <Link to="/" className="group flex items-center gap-2 sm:gap-3">
+          <Link to="/" className="group flex items-center gap-2 sm:gap-3" onClick={handleLinkClick}>
             <div className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary-light dark:bg-emerald-900/20 rounded-xl sm:rounded-2xl overflow-hidden border border-primary-light dark:border-emerald-800 transition-transform group-hover:scale-105">
               <img src={Logo} alt="Logo" className="w-full h-full object-contain transform scale-125" />
             </div>
@@ -154,6 +160,21 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
               <span className="hidden sm:block text-[9px] font-bold text-primary-base dark:text-emerald-400 uppercase tracking-widest mt-1">{t("nav.smartAgri")}</span>
             </div>
           </Link>
+
+          {/* About Us Link alongside ZAR3A SMART AGRI */}
+          <NavLink
+            to="/about"
+            onClick={handleLinkClick}
+            className={({ isActive }) =>
+              `flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border border-transparent ${
+                isActive
+                  ? "bg-primary-light dark:bg-emerald-900/20 text-primary-base dark:text-emerald-400 border-primary-base/10"
+                  : "text-text-subtle dark:text-slate-300 hover:bg-surface-secondary dark:hover:bg-slate-800/80 hover:text-primary-base"
+              }`
+            }
+          >
+            {t("nav.aboutUs") || "About Us"}
+          </NavLink>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
@@ -173,6 +194,7 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
           {(['FARMER', 'ADMIN'].includes(user?.role) || user?.pendingRole === 'FARMER') && (
             <Link 
               to="/subscribe"
+              onClick={handleLinkClick}
               className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
             >
               <LuShield size={16} /> {t("nav.subscribe")}

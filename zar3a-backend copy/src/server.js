@@ -23,8 +23,8 @@ app.use(cors({
 
 // Important: Parse raw body for Stripe webhook verification
 app.use(['/payments/webhook', '/api/payments/webhook'], express.raw({ type: 'application/json' }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use("/uploads", express.static("uploads"));
 
 // ── Routes ────────────────────────────────────────────────────────────────────
@@ -102,6 +102,30 @@ const ensureProductionColumns = async (sequelizeInstance) => {
         ADD COLUMN \`subscriptionExpiresAt\` DATETIME NULL DEFAULT NULL;
       `);
       console.log("✅ 'subscriptionExpiresAt' column added.");
+    }
+
+    // Ensure imageUrl column lengths are modified to TEXT to support long base64 and URLs
+    const tablesToAlter = [
+      { table: 'ExpertListings', column: 'imageUrl' },
+      { table: 'Products', column: 'imageUrl' },
+      { table: 'OrderItems', column: 'imageUrl' },
+      { table: 'OrderTracking', column: 'imageUrl' }
+    ];
+
+    for (const item of tablesToAlter) {
+      try {
+        const [cols] = await sequelizeInstance.query(`SHOW COLUMNS FROM \`${item.table}\` LIKE '${item.column}';`);
+        if (cols.length > 0) {
+          const type = cols[0].Type.toLowerCase();
+          if (type.includes('varchar')) {
+            console.log(`Altering \`${item.table}\`.\`${item.column}\` from ${type} to TEXT...`);
+            await sequelizeInstance.query(`ALTER TABLE \`${item.table}\` MODIFY COLUMN \`${item.column}\` TEXT;`);
+            console.log(`✅ \`${item.table}\`.\`${item.column}\` modified to TEXT.`);
+          }
+        }
+      } catch (colErr) {
+        console.error(`⚠️ Could not alter column ${item.column} in table ${item.table}:`, colErr.message);
+      }
     }
   } catch (err) {
     console.error("⚠️ Error while checking/adding columns in ensureProductionColumns:", err.message);

@@ -92,8 +92,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     menuItems.push({ path: "/admin", label: t("nav.adminPanel"), icon: <FcPrivacy /> });
   }
 
-  // About Us: Everyone
-  menuItems.push({ path: "/about", label: t("nav.aboutUs") || "About Us", icon: <FcAbout /> });
 
   // Animation variants
   const mobileVariants = {

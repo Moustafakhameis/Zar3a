@@ -7,7 +7,7 @@ import { hashPassword } from "./src/utils/auth.js";
     const passwordHash = await hashPassword(password);
 
     const [user, created] = await User.findOrCreate({
-      where: { email: 'admin@zar3a.com' },
+      where: { email: 'admin@gmail.com' },
       defaults: {
         fullName: 'admin',
         username: 'admin',

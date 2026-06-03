@@ -163,11 +163,11 @@ const Footer = () => {
                 </div>
               </div>
               
-              <a href="mailto:hello@zar3a.com" className="flex items-center gap-4 text-text-muted dark:text-text-disabled hover:text-primary-base group">
+              <a href="mailto:hello@gmail.com" className="flex items-center gap-4 text-text-muted dark:text-text-disabled hover:text-primary-base group">
                 <div className="p-2 bg-surface-secondary dark:bg-slate-800 rounded-lg group-hover:bg-primary-light dark:group-hover:bg-emerald-900/30 transition-colors">
                   <LuMail size={20} className="shrink-0" />
                 </div>
-                <span className="font-bold">hello@zar3a.com</span>
+                <span className="font-bold">hello@gmail.com</span>
               </a>
 
               <a href="tel:+201234567890" className="flex items-center gap-4 text-text-muted dark:text-text-disabled hover:text-primary-base group">

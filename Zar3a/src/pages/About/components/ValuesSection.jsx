@@ -1,32 +1,35 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { LuLockOpen, LuMap, LuTrendingUp } from 'react-icons/lu';
-
-const values = [
-  {
-    id: 1,
-    title: "Transparency Over Opacity",
-    description: "Every price. Every rating. Every sensor reading. Visible to the farmer.",
-    icon: <LuLockOpen size={32} />,
-    gradient: "from-blue-500 to-cyan-400"
-  },
-  {
-    id: 2,
-    title: "Local Roots, Modern Tools",
-    description: "Built specifically for Egyptian agriculture. Designed for Egyptian soil, weather, and seasons.",
-    icon: <LuMap size={32} />,
-    gradient: "from-emerald-500 to-teal-400"
-  },
-  {
-    id: 3,
-    title: "Data That Acts",
-    description: "We don't collect data to display it. We collect data to guide actions.",
-    icon: <LuTrendingUp size={32} />,
-    gradient: "from-purple-500 to-pink-400"
-  }
-];
+import { useLanguage } from '../../../context/LanguageContext';
 
 const ValuesSection = () => {
+  const { t } = useLanguage();
+
+  const values = [
+    {
+      id: 1,
+      title: t("about.values.v1.title"),
+      description: t("about.values.v1.desc"),
+      icon: <LuLockOpen size={32} />,
+      gradient: "from-blue-500 to-cyan-400"
+    },
+    {
+      id: 2,
+      title: t("about.values.v2.title"),
+      description: t("about.values.v2.desc"),
+      icon: <LuMap size={32} />,
+      gradient: "from-emerald-500 to-teal-400"
+    },
+    {
+      id: 3,
+      title: t("about.values.v3.title"),
+      description: t("about.values.v3.desc"),
+      icon: <LuTrendingUp size={32} />,
+      gradient: "from-purple-500 to-pink-400"
+    }
+  ];
+
   return (
     <section className="py-32">
       <div className="max-w-7xl mx-auto px-4">
@@ -38,7 +41,7 @@ const ValuesSection = () => {
           className="text-center mb-24"
         >
           <h2 className="text-4xl md:text-5xl font-black text-text-main dark:text-white tracking-tight">
-            Our Core Values
+            {t("about.values.title")}
           </h2>
         </motion.div>
 
@@ -59,7 +62,7 @@ const ValuesSection = () => {
               <div className="relative h-full bg-surface-card dark:bg-slate-900 border border-border-default dark:border-slate-200 dark:border-slate-800 p-10 rounded-[3rem] shadow-lg overflow-hidden">
                 {/* Decorative Number */}
                 <div className="absolute -top-10 -right-6 text-[10rem] font-black text-slate-100 dark:text-slate-200 dark:text-slate-800/50 opacity-50 pointer-events-none select-none">
-                  {value.id}
+                   {value.id}
                 </div>
                 
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${value.gradient} flex items-center justify-center text-white mb-8 shadow-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>

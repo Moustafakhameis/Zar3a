@@ -203,11 +203,7 @@ export default function ProductsDashboard() {
         formData.append("imageFile", editImageFile);
       }
 
-      const res = await api.put(`/marketplace/products/${editingProduct.id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await api.put(`/marketplace/products/${editingProduct.id}`, formData);
 
       // Update local state list
       const updatedProduct = res.data.product;

@@ -76,7 +76,7 @@ const OrderTracking = sequelize.define(
       allowNull: true,
     },
     imageUrl: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     quantity: {

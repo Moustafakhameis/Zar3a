@@ -207,7 +207,7 @@ export const createOrderPayment = async (req, res) => {
           order_id: paymobOrderId,
           billing_data: {
             apartment: "NA",
-            email: user.email || "customer@zar3a.com",
+            email: user.email || "customer@gmail.com",
             floor: "NA",
             first_name: user.fullName.split(' ')[0] || "Customer",
             street: "NA",
@@ -276,7 +276,7 @@ export const createOrderPayment = async (req, res) => {
           order_id: paymobOrderId,
           billing_data: {
             apartment: "NA",
-            email: user.email || "customer@zar3a.com",
+            email: user.email || "customer@gmail.com",
             floor: "NA",
             first_name: user.fullName.split(' ')[0] || "Customer",
             street: "NA",

@@ -3,7 +3,6 @@ import axios from "axios";
 // ── Base instance ─────────────────────────────────────────────────────────────
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5002",
-  headers: { "Content-Type": "application/json" },
 });
 
 // ── Request interceptor: attach access token ──────────────────────────────────
@@ -55,11 +54,11 @@ api.interceptors.response.use(
 export const marketplaceAPI = {
   // CROP MARKET
   getCropMarketProducts: () => api.get('/marketplace/crop-products'),
-  createCropMarketProduct: (data) => api.post('/marketplace/crop-products', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  createCropMarketProduct: (data) => api.post('/marketplace/crop-products', data),
 
   // AGRI SHOP
   getAgriShopProducts: () => api.get('/marketplace/agri-products'),
-  createAgriShopProduct: (data) => api.post('/marketplace/agri-products', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  createAgriShopProduct: (data) => api.post('/marketplace/agri-products', data),
 
   // SEARCH
   searchProducts: (q, marketplace, category) =>
@@ -69,7 +68,7 @@ export const marketplaceAPI = {
 
   // EXPERT LISTINGS
   getExpertListings: () => api.get('/marketplace/expert-listings'),
-  createExpertListing: (data) => api.post('/marketplace/expert-listings', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  createExpertListing: (data) => api.post('/marketplace/expert-listings', data),
 };
 
 /**

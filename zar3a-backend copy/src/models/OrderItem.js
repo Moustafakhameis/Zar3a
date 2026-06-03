@@ -62,7 +62,7 @@ const OrderItem = sequelize.define('OrderItem', {
     },
   },
   imageUrl: {
-    type: DataTypes.STRING(500),
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   marketplaceType: {

@@ -1,8 +1,37 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { LuX, LuCheck, LuDroplets, LuTrendingDown, LuTrendingUp, LuWifi, LuWifiOff } from 'react-icons/lu';
+import { useLanguage } from '../../../context/LanguageContext';
 
 const BeforeAfterSection = () => {
+  const { t } = useLanguage();
+
+  const beforeItems = [
+    { icon: <LuX />, text: t("about.before.guess") },
+    { icon: <LuDroplets />, text: t("about.before.water") },
+    { icon: <LuTrendingDown />, text: t("about.before.disease") },
+    { icon: <LuWifiOff />, text: t("about.before.fragment") }
+  ];
+
+  const beforeStats = [
+    { value: "-15%", label: t("about.before.cropLoss"), pos: "-top-2 -left-4 md:-top-4 md:-left-8" },
+    { value: "+40%", label: t("about.before.waterWaste"), pos: "bottom-4 -left-6 md:bottom-8 md:-left-12" },
+    { value: "-20%", label: t("about.before.profits"), pos: "top-1/3 -right-6 md:top-1/4 md:-right-10" }
+  ];
+
+  const afterItems = [
+    { icon: <LuCheck />, text: t("about.after.ai") },
+    { icon: <LuDroplets />, text: t("about.after.irrigation") },
+    { icon: <LuTrendingUp />, text: t("about.after.iot") },
+    { icon: <LuWifi />, text: t("about.after.dataFarm") }
+  ];
+
+  const afterStats = [
+    { value: "+40%", label: t("about.after.cropYield"), pos: "-top-2 -left-4 md:-top-4 md:-left-8" },
+    { value: "-30%", label: t("about.after.waterWaste"), pos: "bottom-4 -left-6 md:bottom-8 md:-left-12" },
+    { value: "+25%", label: t("about.after.profits"), pos: "top-1/3 -right-6 md:top-1/4 md:-right-10" }
+  ];
+
   return (
     <section className="relative py-24 md:py-32 flex flex-col gap-16 md:gap-32">
       {/* BEFORE ZAR3A SECTION */}
@@ -20,18 +49,13 @@ const BeforeAfterSection = () => {
           <div className="relative z-10 p-8 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl md:text-6xl font-black text-red-600 dark:text-red-500 mb-6 tracking-tighter drop-shadow-md font-['Outfit']">
-                Before Zar3a
+                {t("about.before.title")}
               </h2>
               <p className="text-xl text-slate-600 dark:text-slate-400 font-medium mb-8 font-['Outfit']">
-                Agriculture was disconnected, unpredictable, and vulnerable.
+                {t("about.before.desc")}
               </p>
               <ul className="space-y-4">
-                {[
-                  { icon: <LuX />, text: "Guesswork Decisions" },
-                  { icon: <LuDroplets />, text: "Water Waste" },
-                  { icon: <LuTrendingDown />, text: "Late Disease Detection" },
-                  { icon: <LuWifiOff />, text: "Fragmented Systems" }
-                ].map((item, i) => (
+                {beforeItems.map((item, i) => (
                   <li key={i} className="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-400">
                     <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex shrink-0 items-center justify-center text-red-600 dark:text-red-500">
                       {item.icon}
@@ -47,11 +71,7 @@ const BeforeAfterSection = () => {
                     <LuTrendingDown size={64} className="text-red-500/80 dark:text-red-900/50" />
                  </div>
                  {/* Floating Bad Nodes orbiting the circle */}
-                 {[
-                   { value: "-15%", label: "Crop Loss", pos: "-top-2 -left-4 md:-top-4 md:-left-8" },
-                   { value: "+40%", label: "Water Waste", pos: "bottom-4 -left-6 md:bottom-8 md:-left-12" },
-                   { value: "-20%", label: "Profits", pos: "top-1/3 -right-6 md:top-1/4 md:-right-10" }
-                 ].map((stat, i) => (
+                 {beforeStats.map((stat, i) => (
                     <motion.div 
                       key={i}
                       animate={{ y: [-6, 6, -6] }}
@@ -88,18 +108,13 @@ const BeforeAfterSection = () => {
           <div className="relative z-10 p-8 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 mb-6 tracking-tighter drop-shadow-sm font-['Outfit']">
-                After Zar3a
+                {t("about.after.title")}
               </h2>
               <p className="text-xl text-slate-800 dark:text-slate-200 font-medium mb-8 font-['Outfit']">
-                A connected, intelligent, and highly profitable ecosystem.
+                {t("about.after.desc")}
               </p>
               <ul className="space-y-4">
-                {[
-                  { icon: <LuCheck />, text: "AI-Powered Recommendations" },
-                  { icon: <LuDroplets />, text: "Smart Irrigation Decisions" },
-                  { icon: <LuTrendingUp />, text: "Real-Time IoT Monitoring" },
-                  { icon: <LuWifi />, text: "Data-Driven Farming" }
-                ].map((item, i) => (
+                {afterItems.map((item, i) => (
                   <li key={i} className="flex items-center gap-4 text-lg font-bold text-slate-800 dark:text-slate-100">
                     <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex shrink-0 items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-md">
                       {item.icon}
@@ -116,11 +131,7 @@ const BeforeAfterSection = () => {
                     <LuTrendingUp size={64} className="text-emerald-600 dark:text-emerald-400 relative z-10" />
                  </div>
                  {/* Floating Data Nodes orbiting the circle */}
-                 {[
-                   { value: "+40%", label: "Crop Yield", pos: "-top-2 -left-4 md:-top-4 md:-left-8" },
-                   { value: "-30%", label: "Water Waste", pos: "bottom-4 -left-6 md:bottom-8 md:-left-12" },
-                   { value: "+25%", label: "Profits", pos: "top-1/3 -right-6 md:top-1/4 md:-right-10" }
-                 ].map((stat, i) => (
+                 {afterStats.map((stat, i) => (
                     <motion.div 
                       key={i}
                       animate={{ y: [-6, 6, -6] }}
