@@ -437,7 +437,7 @@ const translations = {
   "dash.aiSuggested":       { en: "AI Suggested",           ar: "مقترح بالذكاء" },
   "dash.moistureTelemetry": { en: "Moisture Telemetry",     ar: "بيانات رطوبة التربة" },
   "dash.pumpStatus":        { en: "Pump Status",            ar: "حالة المضخة" },
-  "dash.aiEngine":          { en: "AI Engine",              ar: "محرك الذكاء الاصطناعي" },
+  "dash.aiEngine":          { en: "AI Recommendation Engine", ar: "محرك توصيات الذكاء الاصطناعي" },
   "dash.viewProfileRevenue":{ en: "View Profile & Revenue",  ar: "عرض الملف المالي والإيرادات" },
   "dash.financialProj":     { en: "Financial Projection",   ar: "التوقعات المالية" },
   "dash.expectedYield":     { en: "Expected Yield",         ar: "الإنتاج المتوقع" },
