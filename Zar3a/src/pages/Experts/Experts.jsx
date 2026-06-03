@@ -4,6 +4,7 @@ import {
   LuMessageSquare, LuStar, LuBadgeCheck, LuX, LuBriefcase,
   LuGraduationCap, LuAward, LuSearch, LuPlus, LuMapPin,
 } from "react-icons/lu";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
@@ -129,7 +130,7 @@ const Experts = () => {
         newListing = await createExpertListing({ ...createForm, hourlyRate: Number(createForm.hourlyRate) });
       }
       setExpertCards((prev) => [normalizeListing(newListing), ...prev]);
-      setSuccessMessage(t("experts.created"));
+      toast.success(t("experts.created") || "Expert listing created successfully!");
       setShowCreateModal(false);
       setCreateForm({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "" });
       setImageFile(null);
@@ -137,7 +138,7 @@ const Experts = () => {
       setFieldErrors({});
     } catch (err) {
       console.error(err);
-      setFormError(err?.response?.data?.message || t("common.error"));
+      toast.error(err?.response?.data?.message || t("common.error"));
     }
   };
 

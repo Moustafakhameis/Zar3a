@@ -361,7 +361,8 @@ const Marketplace = () => {
 
   const handleCreateProduct = async () => {
     if (!createForm.title || !createForm.description || !createForm.category || !createForm.price) {
-      return setFormError(t("experts.requiredFields") || "All fields are required");
+      toast.error(t("experts.requiredFields") || "All fields are required");
+      return;
     }
 
     try {
@@ -393,14 +394,14 @@ const Marketplace = () => {
 
       const newProduct = await createProduct(productData);
       setProducts((prev) => [normalizeProduct(newProduct), ...prev]);
-      setSuccessMessage(t("experts.created") || "Product created successfully");
+      toast.success(t("experts.created") || "Product created successfully");
       setShowCreateModal(false);
       setCreateForm({ title: "", description: "", category: "", price: "", unit: "unit", region: "", imageUrl: "", marketplaceType: "CROP_MARKET", productSource: "MANUAL", status: "AVAILABLE" });
       setImageFile(null);
       setImagePreview("");
     } catch (err) {
       console.error(err);
-      setFormError(err?.response?.data?.message || t("common.error") || "An error occurred");
+      toast.error(err?.response?.data?.message || t("common.error") || "An error occurred");
     }
   };
 
