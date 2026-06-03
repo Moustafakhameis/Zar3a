@@ -31,6 +31,7 @@ const normalizeListing = (listing) => {
     reviews: listing.reviews || 24,
     owner: listing.name || listing.User?.fullName || listing.User?.username || "Expert",
     specialty: listing.specialization || listing.specialty,
+    email: listing.User?.email || "",
     academicDegree: listing.academicDegree || listing.User?.AgroExpertProfile?.academicDegree || "",
     experienceYears: listing.experienceYears || listing.User?.AgroExpertProfile?.experienceYears || 0,
   };
@@ -277,6 +278,9 @@ const Experts = () => {
                 <LuBadgeCheck className="text-blue-500" size={20} />
               </div>
               <p className="text-primary-base dark:text-green-400 font-semibold text-sm uppercase tracking-wide">{expert.specialization}</p>
+              {expert.email && (
+                <p className="text-text-muted dark:text-text-disabled text-sm mt-1">{expert.email}</p>
+              )}
               <div className="flex items-center justify-center gap-2 mt-3 bg-surface-secondary dark:bg-slate-800/50 px-3 py-1.5 rounded-full w-fit mx-auto">
                 <LuStar className="text-yellow-500" fill="currentColor" size={14} />
                 <span className="font-bold text-sm dark:text-white">{expert.rating}</span>
