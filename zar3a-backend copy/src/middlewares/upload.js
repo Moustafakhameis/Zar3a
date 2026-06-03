@@ -23,7 +23,7 @@ const fileFilter = (_req, file, cb) => {
 export const uploadCV = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB
 }).single("cv");
 
 const productImageDir = "uploads/products";
@@ -45,7 +45,7 @@ const productImageFilter = (_req, file, cb) => {
 export const uploadProductImage = multer({
   storage: productImageStorage,
   fileFilter: productImageFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB
 }).single("imageFile");
 
 // ── Chat attachment upload ────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ const chatFileFilter = (_req, file, cb) => {
 export const uploadChatAttachment = multer({
   storage: chatStorage,
   fileFilter: chatFileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
 }).single("file");
 
 const expertImageDir = "uploads/experts";
@@ -90,6 +90,6 @@ const expertImageFilter = (_req, file, cb) => {
 export const uploadExpertImage = multer({
   storage: expertImageStorage,
   fileFilter: expertImageFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB
 }).single("imageFile");
 
