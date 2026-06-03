@@ -18,6 +18,8 @@ import {
   getProductReviews,
   updateProductReview,
   deleteProductReview,
+  updateExpertListing,
+  deleteExpertListing,
 } from '../controllers/marketplace.controller.js';
 
 const router = Router();
@@ -173,5 +175,25 @@ router.post(
   validate,
   createExpertListing
 );
+
+// PUT /marketplace/expert-listings/:id
+// Update an expert listing
+router.put(
+  '/expert-listings/:id',
+  authenticate,
+  uploadExpertImage,
+  [
+    body('title').optional().trim().notEmpty().withMessage('Title is required'),
+    body('specialty').optional().trim().notEmpty().withMessage('Specialty is required'),
+    body('description').optional().trim().notEmpty().withMessage('Description is required'),
+    body('hourlyRate').optional().isFloat({ gt: 0 }).withMessage('Hourly rate must be greater than 0'),
+  ],
+  validate,
+  updateExpertListing
+);
+
+// DELETE /marketplace/expert-listings/:id
+// Delete an expert listing
+router.delete('/expert-listings/:id', authenticate, deleteExpertListing);
 
 export default router;

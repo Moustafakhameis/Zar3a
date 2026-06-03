@@ -306,6 +306,61 @@ export const createExpertListing = async (req, res) => {
   }
 };
 
+export const updateExpertListing = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    const listing = await ExpertListing.findByPk(id);
+    if (!listing) return res.status(404).json({ message: 'Listing not found' });
+
+    if (user.role !== 'ADMIN' && listing.userId !== user.id) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    const { title, specialty, description, hourlyRate, location, imageUrl } = req.body;
+    let finalImageUrl = imageUrl || listing.imageUrl;
+    
+    if (req.file) {
+      finalImageUrl = `/uploads/experts/${req.file.filename}`;
+    }
+
+    await listing.update({
+      title: title || listing.title,
+      specialty: specialty || listing.specialty,
+      description: description || listing.description,
+      hourlyRate: hourlyRate ? Number(hourlyRate) : listing.hourlyRate,
+      location: location !== undefined ? location : listing.location,
+      imageUrl: finalImageUrl,
+    });
+
+    return res.json(listing);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const deleteExpertListing = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    const listing = await ExpertListing.findByPk(id);
+    if (!listing) return res.status(404).json({ message: 'Listing not found' });
+
+    if (user.role !== 'ADMIN' && listing.userId !== user.id) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    await listing.destroy();
+    return res.json({ message: 'Listing deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 /**
  * ─────────────────────────────────────────────────────────
  * PRODUCT SEARCH (gets both marketplaces)
