@@ -282,7 +282,7 @@ const Experts = () => {
               {t("experts.viewProfile")}
             </button>
             
-            {user?.role === "ADMIN" && (
+            {(user?.role === "ADMIN" || expert.userId === user?.id) && (
               <div className="flex gap-2 mt-4 w-full">
                 <button 
                   onClick={(e) => { e.stopPropagation(); handleEditClick(expert); }}
@@ -381,27 +381,21 @@ const Experts = () => {
         )}
       </AnimatePresence>
 
-      {/* Create Modal */}
-      {showCreateModal && (
-        <AnimatePresence>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setShowCreateModal(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-            <motion.div initial={{ y: 20, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 20, opacity: 0, scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
+      {/* Create / Edit Modal */}
       <AnimatePresence>
         {showCreateModal && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={closeModal}
-              className="fixed inset-0 bg-gray-900/60 backdrop-blur-md z-[100]" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-0 m-auto w-[95%] max-w-2xl h-fit max-h-[90vh] bg-surface-card dark:bg-slate-900 z-[100] rounded-[3rem] p-10 overflow-y-auto border border-border-default dark:border-slate-800 shadow-2xl">
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-surface-card dark:bg-slate-900 rounded-[3rem] p-8 md:p-12 shadow-2xl">
               
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-black text-text-main dark:text-white">
-                  {isEditing ? "Edit Expert Listing" : t("experts.createCard")}
-                </h2>
+                <div>
+                  <h2 className="text-3xl font-black text-text-main dark:text-white">
+                    {isEditing ? "Edit Expert Listing" : t("experts.createCard")}
+                  </h2>
+                  <p className="text-sm text-text-muted dark:text-text-disabled">{t("experts.createSub")}</p>
+                </div>
                 <button onClick={closeModal} className="text-text-muted dark:text-slate-300 hover:text-red-500 transition">
                   <LuX size={28} />
                 </button>
@@ -442,45 +436,37 @@ const Experts = () => {
                   <div>
                     <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Hourly Rate (EGP)</label>
                     <input type="number" name="hourlyRate" value={createForm.hourlyRate} onChange={handleCreateInput}
-                      placeholder={t("experts.hourlyPlaceholder")}
-                      className={`w-full bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.hourlyRate ? 'border-red-400 dark:border-red-500' : 'border-border-default dark:border-slate-700'} rounded-3xl px-5 py-4 text-sm font-bold text-text-main dark:text-white outline-none`} />
-                    {fieldErrors.hourlyRate && <p className="text-xs text-red-500 font-semibold mt-1 ml-2">{fieldErrors.hourlyRate}</p>}
-                  </div>
-                  <div>
-                    <input type="text" name="location" value={createForm.location} onChange={handleCreateInput}
-                      placeholder={t("experts.locationPlaceholder")}
-                      className={`w-full bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.location ? 'border-red-400 dark:border-red-500' : 'border-border-default dark:border-slate-700'} rounded-3xl px-5 py-4 text-sm font-bold text-text-main dark:text-white outline-none`} />
-                    {fieldErrors.location && <p className="text-xs text-red-500 font-semibold mt-1 ml-2">{fieldErrors.location}</p>}
+                      className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.hourlyRate ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
+                      placeholder="e.g. 200" />
+                    {fieldErrors.hourlyRate && <p className="mt-1 text-xs text-red-500 font-bold">{fieldErrors.hourlyRate}</p>}
                   </div>
                 </div>
+
                 <div>
-                  <DualImageUpload
-                    label={t("experts.imageUrl")}
-                    value={createForm.imageUrl}
-                    onChange={(e) => { handleCreateInput(e); setImageFile(null); setImagePreview(""); }}
-                    previewImage={imagePreview}
-                    onFileChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        setImageFile(file);
-                        setImagePreview(URL.createObjectURL(file));
-                        setCreateForm(prev => ({ ...prev, imageUrl: "" }));
-                      }
-                    }}
-                  />
-                  {fieldErrors.imageUrl && <p className="text-xs text-red-500 font-semibold mt-1 ml-2">{fieldErrors.imageUrl}</p>}
+                  <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Location</label>
+                  <input type="text" name="location" value={createForm.location} onChange={handleCreateInput}
+                    className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.location ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
+                    placeholder="e.g. Cairo, Egypt" />
+                  {fieldErrors.location && <p className="mt-1 text-xs text-red-500 font-bold">{fieldErrors.location}</p>}
                 </div>
-                {formError && <p className="text-red-600 font-bold">{formError}</p>}
-                {successMessage && <p className="text-primary-base font-bold">{successMessage}</p>}
+
+                <div>
+                  <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Description / Bio</label>
+                  <textarea name="description" value={createForm.description} onChange={handleCreateInput} rows={4}
+                    className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.description ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
+                    placeholder="Describe your expertise and services..." />
+                  {fieldErrors.description && <p className="mt-1 text-xs text-red-500 font-bold">{fieldErrors.description}</p>}
+                </div>
+
                 <button onClick={handleCreateListing}
-                  className="w-full py-4 bg-primary-base text-white rounded-3xl font-black uppercase tracking-widest hover:bg-primary-hover transition">
-                  {t("experts.publish")}
+                  className="w-full py-4 bg-primary-base text-white font-black rounded-2xl hover:bg-primary-hover transition-colors shadow-lg shadow-green-500/30">
+                  {isEditing ? "Save Changes" : t("experts.publish")}
                 </button>
               </div>
             </motion.div>
           </motion.div>
-        </AnimatePresence>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };
