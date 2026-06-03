@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LuMessageSquare, LuStar, LuBadgeCheck, LuX, LuBriefcase,
-  LuGraduationCap, LuAward, LuSearch, LuPlus, LuMapPin,
+  LuGraduationCap, LuAward, LuSearch, LuPlus, LuMapPin, LuUpload
 } from "react-icons/lu";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -181,6 +181,20 @@ const Experts = () => {
     setShowCreateModal(true);
   };
 
+  const handleQuickImageUpload = async (expert, file) => {
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append("imageFile", file);
+      const res = await updateExpertListing(expert.id, formData);
+      setExpertCards((prev) => prev.map(c => c.id === expert.id ? normalizeListing(res) : c));
+      toast.success("Profile photo updated successfully!");
+    } catch (err) {
+      toast.error("Failed to update photo");
+      console.error(err);
+    }
+  };
+
   const executeDelete = async (id) => {
     try {
       await deleteExpertListing(id);
@@ -256,7 +270,7 @@ const Experts = () => {
             className="bg-surface-card dark:bg-slate-900 rounded-[2.5rem] p-8 border border-border-default dark:border-slate-800 shadow-xl shadow-gray-200/50 dark:shadow-none flex flex-col items-center text-center group cursor-pointer"
             onClick={() => setSelectedExpert(expert)}>
             <div className="relative mb-6">
-              <div className="w-28 h-28 rounded-full bg-primary-light dark:bg-green-900/20 p-1">
+              <div className="w-28 h-28 rounded-full bg-primary-light dark:bg-green-900/20 p-1 group/avatar relative overflow-hidden">
                 <img 
                   src={expert.image} 
                   className="w-full h-full rounded-full object-cover" 
@@ -266,6 +280,13 @@ const Experts = () => {
                     e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(expert.name)}&background=0D9488&color=fff&size=128`;
                   }}
                 />
+                {canEdit(expert) && (
+                  <label className="absolute inset-1 rounded-full bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm z-10">
+                    <LuUpload className="text-white mb-1" size={24} />
+                    <span className="text-[10px] font-bold text-white uppercase tracking-wider">Upload</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleQuickImageUpload(expert, e.target.files[0])} />
+                  </label>
+                )}
               </div>
               <div className="absolute -bottom-2 -end-2 bg-surface-card dark:bg-slate-900 p-2 rounded-xl shadow-lg border border-gray-50 dark:border-slate-800">
                 <LuAward className="text-yellow-500" size={20} />
