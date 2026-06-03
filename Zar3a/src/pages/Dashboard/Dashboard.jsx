@@ -1230,80 +1230,90 @@ const Dashboard = () => {
 
         {/* 🌟 NEW: PREMIUM WEATHER CARD 🌟 */}
         <div className="lg:col-span-4 grid grid-cols-1 gap-4">
-          <div className="bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 p-8 rounded-[2.5rem] text-white flex flex-col justify-between shadow-2xl shadow-indigo-200/40 dark:shadow-none relative overflow-hidden h-full">
-            {/* Abstract Glass Glows */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-surface-card opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400 opacity-20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
-
-            {/* Background Icon */}
-            <LuCloudSun
-              size={180}
-              className="absolute -right-12 -bottom-12 opacity-10 text-white"
-              style={{ mixBlendMode: "overlay" }}
-            />
+          <div className="relative overflow-hidden bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] p-8 text-slate-900 dark:text-white flex flex-col shadow-2xl h-full border border-slate-200 dark:border-white/10 group">
+            
+            {/* Dynamic Animated Background Gradients */}
+            <div className="absolute top-0 right-0 w-[120%] h-[120%] bg-linear-to-br from-indigo-300/40 dark:from-indigo-500/40 via-purple-300/20 dark:via-purple-500/20 to-transparent blur-[80px] -translate-y-1/4 translate-x-1/4 group-hover:scale-110 transition-transform duration-1000 ease-out"></div>
+            <div className="absolute bottom-0 left-0 w-[100%] h-[100%] bg-linear-to-tr from-cyan-300/30 dark:from-cyan-500/30 to-transparent blur-[60px] translate-y-1/4 -translate-x-1/4 group-hover:scale-110 transition-transform duration-1000 ease-out"></div>
 
             {/* Top Row: Label & Spinner */}
-            <div className="relative z-10 flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.8)]"></div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-100/90">
+            <div className="relative z-10 flex justify-between items-center mb-8">
+              <div className="flex items-center gap-2 bg-white/60 dark:bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 dark:border-white/10 shadow-sm">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500 dark:bg-green-400 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)] dark:shadow-[0_0_10px_rgba(74,222,128,1)]"></div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-white/90">
                   {t("dash.liveClimate")}
                 </p>
               </div>
               {isWeatherLoading && (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-slate-300 dark:border-white/30 border-t-slate-800 dark:border-t-white rounded-full animate-spin"></div>
               )}
             </div>
 
-            {/* Middle Row: Big Temp & Live Clock */}
-            <div className="relative z-10 flex-1 flex items-center justify-between">
-              <div className="flex flex-col justify-center">
-                <div className="flex items-start gap-1">
-                  <h4 className="text-[5.5rem] font-black tracking-tighter leading-none drop-shadow-lg">
+            {/* Middle Row: Big Temp, Icon & Live Clock */}
+            <div className="relative z-10 flex items-center justify-between mb-auto">
+              {/* Temperature block */}
+              <div className="flex flex-col">
+                <div className="flex items-start">
+                  <h4 className="text-7xl lg:text-8xl font-black tracking-tighter leading-none drop-shadow-xl dark:drop-shadow-2xl text-slate-900 dark:text-white">
                     {weather.temp}
                   </h4>
-                  <div className="flex flex-col pt-2">
-                    <span className="text-4xl font-black text-white/80">°C</span>
-                  </div>
+                  <span className="text-4xl font-black text-slate-400 dark:text-white/60 mt-2 ml-1">°C</span>
                 </div>
-                <p className="text-sm font-bold text-indigo-100 uppercase tracking-widest mt-2">
-                  {t("weather." + weather.condition) || weather.condition}
-                </p>
+                <div className="flex items-center gap-2 mt-4">
+                  <LuCloudSun className="text-3xl text-yellow-500 dark:text-yellow-300 drop-shadow-[0_0_15px_rgba(234,179,8,0.4)] dark:drop-shadow-[0_0_15px_rgba(253,224,71,0.6)]" />
+                  <p className="text-base font-bold text-slate-700 dark:text-white/90 uppercase tracking-widest">
+                    {t("weather." + weather.condition) || weather.condition}
+                  </p>
+                </div>
               </div>
 
+              {/* Clock Block */}
               <div className="flex flex-col items-end text-right">
-                <LiveClock format="time" className="text-4xl font-black tracking-tighter drop-shadow-md" />
-                <LiveClock format="weekday" className="text-sm font-bold text-indigo-100 uppercase tracking-widest mt-1" />
-                <LiveClock format="date" className="text-[10px] font-black text-blue-200/80 uppercase tracking-widest mt-0.5" />
+                <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md border border-white/60 dark:border-white/10 p-4 rounded-3xl flex flex-col items-end shadow-inner transition-colors group-hover:bg-white/60 dark:group-hover:bg-black/30">
+                  <LiveClock format="time" className="text-2xl font-black tracking-tighter text-slate-800 dark:text-white drop-shadow-sm" />
+                  <LiveClock format="weekday" className="text-[10px] font-bold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest mt-1" />
+                  <LiveClock format="date" className="text-[9px] font-black text-slate-500 dark:text-white/60 uppercase tracking-widest" />
+                </div>
               </div>
             </div>
 
-            {/* Bottom Row: Location & Bento AI Pill */}
-            <div className="relative z-10 mt-8 pt-6 border-t border-white/10 flex justify-between items-end">
-              <div>
-                <p className="text-[10px] font-bold text-blue-200/60 uppercase tracking-widest mb-1">
-                  {t("dash.region")}
-                </p>
-                <p className="font-bold text-sm truncate max-w-25">
-                  {t("reg." + weather.region) || weather.region}
-                </p>
-              </div>
-
-              {/* Premium Glassmorphic AI Pill */}
+            {/* AI Suggestion Banner (Takes up the empty space) */}
+            <div className="relative z-10 w-full mt-12 mb-6">
               <div 
-                className="bg-surface-card/10 hover:bg-surface-card/20 transition-all cursor-pointer border border-white/20 px-4 py-2.5 rounded-2xl backdrop-blur-md flex items-center gap-3 shadow-xl"
+                className="group/banner w-full bg-white/40 dark:bg-black/20 hover:bg-white/60 dark:hover:bg-black/40 transition-all cursor-pointer border border-white/60 dark:border-white/10 rounded-[2rem] p-6 backdrop-blur-xl flex flex-row items-center justify-between shadow-xl"
                 onClick={() => setSelectedAiCrop(weather.bestCrop)}
               >
-                <div className="flex flex-col text-right">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-indigo-200">
-                    {t("dash.aiSuggested")}
-                  </span>
-                  <span className="text-sm font-black text-white">
-                    {t("crop." + weather.bestCrop) || weather.bestCrop}
-                  </span>
-                </div>
-                <div className="w-10 h-10 bg-surface-card/20 rounded-[10px] flex items-center justify-center text-2xl shadow-inner border border-white/10">
-                  {cropsData[weather.bestCrop]?.icon}
+                 <div className="flex flex-col">
+                    <div className="flex items-center gap-2 mb-2">
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 dark:text-indigo-300">
+                          ✨ {t("dash.aiSuggested")}
+                       </span>
+                    </div>
+                    <span className="text-4xl font-black text-slate-900 dark:text-white drop-shadow-sm tracking-tight mb-1">
+                      {t("crop." + weather.bestCrop) || weather.bestCrop}
+                    </span>
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                      Maximum yield probability
+                    </span>
+                 </div>
+                 
+                 <div className="w-20 h-20 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-4xl shadow-inner border-4 border-white/80 dark:border-white/10 group-hover/banner:scale-110 group-hover/banner:-rotate-12 transition-transform duration-500">
+                    {cropsData[weather.bestCrop]?.icon}
+                 </div>
+              </div>
+            </div>
+
+            {/* Bottom Row: Location */}
+            <div className="relative z-10 pt-4 border-t border-slate-300/50 dark:border-white/10 flex justify-between items-end">
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 dark:text-white/50 uppercase tracking-widest mb-1.5">
+                  {t("dash.region")}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <LuMapPin className="text-cyan-600 dark:text-cyan-400" size={16} />
+                  <p className="font-bold text-base text-slate-800 dark:text-white tracking-tight drop-shadow-sm">
+                    {t("reg." + weather.region) || weather.region}
+                  </p>
                 </div>
               </div>
             </div>
