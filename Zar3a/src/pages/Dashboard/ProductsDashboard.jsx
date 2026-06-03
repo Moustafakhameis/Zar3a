@@ -14,7 +14,8 @@ import {
 import { FiAlertCircle, FiCheckCircle, FiEdit } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../API/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function ProductsDashboard() {
@@ -105,19 +106,25 @@ export default function ProductsDashboard() {
     }
   };
 
-  const handleDelete = async (productId) => {
-    if (!window.confirm(t("prodDash.confirmDelete"))) return;
-    
-    try {
-      await api.delete(`/marketplace/products/${productId}`);
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
-      setMessage(t("prodDash.deleteSuccess"));
-      setTimeout(() => setMessage(null), 3000);
-    } catch (err) {
-      console.error(err);
-      setErrorMsg(err?.response?.data?.message || t("prodDash.deleteFailed"));
-      setTimeout(() => setErrorMsg(null), 4000);
-    }
+  const handleDelete = (productId) => {
+    toast.warning(t("prodDash.confirmDelete"), {
+      action: {
+        label: t("prodDash.delete") || "Delete",
+        onClick: async () => {
+          try {
+            await api.delete(`/marketplace/products/${productId}`);
+            setProducts((prev) => prev.filter((p) => p.id !== productId));
+            toast.success(t("prodDash.deleteSuccess"));
+          } catch (err) {
+            console.error(err);
+            toast.error(err?.response?.data?.message || t("prodDash.deleteFailed"));
+          }
+        }
+      },
+      cancel: {
+        label: "Cancel"
+      }
+    });
   };
 
   const handleOpenEditModal = (product) => {

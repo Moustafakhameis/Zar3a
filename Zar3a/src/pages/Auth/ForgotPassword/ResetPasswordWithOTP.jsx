@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'sonner';
 import './ForgotPassword.css';
 
 /**
@@ -71,7 +72,7 @@ const ResetPasswordWithOTP = ({ verificationToken, email, onSuccess }) => {
       );
 
       // Success! Show message and redirect
-      alert('✅ Password reset successfully! You can now login with your new password.');
+      toast.success('Password reset successfully! You can now login with your new password.');
       onSuccess?.();
       navigate('/login');
     } catch (err) {

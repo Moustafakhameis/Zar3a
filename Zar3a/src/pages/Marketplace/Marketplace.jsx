@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../hooks/useCart";
 import { useLanguage } from "../../context/LanguageContext";
 import api from "../../API/axiosInstance";
+import { toast } from "sonner";
 import {
   LuSearch,
   LuShoppingCart,
@@ -313,14 +314,24 @@ const Marketplace = () => {
     setNewComment(review.comment);
   };
 
-  const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm(t("market.confirmDeleteReview") || "Are you sure you want to delete this review?")) return;
-    try {
-      await api.delete(`/marketplace/products/${selectedProduct.id}/reviews/${reviewId}`);
-      fetchReviews(selectedProduct.id);
-    } catch (err) {
-      alert(err?.response?.data?.message || "Failed to delete review");
-    }
+  const handleDeleteReview = (reviewId) => {
+    toast.warning(t("market.confirmDeleteReview") || "Are you sure you want to delete this review?", {
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            await api.delete(`/marketplace/products/${selectedProduct.id}/reviews/${reviewId}`);
+            fetchReviews(selectedProduct.id);
+            toast.success("Review deleted successfully");
+          } catch (err) {
+            toast.error(err?.response?.data?.message || "Failed to delete review");
+          }
+        }
+      },
+      cancel: {
+        label: "Cancel"
+      }
+    });
   };
 
   useEffect(() => {
@@ -638,10 +649,10 @@ const Marketplace = () => {
                         location: quoteLocation,
                         message: quoteMessage
                       });
-                      alert(res.data.message || 'Quote requested successfully!');
+                      toast.success(res.data.message || 'Quote requested successfully!');
                       setShowQuoteModal(false);
                     } catch (err) {
-                      alert('Failed to request quote.');
+                      toast.error('Failed to request quote.');
                       console.error(err);
                     }
                   }}

@@ -619,7 +619,7 @@ const Dashboard = () => {
 
   const handleHardwareToggle = (type) => {
     if (isLocked) {
-      alert("Hardware controls are disabled in Read-Only mode. Please wait for sensor approval.");
+      toast.error("Hardware controls are disabled in Read-Only mode. Please wait for sensor approval.");
       return;
     }
     setHardware((prev) => ({
@@ -658,7 +658,7 @@ const Dashboard = () => {
 
   const toggleHardware = (device) => {
     if (isLocked) {
-      alert("Hardware controls are disabled in Read-Only mode. Please wait for sensor approval.");
+      toast.error("Hardware controls are disabled in Read-Only mode. Please wait for sensor approval.");
       return;
     }
     if (activeSector.isAuto) return;
