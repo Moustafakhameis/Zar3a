@@ -11,6 +11,7 @@ import {
   LuArrowUp,
   LuSun,
   LuMoon,
+  LuChevronDown,
 } from "react-icons/lu";
 
 const Footer = () => {
@@ -20,6 +21,7 @@ const Footer = () => {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "Light");
+  const [isNavDropdownOpen, setIsNavDropdownOpen] = useState(false);
 
   const handleSubscribe = (e) => {
     e.preventDefault();
@@ -199,13 +201,35 @@ const Footer = () => {
             </button>
 
             <span className="text-slate-300 dark:text-slate-700">|</span>
-            <Link
-              to="/about"
-              onClick={scrollToTop}
-              className="text-sm font-black text-text-muted hover:text-text-main dark:hover:text-white transition-colors"
-            >
-              {t("nav.aboutUs")}
-            </Link>
+            
+            {/* Navigation Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsNavDropdownOpen(!isNavDropdownOpen)}
+                className="flex items-center gap-2 text-sm font-black text-text-muted hover:text-text-main dark:hover:text-white transition-colors uppercase"
+              >
+                Navigation <LuChevronDown size={16} className={`transition-transform ${isNavDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isNavDropdownOpen && (
+                <div className="absolute bottom-full mb-2 -ml-4 w-32 bg-surface-card dark:bg-slate-800 rounded-xl shadow-lg border border-border-default dark:border-slate-700 overflow-hidden z-50">
+                  <Link 
+                    to="/" 
+                    onClick={() => { scrollToTop(); setIsNavDropdownOpen(false); }}
+                    className="block px-4 py-2.5 text-sm font-bold text-text-muted dark:text-slate-300 hover:bg-surface-secondary dark:hover:bg-slate-700 hover:text-primary-base transition-colors"
+                  >
+                    {t("nav.home") || "Home"}
+                  </Link>
+                  <Link 
+                    to="/about" 
+                    onClick={() => { scrollToTop(); setIsNavDropdownOpen(false); }}
+                    className="block px-4 py-2.5 text-sm font-bold text-text-muted dark:text-slate-300 hover:bg-surface-secondary dark:hover:bg-slate-700 hover:text-primary-base transition-colors"
+                  >
+                    {t("nav.aboutUs") || "About Us"}
+                  </Link>
+                </div>
+              )}
+            </div>
 
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <Link

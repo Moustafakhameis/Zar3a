@@ -161,20 +161,6 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
             </div>
           </Link>
 
-          {/* About Us Link alongside ZAR3A SMART AGRI */}
-          <NavLink
-            to="/about"
-            onClick={handleLinkClick}
-            className={({ isActive }) =>
-              `flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border border-transparent ${
-                isActive
-                  ? "bg-primary-light dark:bg-emerald-900/20 text-primary-base dark:text-emerald-400 border-primary-base/10"
-                  : "text-text-subtle dark:text-slate-300 hover:bg-surface-secondary dark:hover:bg-slate-800/80 hover:text-primary-base"
-              }`
-            }
-          >
-            {t("nav.aboutUs") || "About Us"}
-          </NavLink>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
