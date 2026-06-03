@@ -27,6 +27,7 @@ import {
   LuActivity,
   LuMaximize2,
   LuWrench,
+  LuClock,
 } from "react-icons/lu";
 import {
   AreaChart,
@@ -1267,12 +1268,21 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Clock Block */}
+              {/* Premium Clock Block */}
               <div className="flex flex-col items-end text-right">
-                <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md border border-white/60 dark:border-white/10 p-4 rounded-3xl flex flex-col items-end shadow-inner transition-colors group-hover:bg-white/60 dark:group-hover:bg-black/30">
-                  <LiveClock format="time" className="text-2xl font-black tracking-tighter text-slate-800 dark:text-white drop-shadow-sm" />
-                  <LiveClock format="weekday" className="text-[10px] font-bold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest mt-1" />
-                  <LiveClock format="date" className="text-[9px] font-black text-slate-500 dark:text-white/60 uppercase tracking-widest" />
+                <div className="relative overflow-hidden bg-white/40 dark:bg-black/40 backdrop-blur-2xl border border-white/60 dark:border-white/10 p-5 rounded-[2rem] flex flex-col items-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all hover:scale-105 group/clock">
+                  {/* Subtle inner glow */}
+                  <div className="absolute inset-0 bg-linear-to-b from-white/20 to-transparent dark:from-white/5 pointer-events-none"></div>
+                  
+                  <div className="flex items-center gap-2.5 mb-2 relative z-10">
+                    <LuClock className="text-indigo-600 dark:text-indigo-400" size={18} />
+                    <LiveClock format="time" className="text-3xl font-black tracking-tighter text-slate-800 dark:text-white drop-shadow-sm" />
+                  </div>
+                  
+                  <div className="w-full h-px bg-linear-to-r from-transparent via-slate-300 dark:via-white/20 to-transparent my-1 relative z-10"></div>
+                  
+                  <LiveClock format="weekday" className="text-[10px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-[0.2em] mt-2 relative z-10" />
+                  <LiveClock format="date" className="text-[9px] font-bold text-slate-500 dark:text-white/50 uppercase tracking-widest mt-0.5 relative z-10" />
                 </div>
               </div>
             </div>
