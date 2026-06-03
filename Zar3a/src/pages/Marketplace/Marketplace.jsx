@@ -95,13 +95,19 @@ const TO_SHOP_CATEGORIES = [
 const renderProductImage = (imageSrc, title, className = "w-full h-full object-cover rounded-4xl", textClassName = "text-7xl") => {
   if (!imageSrc) return <span className={textClassName}>🛒</span>;
   const srcStr = imageSrc.toString().trim();
+  
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = "https://placehold.co/600x400/eeeeee/999999?text=No+Image";
+  };
+
   if (srcStr.startsWith("http://") || srcStr.startsWith("https://")) {
-    return <img src={srcStr} className={className} alt={title} />;
+    return <img src={srcStr} className={className} alt={title} onError={handleImageError} />;
   }
   if (srcStr.startsWith("/uploads/") || srcStr.startsWith("uploads/")) {
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5002";
     const fullUrl = srcStr.startsWith("/") ? `${backendUrl}${srcStr}` : `${backendUrl}/${srcStr}`;
-    return <img src={fullUrl} className={className} alt={title} />;
+    return <img src={fullUrl} className={className} alt={title} onError={handleImageError} />;
   }
   return <span className={textClassName}>{srcStr}</span>;
 };
