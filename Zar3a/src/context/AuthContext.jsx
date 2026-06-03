@@ -440,6 +440,21 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const updateExpertListing = async (id, listingData) => {
+    const { data } = await api.put(
+      `/marketplace/expert-listings/${id}`,
+      listingData
+    );
+    return data;
+  };
+
+  const deleteExpertListing = async (id) => {
+    const { data } = await api.delete(
+      `/marketplace/expert-listings/${id}`
+    );
+    return data;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -465,6 +480,8 @@ export function AuthProvider({ children }) {
         createProduct,
         getExpertListings,
         createExpertListing,
+        updateExpertListing,
+        deleteExpertListing,
         // Cart & Checkout
         checkout,
         getUserOrders,

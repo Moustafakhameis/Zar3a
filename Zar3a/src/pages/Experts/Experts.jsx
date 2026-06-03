@@ -38,13 +38,15 @@ const normalizeListing = (listing) => {
 
 const Experts = () => {
   const navigate = useNavigate();
-  const { user, getExpertListings, createExpertListing } = useAuth();
+  const { user, getExpertListings, createExpertListing, updateExpertListing, deleteExpertListing } = useAuth();
   const { t } = useLanguage();
   const [selectedExpert, setSelectedExpert] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [expertCards, setExpertCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [createForm, setCreateForm] = useState({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "" });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -125,20 +127,68 @@ const Experts = () => {
         formData.append("hourlyRate", Number(createForm.hourlyRate));
         formData.append("location", createForm.location);
         formData.append("imageFile", imageFile);
-        newListing = await createExpertListing(formData);
+        if (isEditing) {
+          newListing = await updateExpertListing(editId, formData);
+        } else {
+          newListing = await createExpertListing(formData);
+        }
       } else {
-        newListing = await createExpertListing({ ...createForm, hourlyRate: Number(createForm.hourlyRate) });
+        if (isEditing) {
+          newListing = await updateExpertListing(editId, { ...createForm, hourlyRate: Number(createForm.hourlyRate) });
+        } else {
+          newListing = await createExpertListing({ ...createForm, hourlyRate: Number(createForm.hourlyRate) });
+        }
       }
-      setExpertCards((prev) => [normalizeListing(newListing), ...prev]);
-      toast.success(t("experts.created") || "Expert listing created successfully!");
-      setShowCreateModal(false);
-      setCreateForm({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "" });
-      setImageFile(null);
-      setImagePreview("");
-      setFieldErrors({});
+      
+      if (isEditing) {
+        setExpertCards((prev) => prev.map(card => card.id === editId ? normalizeListing(newListing) : card));
+        toast.success("Expert listing updated successfully!");
+      } else {
+        setExpertCards((prev) => [normalizeListing(newListing), ...prev]);
+        toast.success(t("experts.created") || "Expert listing created successfully!");
+      }
+      
+      closeModal();
     } catch (err) {
       console.error(err);
       toast.error(err?.response?.data?.message || t("common.error"));
+    }
+  };
+
+  const closeModal = () => {
+    setShowCreateModal(false);
+    setIsEditing(false);
+    setEditId(null);
+    setCreateForm({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "" });
+    setImageFile(null);
+    setImagePreview("");
+    setFieldErrors({});
+  };
+
+  const handleEditClick = (expert) => {
+    setIsEditing(true);
+    setEditId(expert.id);
+    setCreateForm({
+      title: expert.title,
+      specialty: expert.specialty,
+      description: expert.description,
+      hourlyRate: expert.hourlyRate.toString(),
+      location: expert.location,
+      imageUrl: expert.image
+    });
+    setImagePreview(expert.image);
+    setShowCreateModal(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this expert card?")) return;
+    try {
+      await deleteExpertListing(id);
+      setExpertCards((prev) => prev.filter(card => card.id !== id));
+      toast.success("Expert listing deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Failed to delete expert listing");
     }
   };
 
@@ -231,6 +281,23 @@ const Experts = () => {
             <button className="mt-8 w-full py-4 bg-gray-900 dark:bg-primary-base text-white rounded-2xl font-bold hover:bg-primary-hover transition-colors shadow-lg">
               {t("experts.viewProfile")}
             </button>
+            
+            {user?.role === "ADMIN" && (
+              <div className="flex gap-2 mt-4 w-full">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); handleEditClick(expert); }}
+                  className="flex-1 py-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-xl font-bold hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); handleDelete(expert.id); }}
+                  className="flex-1 py-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-xl font-bold hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
           </motion.div>
         ))}
       </motion.div>
@@ -322,37 +389,58 @@ const Experts = () => {
             className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ y: 20, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 20, opacity: 0, scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-surface-card dark:bg-slate-900 rounded-[3rem] p-8 md:p-12 shadow-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-3xl font-black dark:text-white">{t("experts.createTitle")}</h2>
-                  <p className="text-sm text-text-muted dark:text-text-disabled">{t("experts.createSub")}</p>
-                </div>
-                <button onClick={() => setShowCreateModal(false)} className="text-text-muted dark:text-slate-300 hover:text-red-500 transition">
-                  <LuX size={26} />
+      <AnimatePresence>
+        {showCreateModal && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={closeModal}
+              className="fixed inset-0 bg-gray-900/60 backdrop-blur-md z-[100]" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 m-auto w-[95%] max-w-2xl h-fit max-h-[90vh] bg-surface-card dark:bg-slate-900 z-[100] rounded-[3rem] p-10 overflow-y-auto border border-border-default dark:border-slate-800 shadow-2xl">
+              
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-3xl font-black text-text-main dark:text-white">
+                  {isEditing ? "Edit Expert Listing" : t("experts.createCard")}
+                </h2>
+                <button onClick={closeModal} className="text-text-muted dark:text-slate-300 hover:text-red-500 transition">
+                  <LuX size={28} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 gap-4">
+
+              {formError && <div className="mb-6 p-4 bg-red-100 text-red-600 rounded-2xl text-sm font-bold">{formError}</div>}
+              {successMessage && <div className="mb-6 p-4 bg-green-100 text-green-600 rounded-2xl text-sm font-bold">{successMessage}</div>}
+
+              <div className="space-y-6">
+                <DualImageUpload label="Profile Picture (Optional)"
+                  currentImageUrl={imagePreview}
+                  onFileSelect={(file) => {
+                    setImageFile(file);
+                    setCreateForm(prev => ({ ...prev, imageUrl: "" }));
+                  }}
+                  onUrlChange={(url) => {
+                    setImageFile(null);
+                    setCreateForm(prev => ({ ...prev, imageUrl: url }));
+                  }}
+                  error={fieldErrors.imageUrl} />
+                
                 <div>
+                  <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Name / Title</label>
                   <input type="text" name="title" value={createForm.title} onChange={handleCreateInput}
-                    placeholder={t("experts.listingTitle")}
-                    className={`w-full bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.title ? 'border-red-400 dark:border-red-500' : 'border-border-default dark:border-slate-700'} rounded-3xl px-5 py-4 text-sm font-bold text-text-main dark:text-white outline-none`} />
-                  {fieldErrors.title && <p className="text-xs text-red-500 font-semibold mt-1 ml-2">{fieldErrors.title}</p>}
+                    className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.title ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
+                    placeholder="e.g. Dr. Ahmed - Soil Expert" />
+                  {fieldErrors.title && <p className="mt-1 text-xs text-red-500 font-bold">{fieldErrors.title}</p>}
                 </div>
-                <div>
-                  <input type="text" name="specialty" value={createForm.specialty} onChange={handleCreateInput}
-                    placeholder={t("experts.specialty")}
-                    className={`w-full bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.specialty ? 'border-red-400 dark:border-red-500' : 'border-border-default dark:border-slate-700'} rounded-3xl px-5 py-4 text-sm font-bold text-text-main dark:text-white outline-none`} />
-                  {fieldErrors.specialty && <p className="text-xs text-red-500 font-semibold mt-1 ml-2">{fieldErrors.specialty}</p>}
-                </div>
-                <div>
-                  <textarea name="description" value={createForm.description} onChange={handleCreateInput}
-                    placeholder={t("experts.descPlaceholder")}
-                    className={`w-full bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.description ? 'border-red-400 dark:border-red-500' : 'border-border-default dark:border-slate-700'} rounded-3xl px-5 py-4 text-sm font-bold text-text-main dark:text-white outline-none h-32 resize-none`} />
-                  {fieldErrors.description && <p className="text-xs text-red-500 font-semibold mt-1 ml-2">{fieldErrors.description}</p>}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
+                    <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Specialty</label>
+                    <input type="text" name="specialty" value={createForm.specialty} onChange={handleCreateInput}
+                      className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.specialty ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
+                      placeholder="e.g. Soil Management" />
+                    {fieldErrors.specialty && <p className="mt-1 text-xs text-red-500 font-bold">{fieldErrors.specialty}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Hourly Rate (EGP)</label>
                     <input type="number" name="hourlyRate" value={createForm.hourlyRate} onChange={handleCreateInput}
                       placeholder={t("experts.hourlyPlaceholder")}
                       className={`w-full bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.hourlyRate ? 'border-red-400 dark:border-red-500' : 'border-border-default dark:border-slate-700'} rounded-3xl px-5 py-4 text-sm font-bold text-text-main dark:text-white outline-none`} />
