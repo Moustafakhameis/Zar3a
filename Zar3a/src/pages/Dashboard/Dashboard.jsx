@@ -1533,7 +1533,7 @@ const Dashboard = () => {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed top-[100px] left-1/2 -translate-x-1/2 w-11/12 max-w-5xl max-h-[calc(100vh-120px)] bg-surface-card dark:bg-slate-900 rounded-[3.5rem] shadow-2xl z-[100] border border-border-default dark:border-slate-800 overflow-y-auto flex flex-col"
             >
-              <div className="p-8 pb-4 flex justify-between items-start">
+              <div className="p-10 md:p-12 pb-4 flex justify-between items-start">
                 <div>
                   <h3 className="text-3xl font-black dark:text-white tracking-tight">
                     {activeModalChart === 'moisture' && (t("dash.moistureTelemetry") || "Moisture Telemetry")}
@@ -1591,7 +1591,7 @@ const Dashboard = () => {
                   ✕
                 </button>
               </div>
-              <div className="p-8 pt-4 h-[60vh] min-h-[400px]">
+              <div className="p-10 md:p-12 pt-4 h-[60vh] min-h-[400px]">
                 <ResponsiveContainer width="99%" height="100%" minHeight={400} debounce={50}>
                   {activeModalChart === 'moisture' ? (
                     <AreaChart data={data}>
