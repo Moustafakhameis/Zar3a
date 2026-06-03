@@ -1,25 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { LuX, LuCheck } from 'react-icons/lu';
-import { useLanguage } from '../../../context/LanguageContext';
 
 const ComparisonSection = () => {
-  const { t } = useLanguage();
-
   const traditional = [
-    t("about.compare.t1"),
-    t("about.compare.t2"),
-    t("about.compare.t3"),
-    t("about.compare.t4"),
-    t("about.compare.t5")
+    "Guesswork & Assumptions",
+    "Delayed Disease Detection",
+    "Middlemen Exploitation",
+    "No Real-Time Data",
+    "Disconnected Supply Chain"
   ];
 
   const zar3a = [
-    t("about.compare.z1"),
-    t("about.compare.z2"),
-    t("about.compare.z3"),
-    t("about.compare.z4"),
-    t("about.compare.z5")
+    "AI-Powered Decisions",
+    "Instant IoT Monitoring",
+    "Direct Farmer-to-Buyer Sales",
+    "Real-Time Sensor Insights",
+    "Integrated Ecosystem"
   ];
 
   return (
@@ -34,10 +31,10 @@ const ComparisonSection = () => {
           className="text-center mb-24"
         >
           <h2 className="text-4xl md:text-5xl font-black text-text-main dark:text-white tracking-tight">
-            {t("about.compare.title")}
+            Why Zar3a is Different
           </h2>
           <p className="mt-6 text-xl text-text-muted dark:text-slate-600 dark:text-slate-400 font-medium max-w-2xl mx-auto">
-            {t("about.compare.subtitle")}
+            We are completely rewiring how agriculture works in Egypt.
           </p>
         </motion.div>
 
@@ -60,7 +57,7 @@ const ComparisonSection = () => {
               transition={{ delay: 0.2 }}
               className="text-3xl font-black text-text-main dark:text-slate-900 dark:text-white mb-8 relative z-10 flex items-center gap-4"
             >
-              {t("about.compare.trad")}
+              Traditional Farming
             </motion.h3>
             <ul className="space-y-6 relative z-10">
               {traditional.map((item, idx) => (
@@ -120,7 +117,7 @@ const ComparisonSection = () => {
               transition={{ delay: 0.4 }}
               className="text-3xl font-black text-text-main dark:text-slate-900 dark:text-white mb-8 relative z-10 flex items-center gap-4"
             >
-              {t("about.compare.zar3a")}
+              The Zar3a Way
             </motion.h3>
             <ul className="space-y-6 relative z-10">
               {zar3a.map((item, idx) => (

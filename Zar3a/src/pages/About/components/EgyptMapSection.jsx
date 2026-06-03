@@ -1,7 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { LuUsers, LuShoppingCart, LuCpu, LuShieldCheck, LuActivity, LuWifi, LuDroplets, LuLeaf, LuPlus, LuMinus, LuArrowUp, LuArrowDown, LuArrowLeft, LuArrowRight } from 'react-icons/lu';
-import { useLanguage } from '../../../context/LanguageContext';
+
+const NODES = [
+  { id: 'alex', lat: 31.20, lng: 29.91, name: 'Alexandria Hub', status: 'Optimal', type: 'pulse', farmers: '1,200+', market: 'High', experts: '45', iot: '98%' },
+  { id: 'delta_w', lat: 30.95, lng: 30.40, name: 'Western Delta', status: 'Normal', type: 'static', farmers: '850+', market: 'Medium', experts: '30', iot: '92%' },
+  { id: 'delta_c', lat: 31.04, lng: 31.38, name: 'Central Delta Node', status: 'Optimal', type: 'pulse', farmers: '950+', market: 'High', experts: '25', iot: '95%' },
+  { id: 'cairo', lat: 30.04, lng: 31.23, name: 'Cairo Main Control', status: 'Active', type: 'pulse', farmers: '1,500+', market: 'Very High', experts: '50', iot: '88%' },
+  { id: 'ismailia', lat: 30.60, lng: 32.27, name: 'Suez Canal Farm', status: 'Warning', type: 'static', farmers: '2,100+', market: 'Very High', experts: '65', iot: '85%' },
+  { id: 'fayoum', lat: 29.30, lng: 30.84, name: 'Fayoum Oasis', status: 'Optimal', type: 'pulse', farmers: '400+', market: 'Emerging', experts: '20', iot: '100%' },
+  { id: 'minya', lat: 28.10, lng: 30.75, name: 'Upper Egypt North', status: 'Normal', type: 'static', farmers: '600+', market: 'High', experts: '22', iot: '90%' },
+  { id: 'asyut', lat: 27.18, lng: 31.18, name: 'Asyut Agri-Center', status: 'Optimal', type: 'pulse', farmers: '700+', market: 'Growing', experts: '15', iot: '75%' }
+];
 
 const LINKS = [
   ['alex', 'delta_w'], ['delta_w', 'delta_c'], ['delta_c', 'cairo'],
@@ -151,18 +161,6 @@ const EgyptMapSection = () => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const [isLeafletLoaded, setIsLeafletLoaded] = useState(false);
-  const { t, lang } = useLanguage();
-
-  const NODES = [
-    { id: 'alex', lat: 31.20, lng: 29.91, name: t('about.map.node.alex'), status: t('about.map.optimal'), type: 'pulse', farmers: '1,200+', market: 'High', experts: '45', iot: '98%', rawStatus: 'Optimal' },
-    { id: 'delta_w', lat: 30.95, lng: 30.40, name: t('about.map.node.delta_w'), status: t('about.map.normal'), type: 'static', farmers: '850+', market: 'Medium', experts: '30', iot: '92%', rawStatus: 'Normal' },
-    { id: 'delta_c', lat: 31.04, lng: 31.38, name: t('about.map.node.delta_c'), status: t('about.map.optimal'), type: 'pulse', farmers: '950+', market: 'High', experts: '25', iot: '95%', rawStatus: 'Optimal' },
-    { id: 'cairo', lat: 30.04, lng: 31.23, name: t('about.map.node.cairo'), status: t('about.map.active'), type: 'pulse', farmers: '1,500+', market: 'Very High', experts: '50', iot: '88%', rawStatus: 'Active' },
-    { id: 'ismailia', lat: 30.60, lng: 32.27, name: t('about.map.node.ismailia'), status: t('about.map.warning'), type: 'static', farmers: '2,100+', market: 'Very High', experts: '65', iot: '85%', rawStatus: 'Warning' },
-    { id: 'fayoum', lat: 29.30, lng: 30.84, name: t('about.map.node.fayoum'), status: t('about.map.optimal'), type: 'pulse', farmers: '400+', market: 'Emerging', experts: '20', iot: '100%', rawStatus: 'Optimal' },
-    { id: 'minya', lat: 28.10, lng: 30.75, name: t('about.map.node.minya'), status: t('about.map.normal'), type: 'static', farmers: '600+', market: 'High', experts: '22', iot: '90%', rawStatus: 'Normal' },
-    { id: 'asyut', lat: 27.18, lng: 31.18, name: t('about.map.node.asyut'), status: t('about.map.optimal'), type: 'pulse', farmers: '700+', market: 'Growing', experts: '15', iot: '75%', rawStatus: 'Optimal' }
-  ];
 
   const handleZoom = (delta) => {
     if (!mapInstance.current) return;
@@ -259,8 +257,8 @@ const EgyptMapSection = () => {
           popupAnchor: [0, -16]
         });
 
-        const statusColor = node.rawStatus === 'Optimal' ? 'bg-emerald-500' : node.rawStatus === 'Warning' ? 'bg-yellow-500' : 'bg-blue-500';
-        const statusText = node.rawStatus === 'Optimal' ? 'text-emerald-500' : node.rawStatus === 'Warning' ? 'text-yellow-500' : 'text-blue-500';
+        const statusColor = node.status === 'Optimal' ? 'bg-emerald-500' : node.status === 'Warning' ? 'bg-yellow-500' : 'bg-blue-500';
+        const statusText = node.status === 'Optimal' ? 'text-emerald-500' : node.status === 'Warning' ? 'text-yellow-500' : 'text-blue-500';
 
         const popupHtml = `
           <div class="p-4" style="font-family: inherit;">
@@ -270,15 +268,15 @@ const EgyptMapSection = () => {
               </div>
               <div class="space-y-3">
                   <div class="flex justify-between items-center text-xs">
-                      <span class="opacity-60 flex items-center gap-1">${t("about.map.status")}</span>
+                      <span class="opacity-60 flex items-center gap-1">Status</span>
                       <span class="font-semibold ${statusText}">${node.status}</span>
                   </div>
                   <div class="flex justify-between items-center text-xs">
-                      <span class="opacity-60 flex items-center gap-1">${t("about.map.farmers")}</span>
+                      <span class="opacity-60 flex items-center gap-1">Farmers</span>
                       <span class="font-semibold">${node.farmers}</span>
                   </div>
                   <div class="flex justify-between items-center text-xs">
-                      <span class="opacity-60 flex items-center gap-1">${t("about.map.iot")}</span>
+                      <span class="opacity-60 flex items-center gap-1">IoT Cov.</span>
                       <span class="font-semibold text-sky-400">${node.iot}</span>
                   </div>
               </div>
@@ -322,7 +320,7 @@ const EgyptMapSection = () => {
         mapInstance.current = null;
       }
     };
-  }, [isLeafletLoaded, lang]);
+  }, [isLeafletLoaded]);
 
   return (
     <section className="py-32 relative overflow-hidden bg-slate-50 dark:bg-slate-950">
@@ -338,10 +336,10 @@ const EgyptMapSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-4">
-            {t("about.map.title")}
+            Growing Across Egypt
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-400 font-medium max-w-2xl mx-auto">
-            {t("about.map.desc")}
+            One connected agricultural ecosystem powering the nation's food security.
           </p>
         </motion.div>
 
@@ -365,7 +363,7 @@ const EgyptMapSection = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </div>
-                <h3 className="text-xs font-black tracking-widest uppercase text-slate-800 dark:text-gray-200">{t("about.map.live")}</h3>
+                <h3 className="text-xs font-black tracking-widest uppercase text-slate-800 dark:text-gray-200">Live Network</h3>
               </div>
               
               <div className="space-y-1">
@@ -373,7 +371,7 @@ const EgyptMapSection = () => {
                 <div className="group cursor-pointer p-3 -mx-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-300">
                   <div className="flex justify-between items-center text-xs mb-2">
                     <span className="flex items-center gap-1.5 transition-colors font-bold text-slate-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                      <LuActivity size={16}/> {t("about.map.activeNodes")}
+                      <LuActivity size={16}/> Active Nodes
                     </span>
                     <span className="text-emerald-500 font-black group-hover:scale-110 transition-transform">8 / 8</span>
                   </div>
@@ -386,11 +384,11 @@ const EgyptMapSection = () => {
                   <div className="max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100 group-hover:mt-4 transition-all duration-500 overflow-hidden">
                     <div className="grid grid-cols-2 gap-2 text-[10px] bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-200 dark:border-slate-700/50">
                       <div>
-                        <span className="block text-slate-400 font-medium mb-0.5">{t("about.map.latency")}</span>
+                        <span className="block text-slate-400 font-medium mb-0.5">Latency</span>
                         <span className="font-bold text-slate-700 dark:text-slate-200">12ms</span>
                       </div>
                       <div>
-                        <span className="block text-slate-400 font-medium mb-0.5">{t("about.map.uptime")}</span>
+                        <span className="block text-slate-400 font-medium mb-0.5">Uptime</span>
                         <span className="font-bold text-emerald-500">99.99%</span>
                       </div>
                     </div>
@@ -401,7 +399,7 @@ const EgyptMapSection = () => {
                 <div className="group cursor-pointer p-3 -mx-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-300">
                   <div className="flex justify-between items-center text-xs mb-2">
                     <span className="flex items-center gap-1.5 transition-colors font-bold text-slate-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                      <LuWifi size={16}/> {t("about.map.dataSync")}
+                      <LuWifi size={16}/> Data Sync
                     </span>
                     <span className="text-blue-500 font-black group-hover:scale-110 transition-transform">98%</span>
                   </div>
@@ -412,11 +410,11 @@ const EgyptMapSection = () => {
                   <div className="max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100 group-hover:mt-4 transition-all duration-500 overflow-hidden">
                     <div className="grid grid-cols-2 gap-2 text-[10px] bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-200 dark:border-slate-700/50">
                       <div>
-                        <span className="block text-slate-400 font-medium mb-0.5">{t("about.map.lastSync")}</span>
+                        <span className="block text-slate-400 font-medium mb-0.5">Last Sync</span>
                         <span className="font-bold text-slate-700 dark:text-slate-200">2s ago</span>
                       </div>
                       <div>
-                        <span className="block text-slate-400 font-medium mb-0.5">{t("about.map.syncRate")}</span>
+                        <span className="block text-slate-400 font-medium mb-0.5">Rate</span>
                         <span className="font-bold text-blue-500">1.2 GB/s</span>
                       </div>
                     </div>
@@ -427,7 +425,7 @@ const EgyptMapSection = () => {
                 <div className="group cursor-pointer p-3 -mx-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-300">
                   <div className="flex justify-between items-center text-xs mb-2">
                     <span className="flex items-center gap-1.5 transition-colors font-bold text-slate-500 dark:text-gray-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400">
-                      <LuDroplets size={16}/> {t("about.map.avgMoisture")}
+                      <LuDroplets size={16}/> Avg Moisture
                     </span>
                     <span className="text-cyan-500 font-black group-hover:scale-110 transition-transform">42%</span>
                   </div>
@@ -438,12 +436,12 @@ const EgyptMapSection = () => {
                   <div className="max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100 group-hover:mt-4 transition-all duration-500 overflow-hidden">
                     <div className="grid grid-cols-2 gap-2 text-[10px] bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-200 dark:border-slate-700/50">
                       <div>
-                        <span className="block text-slate-400 font-medium mb-0.5">{t("about.map.status")}</span>
-                        <span className="font-bold text-slate-700 dark:text-slate-200">{t("about.map.optimal")}</span>
+                        <span className="block text-slate-400 font-medium mb-0.5">Status</span>
+                        <span className="font-bold text-slate-700 dark:text-slate-200">Optimal</span>
                       </div>
                       <div>
-                        <span className="block text-slate-400 font-medium mb-0.5">{t("about.map.irrigation")}</span>
-                        <span className="font-bold text-cyan-500">{t("about.map.standby")}</span>
+                        <span className="block text-slate-400 font-medium mb-0.5">Irrigation</span>
+                        <span className="font-bold text-cyan-500">Standby</span>
                       </div>
                     </div>
                   </div>
@@ -498,7 +496,7 @@ const EgyptMapSection = () => {
                     <LuLeaf size={20} className="absolute inset-0 m-auto text-emerald-500 animate-pulse" />
                   </div>
                   <span className="text-sm font-bold tracking-widest uppercase animate-pulse text-emerald-600 dark:text-emerald-500">
-                    {t("about.map.init")}
+                    Initializing System...
                   </span>
                 </div>
               </div>

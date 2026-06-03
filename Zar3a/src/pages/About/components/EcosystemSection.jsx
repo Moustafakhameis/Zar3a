@@ -1,27 +1,25 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { LuCpu, LuCloud, LuBrainCircuit, LuUsers, LuShoppingCart, LuSprout, LuTrendingUp, LuBanknote } from 'react-icons/lu';
-import { useLanguage } from '../../../context/LanguageContext';
+
+const steps = [
+  { id: 1, icon: <LuCpu />, title: "Smart Sensors", desc: "IoT devices collect soil and climate data 24/7.", border: "border-emerald-500/30 hover:border-emerald-500", bg: "bg-emerald-500/10", text: "text-emerald-500", line: "bg-emerald-500/30 group-hover:bg-emerald-500", node: "bg-emerald-500 shadow-emerald-500/50" },
+  { id: 2, icon: <LuCloud />, title: "Secure Cloud", desc: "Data is instantly transmitted to our secure cloud.", border: "border-sky-500/30 hover:border-sky-500", bg: "bg-sky-500/10", text: "text-sky-500", line: "bg-sky-500/30 group-hover:bg-sky-500", node: "bg-sky-500 shadow-sky-500/50" },
+  { id: 3, icon: <LuBrainCircuit />, title: "AI Analysis", desc: "Machine learning models analyze patterns.", border: "border-indigo-500/30 hover:border-indigo-500", bg: "bg-indigo-500/10", text: "text-indigo-500", line: "bg-indigo-500/30 group-hover:bg-indigo-500", node: "bg-indigo-500 shadow-indigo-500/50" },
+  { id: 4, icon: <LuUsers />, title: "Expert Network", desc: "Agro-experts review edge cases and provide advice.", border: "border-purple-500/30 hover:border-purple-500", bg: "bg-purple-500/10", text: "text-purple-500", line: "bg-purple-500/30 group-hover:bg-purple-500", node: "bg-purple-500 shadow-purple-500/50" },
+  { id: 5, icon: <LuShoppingCart />, title: "Marketplace", desc: "Direct connection to buyers and suppliers.", border: "border-orange-500/30 hover:border-orange-500", bg: "bg-orange-500/10", text: "text-orange-500", line: "bg-orange-500/30 group-hover:bg-orange-500", node: "bg-orange-500 shadow-orange-500/50" },
+  { id: 6, icon: <LuSprout />, title: "Farmer Decisions", desc: "Farmers receive actionable insights.", border: "border-teal-500/30 hover:border-teal-500", bg: "bg-teal-500/10", text: "text-teal-500", line: "bg-teal-500/30 group-hover:bg-teal-500", node: "bg-teal-500 shadow-teal-500/50" },
+  { id: 7, icon: <LuTrendingUp />, title: "Higher Yield", desc: "Optimized resources lead to better harvests.", border: "border-green-500/30 hover:border-green-500", bg: "bg-green-500/10", text: "text-green-500", line: "bg-green-500/30 group-hover:bg-green-500", node: "bg-green-500 shadow-green-500/50" },
+  { id: 8, icon: <LuBanknote />, title: "Higher Profit", desc: "Direct sales and lower costs maximize revenue.", border: "border-yellow-500/30 hover:border-yellow-500", bg: "bg-yellow-500/10", text: "text-yellow-500", line: "bg-yellow-500/30 group-hover:bg-yellow-500", node: "bg-yellow-500 shadow-yellow-500/50" }
+];
 
 const EcosystemSection = () => {
   const containerRef = useRef(null);
-  const { t } = useLanguage();
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start center", "end center"]
   });
-
-  const steps = [
-    { id: 1, icon: <LuCpu />, title: t("about.eco.step1"), desc: t("about.eco.step1Desc"), border: "border-emerald-500/30 hover:border-emerald-500", bg: "bg-emerald-500/10", text: "text-emerald-500", line: "bg-emerald-500/30 group-hover:bg-emerald-500", node: "bg-emerald-500 shadow-emerald-500/50" },
-    { id: 2, icon: <LuCloud />, title: t("about.eco.step2"), desc: t("about.eco.step2Desc"), border: "border-sky-500/30 hover:border-sky-500", bg: "bg-sky-500/10", text: "text-sky-500", line: "bg-sky-500/30 group-hover:bg-sky-500", node: "bg-sky-500 shadow-sky-500/50" },
-    { id: 3, icon: <LuBrainCircuit />, title: t("about.eco.step3"), desc: t("about.eco.step3Desc"), border: "border-indigo-500/30 hover:border-indigo-500", bg: "bg-indigo-500/10", text: "text-indigo-500", line: "bg-indigo-500/30 group-hover:bg-indigo-500", node: "bg-indigo-500 shadow-indigo-500/50" },
-    { id: 4, icon: <LuUsers />, title: t("about.eco.step4"), desc: t("about.eco.step4Desc"), border: "border-purple-500/30 hover:border-purple-500", bg: "bg-purple-500/10", text: "text-purple-500", line: "bg-purple-500/30 group-hover:bg-purple-500", node: "bg-purple-500 shadow-purple-500/50" },
-    { id: 5, icon: <LuShoppingCart />, title: t("about.eco.step5"), desc: t("about.eco.step5Desc"), border: "border-orange-500/30 hover:border-orange-500", bg: "bg-orange-500/10", text: "text-orange-500", line: "bg-orange-500/30 group-hover:bg-orange-500", node: "bg-orange-500 shadow-orange-500/50" },
-    { id: 6, icon: <LuSprout />, title: t("about.eco.step6"), desc: t("about.eco.step6Desc"), border: "border-teal-500/30 hover:border-teal-500", bg: "bg-teal-500/10", text: "text-teal-500", line: "bg-teal-500/30 group-hover:bg-teal-500", node: "bg-teal-500 shadow-teal-500/50" },
-    { id: 7, icon: <LuTrendingUp />, title: t("about.eco.step7"), desc: t("about.eco.step7Desc"), border: "border-green-500/30 hover:border-green-500", bg: "bg-green-500/10", text: "text-green-500", line: "bg-green-500/30 group-hover:bg-green-500", node: "bg-green-500 shadow-green-500/50" },
-    { id: 8, icon: <LuBanknote />, title: t("about.eco.step8"), desc: t("about.eco.step8Desc"), border: "border-yellow-500/30 hover:border-yellow-500", bg: "bg-yellow-500/10", text: "text-yellow-500", line: "bg-yellow-500/30 group-hover:bg-yellow-500", node: "bg-yellow-500 shadow-yellow-500/50" }
-  ];
 
   return (
     <section ref={containerRef} className="py-32 relative">
@@ -29,10 +27,10 @@ const EcosystemSection = () => {
         
         <div className="text-center mb-24">
           <h2 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tighter mb-6">
-            {t("about.eco.title")}
+            The Ecosystem Flow
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-400 font-medium">
-            {t("about.eco.subtitle")}
+            How a single drop of water translates into higher profits.
           </p>
         </div>
 

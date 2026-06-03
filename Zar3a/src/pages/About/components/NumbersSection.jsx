@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { motion, animate } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { LuUsers, LuMap, LuStore, LuBrainCircuit } from 'react-icons/lu';
-import { useLanguage } from '../../../context/LanguageContext';
 
 const Counter = ({ from = 0, to, duration = 2.5, suffix = "" }) => {
   const [count, setCount] = useState(from);
@@ -44,13 +43,11 @@ const Counter = ({ from = 0, to, duration = 2.5, suffix = "" }) => {
 };
 
 const NumbersSection = () => {
-  const { t } = useLanguage();
-
   const stats = [
-    { to: 2800, suffix: "+", title: t("about.numbers.farmers"), icon: <LuUsers size={32} strokeWidth={2.5} /> },
-    { to: 12, suffix: "", title: t("about.numbers.govs"), icon: <LuMap size={32} strokeWidth={2.5} /> },
-    { to: 1200, suffix: "+", title: t("about.numbers.listings"), icon: <LuStore size={32} strokeWidth={2.5} /> },
-    { to: 94, suffix: ".2%", title: t("about.numbers.accuracy"), icon: <LuBrainCircuit size={32} strokeWidth={2.5} /> }
+    { to: 2800, suffix: "+", title: "Registered Farmers", icon: <LuUsers size={32} strokeWidth={2.5} /> },
+    { to: 12, suffix: "", title: "Governorates Active", icon: <LuMap size={32} strokeWidth={2.5} /> },
+    { to: 1200, suffix: "+", title: "Market Listings", icon: <LuStore size={32} strokeWidth={2.5} /> },
+    { to: 94, suffix: ".2%", title: "AI Diagnostic Accuracy", icon: <LuBrainCircuit size={32} strokeWidth={2.5} /> }
   ];
 
   const containerVariants = {

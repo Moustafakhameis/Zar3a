@@ -2,11 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { LuArrowRight, LuLeaf } from 'react-icons/lu';
-import { useLanguage } from '../../../context/LanguageContext';
 
 const CTASection = () => {
-  const { t } = useLanguage();
-
   return (
     <section className="py-32 relative overflow-hidden bg-slate-50 dark:bg-slate-950">
       {/* High-Energy Animated Background Gradients */}
@@ -48,14 +45,14 @@ const CTASection = () => {
           </motion.div>
 
           <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white tracking-tighter mb-8 relative z-10 leading-tight">
-            {t("about.cta.title1")} <br />
+            Ready to Transform <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-400 dark:to-teal-400 inline-block drop-shadow-sm group-hover:scale-105 transition-transform duration-500">
-              {t("about.cta.title2")}
+              Agriculture?
             </span>
           </h2>
           
           <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 font-medium mb-12 max-w-2xl mx-auto leading-relaxed relative z-10">
-            {t("about.cta.desc")}
+            Join thousands of farmers, experts, and suppliers who are already building the future of farming in Egypt.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 relative z-10">
@@ -65,7 +62,7 @@ const CTASection = () => {
                 whileTap={{ scale: 0.95 }}
                 className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl text-xl shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-3 transition-colors duration-300"
               >
-                {t("about.cta.join")} <LuArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                Join Zar3a <LuArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
               </motion.button>
             </Link>
             
@@ -75,7 +72,7 @@ const CTASection = () => {
                 whileTap={{ scale: 0.95 }}
                 className="w-full sm:w-auto px-10 py-5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md hover:bg-white dark:hover:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white font-black rounded-2xl text-xl shadow-lg flex items-center justify-center transition-colors duration-300"
               >
-                {t("about.cta.explore")}
+                Explore Marketplace
               </motion.button>
             </Link>
           </div>

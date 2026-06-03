@@ -1,11 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { LuEye, LuRocket } from 'react-icons/lu';
-import { useLanguage } from '../../../context/LanguageContext';
 
 const VisionMission = () => {
-  const { t } = useLanguage();
-
   // Staggered animation for the list items
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -21,14 +18,6 @@ const VisionMission = () => {
     hidden: { opacity: 0, x: -20 },
     visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 100 } }
   };
-
-  const missionItems = [
-    t("about.mission.ai"),
-    t("about.mission.iot"),
-    t("about.mission.data"),
-    t("about.mission.market"),
-    t("about.mission.expert")
-  ];
 
   return (
     <section className="py-32 relative overflow-hidden">
@@ -60,9 +49,9 @@ const VisionMission = () => {
             >
               <LuEye size={40} className="text-emerald-600 dark:text-emerald-400" />
             </motion.div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">{t("about.vision.title")}</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">Our Vision</h2>
             <p className="text-xl text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-              {t("about.vision.desc")}
+              To lead Egypt's digital agricultural revolution, creating a future where every farm is connected, every crop is optimized, and every farmer thrives through intelligent technology.
             </p>
           </div>
         </motion.div>
@@ -87,9 +76,9 @@ const VisionMission = () => {
             >
               <LuRocket size={40} className="text-indigo-600 dark:text-indigo-400" />
             </motion.div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">{t("about.mission.title")}</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">Our Mission</h2>
             <p className="text-xl text-slate-700 dark:text-slate-300 font-medium leading-relaxed mb-8">
-              {t("about.mission.desc")}
+              Bridge traditional agriculture and modern technology through:
             </p>
             
             <motion.ul 
@@ -99,7 +88,7 @@ const VisionMission = () => {
               whileInView="visible"
               viewport={{ once: true }}
             >
-              {missionItems.map((item, idx) => (
+              {["Artificial Intelligence", "IoT Sensors & Automation", "Data Analytics", "Marketplace Solutions", "Expert Consultations"].map((item, idx) => (
                 <motion.li key={idx} variants={itemVariants} className="flex items-center gap-4 text-lg font-bold text-slate-800 dark:text-slate-200">
                   <span className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
                     ✓

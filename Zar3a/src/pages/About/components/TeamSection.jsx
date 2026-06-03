@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useLanguage } from '../../../context/LanguageContext';
 
 import moustafaImg from '../../../assets/Pictures/Moustafa Alaa Mohamed Rady.JPG';
 import mostafaImg from '../../../assets/Pictures/Mostafa Ali Emam.PNG';
@@ -9,6 +8,22 @@ import sandyImg from '../../../assets/Pictures/Sandy Ehab Elsayed.jpg';
 import husseinImg from '../../../assets/Pictures/Mohamed Ahmed Hussein Sayed.jpg';
 import tolbaImg from '../../../assets/Pictures/Mohamed Amr Mohamed Tolba.jpg';
 import kerolosImg from '../../../assets/Pictures/Kerolos Samir Abd-Elmalak Ghattas.JPG';
+
+const tier1 = [
+  { name: "Moustafa Alaa Mohamed Rady", role: "Team Leader & Business Development", image: moustafaImg, desc: "Driving strategic partnerships across the agricultural sector.", pos: "object-top" }
+];
+
+const tier2 = [
+  { name: "Mostafa Ali Emam", role: "Front-End Developer", image: mostafaImg, desc: "Architecting the core Zar3a ecosystem and user interfaces.", pos: "object-top" },
+  { name: "Ahmed Amr Abdelazim Dekhil", role: "Back-End Developer", image: ahmedImg, desc: "Building scalable infrastructure and AI data pipelines.", pos: "object-center" }
+];
+
+const tier3 = [
+  { name: "Sandy Ehab Elsayed", role: "Front-End Developer", image: sandyImg, desc: "Crafting premium, accessible user interfaces for farmers.", pos: "object-center" },
+  { name: "Mohamed Ahmed Hussein Sayed", role: "Business Development", image: husseinImg, desc: "Expanding market reach and onboard verified suppliers.", pos: "object-top" },
+  { name: "Mohamed Amr Mohamed Tolba", role: "System Analyst", image: tolbaImg, desc: "Analyzing data flows and optimizing the smart dashboard.", pos: "object-top" },
+  { name: "Kerolos Samir Abd-Elmalak Ghattas", role: "System Analyst", image: kerolosImg, desc: "Ensuring seamless integration between hardware and software.", pos: "object-top" }
+];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -71,24 +86,6 @@ const ConnectorLine = ({ delay }) => (
 );
 
 const TeamSection = () => {
-  const { t } = useLanguage();
-
-  const tier1 = [
-    { name: "Moustafa Alaa Mohamed Rady", role: t("about.team.leader"), image: moustafaImg, desc: t("about.team.m1Desc"), pos: "object-top" }
-  ];
-
-  const tier2 = [
-    { name: "Mostafa Ali Emam", role: t("about.team.frontend"), image: mostafaImg, desc: t("about.team.m2Desc"), pos: "object-top" },
-    { name: "Ahmed Amr Abdelazim Dekhil", role: t("about.team.backend"), image: ahmedImg, desc: t("about.team.m3Desc"), pos: "object-center" }
-  ];
-
-  const tier3 = [
-    { name: "Sandy Ehab Elsayed", role: t("about.team.frontend"), image: sandyImg, desc: t("about.team.m4Desc"), pos: "object-center" },
-    { name: "Mohamed Ahmed Hussein Sayed", role: t("about.team.bizDev"), image: husseinImg, desc: t("about.team.m5Desc"), pos: "object-top" },
-    { name: "Mohamed Amr Mohamed Tolba", role: t("about.team.analyst"), image: tolbaImg, desc: t("about.team.m6Desc"), pos: "object-top" },
-    { name: "Kerolos Samir Abd-Elmalak Ghattas", role: t("about.team.analyst"), image: kerolosImg, desc: t("about.team.m7Desc"), pos: "object-top" }
-  ];
-
   return (
     <section className="py-32 relative overflow-hidden bg-slate-50 dark:bg-slate-950">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -114,10 +111,10 @@ const TeamSection = () => {
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-            {t("about.team.title")}
+            The Minds Behind Zar3a
           </h2>
           <p className="mt-6 text-xl text-slate-600 dark:text-slate-400 font-medium max-w-2xl mx-auto">
-            {t("about.team.subtitle")}
+            A multidisciplinary team dedicated to revolutionizing agriculture.
           </p>
         </motion.div>
 

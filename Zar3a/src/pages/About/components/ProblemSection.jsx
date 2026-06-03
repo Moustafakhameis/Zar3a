@@ -1,19 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useLanguage } from '../../../context/LanguageContext';
+
+const problems = [
+  "Water Scarcity",
+  "Climate Change",
+  "Crop Diseases",
+  "Fragmented Supply Chains",
+  "Lack of Real-Time Data",
+  "Limited Expert Access"
+];
 
 const ProblemSection = () => {
-  const { t } = useLanguage();
-
-  const problems = [
-    t("about.problem.water"),
-    t("about.problem.climate"),
-    t("about.problem.disease"),
-    t("about.problem.supply"),
-    t("about.problem.data"),
-    t("about.problem.expert")
-  ];
-
   return (
     <section className="min-h-screen relative flex items-center py-32 overflow-hidden">
       {/* Emotional Background Image */}
@@ -28,10 +25,10 @@ const ProblemSection = () => {
           className="text-center max-w-4xl mx-auto"
         >
           <h2 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-slate-100 tracking-tighter mb-8">
-            {t("about.problem.title")}
+            A Breaking Point.
           </h2>
           <p className="text-2xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-16">
-            {t("about.problem.desc")}
+            Egyptian agriculture has fed civilizations for millennia. But today, the soil is thirsty, the climate is unpredictable, and traditional methods can no longer keep up.
           </p>
         </motion.div>
 

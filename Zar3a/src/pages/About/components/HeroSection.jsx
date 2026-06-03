@@ -2,11 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Sphere, MeshDistortMaterial } from '@react-three/drei';
-import { useLanguage } from '../../../context/LanguageContext';
 
 const HeroSection = () => {
-  const { t } = useLanguage();
-
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       <div className="absolute inset-0 z-0">
@@ -33,8 +30,8 @@ const HeroSection = () => {
           transition={{ duration: 1, ease: "easeOut" }}
         >
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-tight drop-shadow-2xl font-['Outfit']">
-            {t("about.hero.title1")} <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 drop-shadow-lg">{t("about.hero.title2")}</span>
+            Your Soil's <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 drop-shadow-lg">Sixth Sense.</span>
           </h1>
         </motion.div>
         
@@ -44,7 +41,7 @@ const HeroSection = () => {
           transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
           className="mt-6 text-lg md:text-2xl text-slate-800 dark:text-slate-200 font-medium max-w-3xl mx-auto drop-shadow-md font-['Outfit']"
         >
-          {t("about.hero.subtitle")}
+          Egypt's intelligent agricultural network. We connect farmers, suppliers, experts, and AI to eliminate guesswork from farming.
         </motion.p>
       </div>
     </section>
