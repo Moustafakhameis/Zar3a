@@ -525,6 +525,12 @@ export const listAllOrders = async (req, res) => {
 export const getFarmerOrders = async (req, res) => {
   try {
     const orders = await Order.findAll({
+      where: {
+        [Op.or]: [
+          { userId: req.user.id },
+          { '$OrderItems.ownerId$': req.user.id }
+        ]
+      },
       include: [
         {
           model: OrderItem,
@@ -552,6 +558,12 @@ export const getFarmerOrders = async (req, res) => {
 export const getSupplierOrders = async (req, res) => {
   try {
     const orders = await Order.findAll({
+      where: {
+        [Op.or]: [
+          { userId: req.user.id },
+          { '$OrderItems.ownerId$': req.user.id }
+        ]
+      },
       include: [
         {
           model: OrderItem,

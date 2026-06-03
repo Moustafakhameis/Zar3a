@@ -72,8 +72,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     menuItems.push({ path: "/track-orders", label: t("nav.trackOrders"), icon: <FcShipped /> });
   }
 
-  // AI Assistant: Hide from unregistered users and AGRO_EXPERT
-  if (user?.role && user.role !== 'AGRO_EXPERT') {
+  // AI Assistant: Hide from unregistered users
+  if (user?.role) {
     menuItems.push({ path: "/chatbot", label: t("nav.aiAssistant"), icon: <FcAssistant /> });
   }
 

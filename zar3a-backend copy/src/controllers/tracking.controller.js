@@ -28,27 +28,45 @@ export const getOrderTracking = async (req, res) => {
     const orderItemWhere = {};
     const orderWhere = { paymentStatus: 'PAID' }; // Only show paid orders
 
-    // Apply role-based marketplace filtering
     if (user.role === 'FARMER') {
-      // Farmers only see CROP_MARKET items they purchased
+      prodWhere.userId = user.id;
       prodWhere.marketplaceType = 'CROP_MARKET';
-      trackWhere.marketplaceType = 'CROP_MARKET';
-      orderItemWhere.marketplaceType = 'CROP_MARKET';
     } else if (user.role === 'SUPPLIER') {
-      // Suppliers only see AGRI_MARKET items they purchased
+      prodWhere.userId = user.id;
       prodWhere.marketplaceType = 'AGRI_MARKET';
-      trackWhere.marketplaceType = 'AGRI_MARKET';
-      orderItemWhere.marketplaceType = 'AGRI_MARKET';
+    } else if (user.role === 'ADMIN') {
+      if (marketplaceType) {
+        prodWhere.marketplaceType = marketplaceType;
+        trackWhere.marketplaceType = marketplaceType;
+        orderItemWhere.marketplaceType = marketplaceType;
+      }
+    } else {
+      // Buyers and experts don't see listings
+      prodWhere.id = -1;
     }
-    // Admin sees everything (no marketplace filter)
+
+    // Apply security limits at database level for non-admins
+    if (user.role !== 'ADMIN') {
+      trackWhere[Op.and] = [
+        {
+          [Op.or]: [
+            { userId: user.id },
+            { '$Product.userId$': user.id }
+          ]
+        }
+      ];
+
+      orderWhere[Op.and] = [
+        {
+          [Op.or]: [
+            { userId: user.id },
+            { '$OrderItems.ownerId$': user.id }
+          ]
+        }
+      ];
+    }
 
     // Apply search and status filters
-    if (marketplaceType && user.role === 'ADMIN') {
-      // Admin can filter by marketplace type if specified
-      prodWhere.marketplaceType = marketplaceType;
-      trackWhere.marketplaceType = marketplaceType;
-      orderItemWhere.marketplaceType = marketplaceType;
-    }
     if (search) {
       prodWhere.title = { [Op.like]: `%${search}%` };
       trackWhere.title = { [Op.like]: `%${search}%` };
@@ -173,6 +191,7 @@ export const getOrderTracking = async (req, res) => {
         totalPrice: item.totalPrice,
         User: order.User,
         Product: item.Product,
+        ownerId: item.ownerId,
         createdAt: item.createdAt,
       }))
     );
@@ -182,30 +201,27 @@ export const getOrderTracking = async (req, res) => {
 
     // Filter based on user role
     let filtered = combined;
-    if (user.role === 'FARMER' || user.role === 'SUPPLIER') {
+    if (user.role !== 'ADMIN') {
       filtered = combined.filter((item) => {
-        // Must match the marketplace type for Farmer/Supplier
-        if (user.role === 'FARMER' && item.marketplaceType !== 'CROP_MARKET') return false;
-        if (user.role === 'SUPPLIER' && item.marketplaceType !== 'AGRI_MARKET') return false;
-
         // Show if it's their own listing
         if (item.type === 'LISTING') {
           return item.User?.id === user.id;
         }
 
-        // Show if it's a purchase they made
+        // Show if it's a purchase/sale they are involved in
         if (item.type === 'PURCHASE') {
-          return item.paymentStatus === 'PAID';
+          const isBuyer = item.User?.id === user.id;
+          const isSeller = item.ownerId === user.id || item.Product?.userId === user.id;
+          return (isBuyer || isSeller) && item.paymentStatus === 'PAID';
         }
 
-        return false;
-      });
-    } else if (user.role === 'BUYER' || user.role === 'AGRO_EXPERT') {
-      filtered = combined.filter((item) => {
-        // Show if it's a purchase they made
-        if (item.type === 'PURCHASE') {
-          return item.User?.id === user.id && item.paymentStatus === 'PAID';
+        // Show if it's an inquiry they are involved in
+        if (item.type === 'INQUIRY') {
+          const isInquirer = item.User?.id === user.id;
+          const isSeller = item.Product?.userId === user.id;
+          return isInquirer || isSeller;
         }
+
         return false;
       });
     }
