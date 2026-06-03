@@ -319,7 +319,7 @@ const Experts = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/70 backdrop-blur-md z-[60] flex items-center justify-center p-4">
             <motion.div initial={{ y: 20, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 20, opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-2xl bg-surface-card dark:bg-slate-900 rounded-[3rem] p-8 md:p-12 shadow-2xl">
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-surface-card dark:bg-slate-900 rounded-[3rem] p-8 md:p-12 shadow-2xl">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-3xl font-black dark:text-white">{t("experts.createTitle")}</h2>
