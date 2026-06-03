@@ -16,6 +16,7 @@ const translations = {
   "nav.agriShop":           { en: "Agri Shop",               ar: "متجر الزراعة" },
   "nav.marketplace":        { en: "Marketplace",             ar: "السوق" },
   "nav.aboutUs":            { en: "About Us",                ar: "من نحن" },
+  "nav.home":               { en: "Home",                    ar: "الرئيسية" },
   "nav.experts":            { en: "Experts",                 ar: "الخبراء" },
   "nav.aiAssistant":        { en: "AI Assistant",            ar: "المساعد الذكي" },
   "nav.trackOrder":         { en: "Track Order",             ar: "تتبع الطلب" },
