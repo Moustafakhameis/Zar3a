@@ -180,8 +180,7 @@ const Experts = () => {
     setShowCreateModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this expert card?")) return;
+  const executeDelete = async (id) => {
     try {
       await deleteExpertListing(id);
       setExpertCards((prev) => prev.filter(card => card.id !== id));
@@ -190,6 +189,19 @@ const Experts = () => {
       console.error(err);
       toast.error(err?.response?.data?.message || "Failed to delete expert listing");
     }
+  };
+
+  const handleDelete = (id) => {
+    toast("Are you sure you want to delete this expert card?", {
+      description: "This action cannot be undone.",
+      action: {
+        label: "Delete",
+        onClick: () => executeDelete(id),
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    });
   };
 
   const filteredExperts = expertCards.filter(
