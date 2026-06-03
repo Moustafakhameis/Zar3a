@@ -1250,40 +1250,43 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Middle Row: Big Temp, Icon & Live Clock */}
-            <div className="relative z-10 flex items-center justify-between mb-auto">
-              {/* Temperature block */}
-              <div className="flex flex-col">
-                <div className="flex items-start">
-                  <h4 className="text-7xl lg:text-8xl font-black tracking-tighter leading-none drop-shadow-xl dark:drop-shadow-2xl text-slate-900 dark:text-white">
-                    {weather.temp}
-                  </h4>
-                  <span className="text-4xl font-black text-slate-400 dark:text-white/60 mt-2 ml-1">°C</span>
-                </div>
-                <div className="flex items-center gap-2 mt-4">
-                  <LuCloudSun className="text-3xl text-yellow-500 dark:text-yellow-300 drop-shadow-[0_0_15px_rgba(234,179,8,0.4)] dark:drop-shadow-[0_0_15px_rgba(253,224,71,0.6)]" />
-                  <p className="text-base font-bold text-slate-700 dark:text-white/90 uppercase tracking-widest">
+            {/* Middle Row: Big Temp, Icon & Live Clock Combined */}
+            <div className="relative z-10 flex flex-col justify-center mb-auto pt-2">
+              {/* Temperature */}
+              <div className="flex items-start">
+                <h4 className="text-[7rem] lg:text-[8rem] font-black tracking-tighter leading-none drop-shadow-xl dark:drop-shadow-2xl text-slate-900 dark:text-white">
+                  {weather.temp}
+                </h4>
+                <span className="text-4xl lg:text-5xl font-black text-slate-400 dark:text-white/60 mt-3 ml-2">°C</span>
+              </div>
+
+              {/* Combined Info Pill */}
+              <div className="flex flex-wrap items-center gap-5 mt-6 bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-2xl p-4 shadow-sm w-fit transition-transform hover:scale-[1.02]">
+                
+                {/* Weather Condition */}
+                <div className="flex items-center gap-3">
+                  <LuCloudSun className="text-3xl text-yellow-500 dark:text-yellow-300 drop-shadow-md" />
+                  <p className="text-sm font-black text-slate-800 dark:text-white/90 uppercase tracking-[0.15em] drop-shadow-sm">
                     {t("weather." + weather.condition) || weather.condition}
                   </p>
                 </div>
-              </div>
-
-              {/* Premium Clock Block */}
-              <div className="flex flex-col items-end text-right">
-                <div className="relative overflow-hidden bg-white/40 dark:bg-black/40 backdrop-blur-2xl border border-white/60 dark:border-white/10 p-5 rounded-[2rem] flex flex-col items-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all hover:scale-105 group/clock">
-                  {/* Subtle inner glow */}
-                  <div className="absolute inset-0 bg-linear-to-b from-white/20 to-transparent dark:from-white/5 pointer-events-none"></div>
-                  
-                  <div className="flex items-center gap-2.5 mb-2 relative z-10">
-                    <LuClock className="text-indigo-600 dark:text-indigo-400" size={18} />
-                    <LiveClock format="time" className="text-3xl font-black tracking-tighter text-slate-800 dark:text-white drop-shadow-sm" />
+                
+                {/* Divider */}
+                <div className="w-px h-8 bg-slate-300 dark:bg-white/20"></div>
+                
+                {/* Time & Date */}
+                <div className="flex items-center gap-3">
+                  <LuClock className="text-indigo-600 dark:text-indigo-400 drop-shadow-sm" size={24} />
+                  <div className="flex flex-col justify-center">
+                    <LiveClock format="time" className="text-lg font-black tracking-tighter text-slate-900 dark:text-white leading-none drop-shadow-sm" />
+                    <div className="flex gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-indigo-700 dark:text-indigo-300 mt-1.5">
+                      <LiveClock format="weekday" />
+                      <span className="text-slate-400 dark:text-white/30">•</span>
+                      <LiveClock format="date" />
+                    </div>
                   </div>
-                  
-                  <div className="w-full h-px bg-linear-to-r from-transparent via-slate-300 dark:via-white/20 to-transparent my-1 relative z-10"></div>
-                  
-                  <LiveClock format="weekday" className="text-[10px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-[0.2em] mt-2 relative z-10" />
-                  <LiveClock format="date" className="text-[9px] font-bold text-slate-500 dark:text-white/50 uppercase tracking-widest mt-0.5 relative z-10" />
                 </div>
+                
               </div>
             </div>
 
