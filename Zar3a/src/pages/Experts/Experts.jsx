@@ -181,6 +181,11 @@ const Experts = () => {
     setShowCreateModal(true);
   };
 
+  const canEdit = (expert) => {
+    if (!user) return false;
+    return user.role === "ADMIN" || user.id === expert.userId;
+  };
+
   const handleQuickImageUpload = async (expert, file) => {
     if (!file) return;
     try {
