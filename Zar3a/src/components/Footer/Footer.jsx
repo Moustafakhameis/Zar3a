@@ -208,7 +208,7 @@ const Footer = () => {
                 onClick={() => setIsNavDropdownOpen(!isNavDropdownOpen)}
                 className="flex items-center gap-2 text-sm font-black text-text-muted hover:text-text-main dark:hover:text-white transition-colors uppercase"
               >
-                Navigation <LuChevronDown size={16} className={`transition-transform ${isNavDropdownOpen ? 'rotate-180' : ''}`} />
+                Zar3a <LuChevronDown size={16} className={`transition-transform ${isNavDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isNavDropdownOpen && (
