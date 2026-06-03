@@ -26,6 +26,7 @@ import {
   LuCloudSun,
   LuActivity,
   LuMaximize2,
+  LuWrench,
 } from "react-icons/lu";
 import {
   AreaChart,
@@ -1130,7 +1131,7 @@ const Dashboard = () => {
             <h4 className="font-black dark:text-white flex items-center gap-2 mb-4">
               <LuSprout className="text-primary-base" /> {t("dash.cropInsights")}
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
                 <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
                   <LuCalendar size={12} className="text-status-info" /> {t("dash.plantingDates")}
@@ -1145,6 +1146,30 @@ const Dashboard = () => {
                 </p>
                 <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
                   {cropsData[activeSector.crop].whyPlanted}
+                </p>
+              </div>
+              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
+                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                  <LuWrench size={12} className="text-amber-500" /> {t("dash.tools")}
+                </p>
+                <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
+                  {cropsData[activeSector.crop].tools?.join(", ") || "None specified"}
+                </p>
+              </div>
+              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
+                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                  <LuFlaskConical size={12} className="text-purple-500" /> {t("dash.fertilizer")}
+                </p>
+                <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
+                  {cropsData[activeSector.crop].nutrients}
+                </p>
+              </div>
+              <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-3xl flex flex-col justify-center">
+                <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                  <LuDroplet size={12} className="text-blue-500" /> {t("dash.irrigation")}
+                </p>
+                <p className="font-bold text-xs sm:text-sm text-text-main dark:text-white leading-tight">
+                  {cropsData[activeSector.crop].irrigation}
                 </p>
               </div>
             </div>

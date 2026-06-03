@@ -429,6 +429,8 @@ const translations = {
   "dash.pump":              { en: "Pump",                   ar: "المضخة" },
   "dash.vent":              { en: "Vent",                   ar: "التهوية" },
   "dash.fertilizer":        { en: "Fertilizer",             ar: "التسميد" },
+  "dash.tools":             { en: "Tools Needed",           ar: "الأدوات المطلوبة" },
+  "dash.irrigation":        { en: "Water / Irrigation",     ar: "الري والمياه" },
   "dash.liveClimate":       { en: "Live Climate",           ar: "المناخ المباشر" },
   "dash.region":            { en: "Region",                  ar: "المنطقة" },
   "dash.addSector":         { en: "Add Sector",              ar: "إضافة قطاع" },
