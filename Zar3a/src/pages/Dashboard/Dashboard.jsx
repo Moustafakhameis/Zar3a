@@ -582,11 +582,22 @@ const Dashboard = () => {
       setIsWeatherLoading(true);
       try {
         const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${locInfo.lat}&longitude=${locInfo.lng}&current_weather=true`,
+          `https://api.open-meteo.com/v1/forecast?latitude=${locInfo.lat}&longitude=${locInfo.lng}&current_weather=true&hourly=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`,
         );
         const result = await response.json();
+        
+        // Get current hour for humidity
+        const currentHour = new Date().getHours();
+        const humidity = result.hourly?.relative_humidity_2m[currentHour] || 50;
+        const tempMax = Math.round(result.daily?.temperature_2m_max[0]) || Math.round(result.current_weather.temperature) + 4;
+        const tempMin = Math.round(result.daily?.temperature_2m_min[0]) || Math.round(result.current_weather.temperature) - 5;
+
         setWeather({
           temp: Math.round(result.current_weather.temperature),
+          tempMax: tempMax,
+          tempMin: tempMin,
+          humidity: humidity,
+          windspeed: result.current_weather.windspeed,
           condition: getWeatherCondition(result.current_weather.weathercode),
           bestCrop: locInfo.bestCrop,
           region: locInfo.region,
@@ -594,6 +605,10 @@ const Dashboard = () => {
       } catch (error) {
         setWeather({
           temp: 30,
+          tempMax: 35,
+          tempMin: 22,
+          humidity: 45,
+          windspeed: 12,
           condition: "Offline",
           bestCrop: locInfo.bestCrop,
           region: locInfo.region,
@@ -1275,17 +1290,60 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Time & Date */}
-              <div className="flex items-center gap-3 mt-4 pl-2">
-                <LuClock className="text-indigo-600 dark:text-indigo-400 drop-shadow-sm" size={24} />
-                <div className="flex flex-col justify-center">
-                  <LiveClock format="time" className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none drop-shadow-sm" />
-                  <div className="flex gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 dark:text-indigo-300 mt-1.5">
-                    <LiveClock format="weekday" />
-                    <span className="text-slate-400 dark:text-white/30">•</span>
-                    <LiveClock format="date" />
+              {/* Extended Data & Clock Row */}
+              <div className="flex flex-wrap items-center gap-6 mt-4 pl-2">
+                
+                {/* Time & Date */}
+                <div className="flex items-center gap-3">
+                  <LuClock className="text-indigo-600 dark:text-indigo-400 drop-shadow-sm" size={24} />
+                  <div className="flex flex-col justify-center">
+                    <LiveClock format="time" className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none drop-shadow-sm" />
+                    <div className="flex gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 dark:text-indigo-300 mt-1.5">
+                      <LiveClock format="weekday" />
+                      <span className="text-slate-400 dark:text-white/30">•</span>
+                      <LiveClock format="date" />
+                    </div>
                   </div>
                 </div>
+
+                {/* Divider */}
+                <div className="w-px h-8 bg-slate-300 dark:bg-white/20 hidden sm:block"></div>
+
+                {/* Actual Weather Metrics */}
+                <div className="flex items-center gap-5 bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-2xl px-4 py-2 shadow-sm">
+                  
+                  {/* High/Low */}
+                  <div className="flex flex-col items-center">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-white/50 mb-0.5">H / L</p>
+                    <p className="text-sm font-black text-slate-800 dark:text-white">
+                      {weather.tempMax}° <span className="text-slate-400 dark:text-white/40 font-bold">/</span> {weather.tempMin}°
+                    </p>
+                  </div>
+
+                  <div className="w-px h-6 bg-slate-300 dark:bg-white/10"></div>
+
+                  {/* Humidity */}
+                  <div className="flex flex-col items-center">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-white/50 mb-0.5">Humidity</p>
+                    <div className="flex items-center gap-1 text-sm font-black text-blue-600 dark:text-blue-400">
+                      <LuDroplet size={12} />
+                      {weather.humidity}%
+                    </div>
+                  </div>
+
+                  <div className="w-px h-6 bg-slate-300 dark:bg-white/10"></div>
+
+                  {/* Wind */}
+                  <div className="flex flex-col items-center">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-white/50 mb-0.5">Wind</p>
+                    <div className="flex items-center gap-1 text-sm font-black text-teal-600 dark:text-teal-400">
+                      <LuWind size={12} />
+                      {weather.windspeed} <span className="text-[10px]">km/h</span>
+                    </div>
+                  </div>
+
+                </div>
+
               </div>
             </div>
 
