@@ -9,6 +9,8 @@ import {
   deleteUser,
   deleteProduct,
   getAdminStats,
+  getInquiries,
+  updateInquiryStatus,
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -32,5 +34,13 @@ router.post(
 router.delete('/users/:userId', deleteUser);
 router.delete('/products/:productId', deleteProduct);
 router.get('/stats', getAdminStats);
+
+router.get('/inquiries', getInquiries);
+router.put(
+  '/inquiries/:id/status',
+  [body('status').isIn(['ACCEPTED', 'REJECTED']).withMessage('Invalid status')],
+  validate,
+  updateInquiryStatus
+);
 
 export default router;

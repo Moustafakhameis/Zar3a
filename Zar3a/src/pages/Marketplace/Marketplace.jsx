@@ -585,10 +585,11 @@ const Marketplace = () => {
     <div className="max-w-7xl mx-auto space-y-6 pb-20 px-4 text-left">
 
       {/* Quote Modal */}
-      <AnimatePresence>
-        {showQuoteModal && quoteProduct && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {showQuoteModal && quoteProduct && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -650,7 +651,7 @@ const Marketplace = () => {
                 <button
                   onClick={async () => {
                     try {
-                      const res = await api.post('/api/market/inquiries', {
+                      const res = await api.post('/marketplace/inquiries', {
                         productId: quoteProduct.id,
                         quantity: quoteQuantity,
                         location: quoteLocation,
@@ -670,8 +671,10 @@ const Marketplace = () => {
               </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-surface-card dark:bg-slate-900 p-4 rounded-[2.5rem] shadow-sm border border-border-default dark:border-slate-800">
         <div className="flex w-full md:w-auto bg-surface-secondary dark:bg-slate-800 p-1.5 rounded-full relative">

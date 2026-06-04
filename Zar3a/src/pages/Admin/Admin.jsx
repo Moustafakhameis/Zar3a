@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
+import { adminAPI } from "../../API/axiosInstance";
 
 export default function Admin() {
   const { t } = useLanguage();
@@ -33,6 +34,7 @@ export default function Admin() {
   } = useAuth();
 
   const [pendingUsers, setPendingUsers] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,15 +57,19 @@ export default function Admin() {
   const loadAdminData = async () => {
     try {
       setLoading(true);
-      const [pendingList, userData, adminStats] = await Promise.all([
+      const [pendingList, userData, adminStats, inquiriesData] = await Promise.all([
         getPendingUsers(),
         getAllUsers({ limit: 50 }),
         getAdminStats(),
+        adminAPI.getInquiries().catch(() => ({ data: { inquiries: [] } }))
       ]);
 
       setPendingUsers(pendingList || []);
       setUsers(userData.users || []);
       setStats(adminStats?.stats || null);
+      
+      const pendingInquiries = (inquiriesData?.data?.inquiries || []).filter(i => i.status === 'PENDING');
+      setInquiries(pendingInquiries);
     } catch (err) {
       setError(err?.response?.data?.message || "Unable to load admin dashboard.");
       console.error(err);
@@ -131,6 +137,21 @@ export default function Admin() {
       setSuccess("User request rejected successfully.");
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to reject user request.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleInquiryStatus = async (id, status) => {
+    try {
+      setActionLoading(`inquiry-${id}`);
+      setError("");
+      setSuccess("");
+      await adminAPI.updateInquiryStatus(id, status);
+      setInquiries((prev) => prev.filter((i) => i.id !== id));
+      setSuccess(`Inquiry ${status.toLowerCase()} successfully.`);
+    } catch (err) {
+      setError(err?.response?.data?.message || `Failed to ${status.toLowerCase()} inquiry.`);
     } finally {
       setActionLoading(null);
     }
@@ -378,6 +399,61 @@ export default function Admin() {
                   </motion.div>
                 );
               })}
+            </div>
+          )}
+        </section>
+
+        {/* ───────────────────────────────────────────────────────── */}
+        {/* PENDING QUOTE REQUESTS SECTION */}
+        {/* ───────────────────────────────────────────────────────── */}
+        <section className="rounded-3xl overflow-hidden bg-surface-card shadow-sm border border-border-default dark:bg-slate-800 dark:border-slate-700">
+          <div className="border-b border-border-default px-6 py-5 dark:border-slate-700 bg-surface-secondary dark:bg-slate-900">
+            <h2 className="text-xl font-bold text-text-main dark:text-white">Pending Quote Requests</h2>
+            <p className="text-sm text-text-muted dark:text-text-disabled">Manage sensor quote inquiries from farmers and buyers.</p>
+          </div>
+          {inquiries.length === 0 ? (
+            <div className="p-10 text-center text-text-muted dark:text-text-disabled">No pending quote requests.</div>
+          ) : (
+            <div className="space-y-4 p-6">
+              {inquiries.map((inquiry) => (
+                <motion.div key={`inquiry-${inquiry.id}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-border-default bg-surface-secondary p-5 dark:border-slate-700 dark:bg-slate-900">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-text-main dark:text-white">{inquiry.User?.fullName}</h3>
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400">
+                          {inquiry.User?.role}
+                        </span>
+                      </div>
+                      <p className="text-sm text-text-muted dark:text-text-disabled">{inquiry.User?.email} | {inquiry.User?.phone}</p>
+                      
+                      <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                        <p><strong>Product:</strong> {inquiry.Product?.title}</p>
+                        <p><strong>Quantity:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">{inquiry.quantity}</span></p>
+                        <p><strong>Location:</strong> {inquiry.location || "N/A"}</p>
+                        <p><strong>Message:</strong> {inquiry.message}</p>
+                        <p><strong>Date:</strong> {new Date(inquiry.createdAt).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        disabled={actionLoading === `inquiry-${inquiry.id}`}
+                        onClick={() => handleInquiryStatus(inquiry.id, 'ACCEPTED')}
+                        className="rounded-2xl bg-emerald-500 px-4 py-2 text-white transition hover:bg-primary-base disabled:opacity-50 font-bold text-xs"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        disabled={actionLoading === `inquiry-${inquiry.id}`}
+                        onClick={() => handleInquiryStatus(inquiry.id, 'REJECTED')}
+                        className="rounded-2xl bg-rose-500 px-4 py-2 text-white transition hover:bg-rose-600 disabled:opacity-50 font-bold text-xs"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           )}
         </section>
