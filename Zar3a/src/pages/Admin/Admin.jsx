@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FiUserCheck,
   FiMail,
@@ -13,11 +13,64 @@ import {
   FiUsers,
   FiAlertCircle,
   FiTrash2,
+  FiSearch,
+  FiFilter,
+  FiChevronDown
 } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { adminAPI } from "../../API/axiosInstance";
+
+const CustomSelect = ({ value, onChange, options, className }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((o) => o.value === value) || options[0];
+
+  return (
+    <div className={`relative ${className}`} ref={ref}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all cursor-pointer"
+      >
+        <span className="truncate">{selectedOption.label}</span>
+        <FiChevronDown className={`ml-2 flex-shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} size={16} />
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 top-full left-0 mt-2 w-full min-w-[140px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden py-1"
+          >
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors ${value === opt.value ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export default function Admin() {
   const { t } = useLanguage();
@@ -41,6 +94,11 @@ export default function Admin() {
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [userRoleFilter, setUserRoleFilter] = useState("ALL");
+  const [userStatusFilter, setUserStatusFilter] = useState("ALL");
+  const [pendingRoleFilter, setPendingRoleFilter] = useState("ALL");
 
   useEffect(() => {
     if (!user) return;
@@ -157,6 +215,26 @@ export default function Admin() {
     }
   };
 
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      (u.fullName || "").toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      (u.email || "").toLowerCase().includes(userSearchQuery.toLowerCase());
+    
+    const matchesRole = userRoleFilter === "ALL" || u.role === userRoleFilter;
+    
+    let matchesStatus = true;
+    if (userStatusFilter === "ACTIVE") matchesStatus = u.isActive === true;
+    if (userStatusFilter === "INACTIVE") matchesStatus = u.isActive === false;
+
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
+  const filteredPendingUsers = pendingUsers.filter((user) => {
+    if (pendingRoleFilter === "ALL") return true;
+    const userRole = user.pendingRole || user.role;
+    return userRole === pendingRoleFilter;
+  });
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-secondary dark:bg-slate-900">
@@ -246,73 +324,143 @@ export default function Admin() {
         {success && <div className="rounded-3xl bg-primary-light p-5 text-emerald-700 border border-emerald-100">{success}</div>}
 
         <section className="rounded-3xl overflow-hidden bg-surface-card shadow-sm border border-border-default dark:bg-slate-800 dark:border-slate-700">
-          <div className="border-b border-border-default px-6 py-5 dark:border-slate-700 bg-surface-secondary dark:bg-slate-900">
-            <h2 className="text-xl font-bold text-text-main dark:text-white">{t("admin.usersTable")}</h2>
-            <p className="text-sm text-text-muted dark:text-text-disabled">{t("admin.usersTableDesc")}</p>
+          <div className="border-b border-border-default px-6 py-5 dark:border-slate-700 bg-surface-secondary dark:bg-slate-900 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-text-main dark:text-white">{t("admin.usersTable")}</h2>
+              <p className="text-sm text-text-muted dark:text-text-disabled">{t("admin.usersTableDesc")}</p>
+            </div>
+            
+            {/* Filter Controls */}
+            <div className="flex flex-col sm:flex-row gap-3 items-center">
+              <div className="relative w-full sm:w-64">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted dark:text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search name or email..."
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-medium focus:outline-none focus:border-emerald-500 dark:text-white transition-colors"
+                />
+              </div>
+              <div className="flex gap-3 w-full sm:w-auto">
+                <CustomSelect
+                  value={userRoleFilter}
+                  onChange={setUserRoleFilter}
+                  className="w-full sm:w-[140px]"
+                  options={[
+                    { value: "ALL", label: "All Roles" },
+                    { value: "ADMIN", label: "Admin" },
+                    { value: "FARMER", label: "Farmer" },
+                    { value: "SUPPLIER", label: "Supplier" },
+                    { value: "BUYER", label: "Buyer" },
+                    { value: "AGRO_EXPERT", label: "Agro Expert" },
+                  ]}
+                />
+                <CustomSelect
+                  value={userStatusFilter}
+                  onChange={setUserStatusFilter}
+                  className="w-full sm:w-[140px]"
+                  options={[
+                    { value: "ALL", label: "All Statuses" },
+                    { value: "ACTIVE", label: "Active" },
+                    { value: "INACTIVE", label: "Inactive" },
+                  ]}
+                />
+              </div>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm text-text-subtle dark:text-slate-300">
               <thead className="bg-surface-secondary text-text-muted uppercase tracking-[0.2em] text-xs dark:bg-slate-900 dark:text-text-disabled">
                 <tr>
-                  <th className="px-6 py-4">{t("admin.tableName")}</th>
-                  <th className="px-6 py-4">{t("admin.tableEmail")}</th>
-                  <th className="px-6 py-4">{t("admin.tableRole")}</th>
-                  <th className="px-6 py-4">{t("admin.tableStatus")}</th>
-                  <th className="px-6 py-4">{t("admin.tableActions")}</th>
+                  <th className="px-6 py-4 w-[25%]">{t("admin.tableName")}</th>
+                  <th className="px-6 py-4 w-[30%]">{t("admin.tableEmail")}</th>
+                  <th className="px-6 py-4 w-[15%]">{t("admin.tableRole")}</th>
+                  <th className="px-6 py-4 w-[10%]">{t("admin.tableStatus")}</th>
+                  <th className="px-6 py-4 w-[20%]">{t("admin.tableActions")}</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map((item) => (
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-12 text-center text-text-muted dark:text-text-disabled">
+                      No users match your filters.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((item) => (
                   <tr key={item.id} className="border-t border-border-default dark:border-slate-700">
                     <td className="px-6 py-4 font-semibold text-text-main dark:text-white">{item.fullName}</td>
                     <td className="px-6 py-4">{item.email}</td>
                     <td className="px-6 py-4">
-                      {item.role === "ADMIN" ? t("admin.roleAdmin") :
-                       item.role === "FARMER" ? t("admin.roleFarmer") :
-                       item.role === "SUPPLIER" ? t("admin.roleSupplier") :
-                       item.role === "BUYER" ? t("admin.roleBuyer") :
-                       item.role === "AGRO_EXPERT" ? t("admin.roleExpert") :
-                       t("admin.roleUnassigned")}
+                      <span className="bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 font-bold px-3 py-1.5 rounded-full text-xs uppercase tracking-wide whitespace-nowrap">
+                        {item.role === "ADMIN" ? t("admin.roleAdmin") :
+                         item.role === "FARMER" ? t("admin.roleFarmer") :
+                         item.role === "SUPPLIER" ? t("admin.roleSupplier") :
+                         item.role === "BUYER" ? t("admin.roleBuyer") :
+                         item.role === "AGRO_EXPERT" ? t("admin.roleExpert") :
+                         t("admin.roleUnassigned")}
+                      </span>
                     </td>
-                    <td className="px-6 py-4">{item.isActive ? t("admin.statusActive") : t("admin.statusInactive")}</td>
-                    <td className="px-6 py-4 flex flex-wrap gap-2">
-                      <select
+                    <td className="px-6 py-4">
+                      <span className={`font-bold px-3 py-1.5 rounded-full text-xs uppercase tracking-wide whitespace-nowrap ${item.isActive ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+                        {item.isActive ? t("admin.statusActive") : t("admin.statusInactive")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 flex items-center gap-3 whitespace-nowrap">
+                      <CustomSelect
                         value={item.role || ''}
-                        onChange={(e) => handleRoleChange(item.id, e.target.value)}
-                        className="rounded-2xl border border-border-default bg-surface-card px-3 py-2 text-sm text-slate-700 outline-none transition dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                      >
-                        <option value="">{t("admin.selectRole")}</option>
-                        <option value="ADMIN">{t("admin.roleAdmin")}</option>
-                        <option value="FARMER">{t("admin.roleFarmer")}</option>
-                        <option value="SUPPLIER">{t("admin.roleSupplier")}</option>
-                        <option value="BUYER">{t("admin.roleBuyer")}</option>
-                        <option value="AGRO_EXPERT">{t("admin.roleExpert")}</option>
-                      </select>
+                        onChange={(val) => handleRoleChange(item.id, val)}
+                        className="w-[140px]"
+                        options={[
+                          { value: "", label: t("admin.selectRole") },
+                          { value: "ADMIN", label: t("admin.roleAdmin") },
+                          { value: "FARMER", label: t("admin.roleFarmer") },
+                          { value: "SUPPLIER", label: t("admin.roleSupplier") },
+                          { value: "BUYER", label: t("admin.roleBuyer") },
+                          { value: "AGRO_EXPERT", label: t("admin.roleExpert") },
+                        ]}
+                      />
                       <button
                         onClick={() => handleDeleteUser(item.id)}
                         disabled={actionLoading === item.id}
-                        className="rounded-2xl bg-rose-500 px-4 py-2 text-white transition hover:bg-rose-600 disabled:opacity-50"
+                        className="flex items-center gap-2 rounded-2xl bg-rose-50 dark:bg-rose-500/10 px-4 py-2.5 text-sm font-bold text-rose-600 dark:text-rose-400 transition-all hover:bg-rose-100 dark:hover:bg-rose-500/20 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                       >
+                        <FiTrash2 size={16} />
                         {t("admin.delete")}
                       </button>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </section>
 
         <section className="rounded-3xl overflow-hidden bg-surface-card shadow-sm border border-border-default dark:bg-slate-800 dark:border-slate-700">
-          <div className="border-b border-border-default px-6 py-5 dark:border-slate-700 bg-surface-secondary dark:bg-slate-900">
-            <h2 className="text-xl font-bold text-text-main dark:text-white">{t("admin.pendingRequests")}</h2>
-            <p className="text-sm text-text-muted dark:text-text-disabled">{t("admin.pendingTableDesc")}</p>
+          <div className="border-b border-border-default px-6 py-5 dark:border-slate-700 bg-surface-secondary dark:bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-text-main dark:text-white">{t("admin.pendingRequests")}</h2>
+              <p className="text-sm text-text-muted dark:text-text-disabled">{t("admin.pendingTableDesc")}</p>
+            </div>
+            <CustomSelect
+              value={pendingRoleFilter}
+              onChange={setPendingRoleFilter}
+              className="w-full sm:w-[160px]"
+              options={[
+                { value: "ALL", label: "All Requests" },
+                { value: "FARMER", label: "Farmer" },
+                { value: "SUPPLIER", label: "Supplier" },
+                { value: "AGRO_EXPERT", label: "Agro Expert" },
+              ]}
+            />
           </div>
-          {pendingUsers.length === 0 ? (
-            <div className="p-10 text-center text-text-muted dark:text-text-disabled">{t("admin.noPending")}</div>
+          {filteredPendingUsers.length === 0 ? (
+            <div className="p-10 text-center text-text-muted dark:text-text-disabled">{pendingUsers.length === 0 ? t("admin.noPending") : "No pending requests match this filter."}</div>
           ) : (
             <div className="space-y-4 p-6">
-              {pendingUsers.map((item) => {
+              {filteredPendingUsers.map((item) => {
                 const isFarmer = item.role === "FARMER" || item.pendingRole === "FARMER";
                 const isSupplier = item.role === "SUPPLIER" || item.pendingRole === "SUPPLIER";
                 const isExpert = item.role === "AGRO_EXPERT" || item.pendingRole === "AGRO_EXPERT";

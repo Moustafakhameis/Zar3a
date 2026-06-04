@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LuSearch,
@@ -9,7 +9,11 @@ import {
   LuCheck,
   LuLayoutGrid,
   LuX,
-  LuPlus
+  LuPlus,
+  LuMapPin,
+  LuBanknote,
+  LuChevronDown,
+  LuFilter
 } from "react-icons/lu";
 import { FiAlertCircle, FiCheckCircle, FiEdit } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
@@ -17,6 +21,59 @@ import api from "../../API/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useLanguage } from "../../context/LanguageContext";
+const CustomSelect = ({ value, onChange, options, icon: Icon, label }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((o) => o.value === value) || options[0];
+
+  return (
+    <div className="space-y-2" ref={ref}>
+      <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+        <Icon size={14} /> {label}
+      </label>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all cursor-pointer hover:border-emerald-500/50"
+        >
+          {selectedOption.label}
+          <LuChevronDown className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} size={18} />
+        </button>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden py-2"
+            >
+              {options.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                  className={`w-full text-left px-5 py-3 text-sm font-bold transition-colors ${value === opt.value ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
 
 export default function ProductsDashboard() {
   const { t } = useLanguage();
@@ -34,6 +91,13 @@ export default function ProductsDashboard() {
   const [activeTypeFilter, setActiveTypeFilter] = useState("ALL"); // "ALL" | "CROP" | "AGRI"
   const [message, setMessage] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  // Advanced Filter states
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [regionFilter, setRegionFilter] = useState("ALL");
 
   // Edit Product states
   const [editingProduct, setEditingProduct] = useState(null);
@@ -255,10 +319,21 @@ export default function ProductsDashboard() {
         (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (p.region && p.region.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      if (activeTypeFilter === "ALL") return matchesSearch;
-      if (activeTypeFilter === "CROP") return matchesSearch && p.marketplaceType === "CROP_MARKET";
-      if (activeTypeFilter === "AGRI") return matchesSearch && p.marketplaceType === "AGRI_MARKET";
-      return matchesSearch;
+      let matchesType = false;
+      if (activeTypeFilter === "ALL") matchesType = true;
+      if (activeTypeFilter === "CROP" && p.marketplaceType === "CROP_MARKET") matchesType = true;
+      if (activeTypeFilter === "AGRI" && p.marketplaceType === "AGRI_MARKET") matchesType = true;
+      if (activeTypeFilter === "SENSOR" && (p.marketplaceType === "SENSOR_MARKET" || p.marketplaceType === "SENSOR" || p.category === "SENSOR")) matchesType = true;
+
+      const matchesCategory = categoryFilter === "ALL" || p.category === categoryFilter;
+      const matchesStatus = statusFilter === "ALL" || p.status === statusFilter;
+      const matchesRegion = regionFilter === "ALL" || (p.region || "").toLowerCase().includes(regionFilter.toLowerCase());
+      
+      const price = Number(p.price) || 0;
+      const matchesMinPrice = priceRange.min === "" || price >= Number(priceRange.min);
+      const matchesMaxPrice = priceRange.max === "" || price <= Number(priceRange.max);
+
+      return matchesSearch && matchesType && matchesCategory && matchesStatus && matchesRegion && matchesMinPrice && matchesMaxPrice;
     });
 
   const handleBoostAll = () => {
@@ -347,6 +422,13 @@ export default function ProductsDashboard() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border-none outline-none font-bold text-gray-700 dark:text-white w-full px-4 text-sm"
             />
+            <button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className={`p-3 rounded-2xl ml-2 transition-colors flex items-center justify-center ${showAdvancedFilters ? 'bg-primary-base text-white shadow-md shadow-emerald-500/20' : 'bg-surface-secondary dark:bg-slate-800 text-text-muted hover:text-primary-base dark:hover:text-emerald-400'}`}
+              title="Advanced Filters"
+            >
+              <LuSlidersHorizontal size={20} />
+            </button>
           </div>
 
           {user && user.role === "ADMIN" && (
@@ -381,9 +463,116 @@ export default function ProductsDashboard() {
               >
                 {t("prodDash.agriShop")}
               </button>
+              <button
+                onClick={() => setActiveTypeFilter("SENSOR")}
+                className={`px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest transition-all ${
+                  activeTypeFilter === "SENSOR"
+                    ? "bg-primary-base text-white shadow-md"
+                    : "text-text-muted hover:text-gray-950 dark:hover:text-white"
+                }`}
+              >
+                {t("prodDash.ourSensor")}
+              </button>
             </div>
           )}
         </div>
+
+        {/* Advanced Filters Panel */}
+        <AnimatePresence>
+          {showAdvancedFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+              animate={{ 
+                height: "auto", 
+                opacity: 1,
+                transitionEnd: { overflow: "visible" }
+              }}
+              exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+            >
+              <div className="bg-surface-card dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-xl shadow-slate-200/50 dark:shadow-none mt-4 relative">
+                {/* Decorative background elements */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                    <LuFilter size={18} />
+                  </div>
+                  <h3 className="font-extrabold text-slate-700 dark:text-slate-200 uppercase tracking-widest text-xs antialiased transform-gpu">Advanced Filters</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                  {/* Category */}
+                  <CustomSelect
+                    label="Category"
+                    icon={LuLayoutGrid}
+                    value={categoryFilter}
+                    onChange={setCategoryFilter}
+                    options={[
+                      { value: "ALL", label: "All Categories" },
+                      { value: "SEEDS", label: "Seeds" },
+                      { value: "FERTILIZERS", label: "Fertilizers" },
+                      { value: "TOOLS", label: "Tools" },
+                      { value: "PRODUCE", label: "Produce" },
+                      { value: "EQUIPMENT", label: "Equipment" },
+                      { value: "OTHER", label: "Other" },
+                    ]}
+                  />
+
+                  {/* Status */}
+                  <CustomSelect
+                    label="Status"
+                    icon={LuSprout}
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    options={[
+                      { value: "ALL", label: "All Statuses" },
+                      { value: "AVAILABLE", label: "Available" },
+                      { value: "SOLD", label: "Sold" },
+                    ]}
+                  />
+
+                  {/* Region */}
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                      <LuMapPin size={14} /> Region
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Cairo, Ismailia..."
+                      value={regionFilter === "ALL" ? "" : regionFilter}
+                      onChange={(e) => setRegionFilter(e.target.value || "ALL")}
+                      className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all hover:border-emerald-500/50 placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-medium"
+                    />
+                  </div>
+
+                  {/* Price Range */}
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                      <LuBanknote size={14} /> Price Range (EGP)
+                    </label>
+                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-1 transition-all focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 hover:border-emerald-500/50">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        value={priceRange.min}
+                        onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
+                        className="w-full bg-transparent border-none outline-none px-3 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 text-center placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-medium"
+                      />
+                      <div className="w-px h-6 bg-slate-300 dark:bg-slate-600"></div>
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={priceRange.max}
+                        onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
+                        className="w-full bg-transparent border-none outline-none px-3 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 text-center placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-medium"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Product List Grid */}
         {loading ? (

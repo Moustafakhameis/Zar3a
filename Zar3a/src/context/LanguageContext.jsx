@@ -555,6 +555,7 @@ const translations = {
   "prodDash.allItems":      { en: "All Items",              ar: "جميع السلع" },
   "prodDash.cropProd":      { en: "Crop Products",           ar: "منتجات المحاصيل" },
   "prodDash.agriShop":      { en: "Agri Shop",               ar: "متجر الزراعة" },
+  "prodDash.ourSensor":     { en: "Our Sensor",              ar: "جهاز الاستشعار الخاص بنا" },
   "prodDash.cropMarket":    { en: "Crop Market",             ar: "سوق المحاصيل" },
   "prodDash.seller":        { en: "Seller",                  ar: "البائع" },
   "prodDash.region":        { en: "Region",                  ar: "المنطقة" },
