@@ -897,14 +897,20 @@ export const getPendingUsers = async (req, res) => {
   try {
     const pendingUsers = await User.findAll({
       where: {
-        [Op.or]: [
-          { isApproved: false },
-          { role: 'FARMER', status: 'pending_second_approval' }
-        ],
-        [Op.or]: [
-          { role: { [Op.in]: ['FARMER', 'SUPPLIER', 'AGRO_EXPERT'] } },
-          { pendingRole: { [Op.in]: ['FARMER', 'SUPPLIER', 'AGRO_EXPERT'] } },
-        ],
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { isApproved: false },
+              { role: 'FARMER', status: 'pending_second_approval' }
+            ]
+          },
+          {
+            [Op.or]: [
+              { role: { [Op.in]: ['FARMER', 'SUPPLIER', 'AGRO_EXPERT'] } },
+              { pendingRole: { [Op.in]: ['FARMER', 'SUPPLIER', 'AGRO_EXPERT'] } },
+            ]
+          }
+        ]
       },
       include: [
         { model: FarmerProfile, required: false },
@@ -925,7 +931,7 @@ export const approveUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, { include: [FarmerProfile] });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const targetRole = user.pendingRole || user.role;
@@ -933,14 +939,20 @@ export const approveUser = async (req, res) => {
     if (targetRole === 'FARMER') {
       if (user.status === 'pending_second_approval') {
         // Second approval: status becomes approved
-        await User.update({ status: 'approved' }, { where: { id: userId } });
+        await User.update({ 
+          role: 'FARMER',
+          pendingRole: null,
+          isApproved: true,
+          status: 'approved' 
+        }, { where: { id: userId } });
       } else {
-        // First approval: status becomes pending_sensor
+        // First approval: check if they already have a sensor ID
+        const hasSensor = user.FarmerProfile && user.FarmerProfile.sensorId;
         await User.update({
           role: 'FARMER',
           pendingRole: null,
           isApproved: true,
-          status: 'pending_sensor'
+          status: hasSensor ? 'pending_second_approval' : 'pending_sensor'
         }, { where: { id: userId } });
       }
     } else if (user.pendingRole) {
@@ -951,7 +963,11 @@ export const approveUser = async (req, res) => {
         status: 'approved'
       }, { where: { id: userId } });
     } else {
-      await User.update({ isApproved: true, status: 'approved' }, { where: { id: userId } });
+      await User.update({ 
+        pendingRole: null,
+        isApproved: true, 
+        status: 'approved' 
+      }, { where: { id: userId } });
     }
 
     const updatedUser = await User.findByPk(userId, {

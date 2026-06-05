@@ -1494,7 +1494,11 @@ const Marketplace = () => {
                     <DualImageUpload
                       label={t("market.imageSource") === "market.imageSource" ? "Image Source" : t("market.imageSource")}
                       value={createForm.imageUrl}
-                      onChange={(e) => { handleCreateInput(e); setImageFile(null); setImagePreview(""); }}
+                      onChange={(e) => { 
+                        setCreateForm(prev => ({ ...prev, imageUrl: e.target.value }));
+                        setImageFile(null); 
+                        setImagePreview(""); 
+                      }}
                       previewImage={imagePreview}
                       onFileChange={(e) => {
                         const file = e.target.files[0];

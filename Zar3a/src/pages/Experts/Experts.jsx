@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LuMessageSquare, LuStar, LuBadgeCheck, LuX, LuBriefcase,
-  LuGraduationCap, LuAward, LuSearch, LuPlus, LuMapPin, LuUpload
+  LuGraduationCap, LuAward, LuSearch, LuPlus, LuMapPin, LuUpload, LuChevronDown
 } from "react-icons/lu";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -43,6 +43,8 @@ const Experts = () => {
   const { t } = useLanguage();
   const [selectedExpert, setSelectedExpert] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSpecialtyFilter, setSelectedSpecialtyFilter] = useState("All");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [expertCards, setExpertCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -224,12 +226,19 @@ const Experts = () => {
     });
   };
 
-  const filteredExperts = expertCards.filter(
-    (expert) =>
-      expert.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expert.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expert.title.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const uniqueSpecialties = ["All", ...new Set(expertCards.map(e => e.specialty))].filter(Boolean);
+
+  const filteredExperts = expertCards.filter((expert) => {
+    const matchesSearch = expert.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          expert.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          expert.title.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesSpecialty = selectedSpecialtyFilter === "All" || !selectedSpecialtyFilter
+                             ? true 
+                             : expert.specialty === selectedSpecialtyFilter;
+
+    return matchesSearch && matchesSpecialty;
+  });
 
   if (loading) {
     return (
@@ -252,17 +261,56 @@ const Experts = () => {
           <p className="text-text-muted dark:text-text-disabled text-lg">{t("experts.subtitle")}</p>
         </div>
 
-        <div className="flex flex-col gap-4 w-full md:w-auto">
-          <div className="relative w-full md:w-96">
+        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+          <div className="relative w-full md:w-80">
             <LuSearch className="absolute start-4 top-1/2 -translate-y-1/2 text-text-disabled" size={20} />
             <input type="text" placeholder={t("experts.search")}
               className="w-full ps-12 pe-4 py-4 bg-surface-card dark:bg-slate-800 border border-border-default dark:border-slate-700 text-text-main dark:text-white placeholder:text-text-disabled rounded-2xl outline-none focus:ring-2 focus:ring-green-500 transition-all shadow-sm"
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
+
+          <div className="relative w-full md:w-64 z-20">
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="w-full px-5 py-4 bg-surface-card dark:bg-slate-800 border border-border-default dark:border-slate-700 text-text-main dark:text-white rounded-2xl outline-none focus:ring-2 focus:ring-green-500 transition-all shadow-sm cursor-pointer flex justify-between items-center font-semibold"
+            >
+              <span className="truncate">{selectedSpecialtyFilter === "All" ? "All Specialties" : selectedSpecialtyFilter}</span>
+              <LuChevronDown className={`transition-transform duration-300 ${isFilterOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            <AnimatePresence>
+              {isFilterOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full start-0 mt-2 w-full max-h-64 overflow-y-auto bg-surface-card dark:bg-slate-800 border border-border-default dark:border-slate-700 rounded-2xl shadow-xl z-50 flex flex-col py-2 custom-scrollbar"
+                >
+                  {uniqueSpecialties.map((spec) => (
+                    <button
+                      key={spec}
+                      onClick={() => {
+                        setSelectedSpecialtyFilter(spec);
+                        setIsFilterOpen(false);
+                      }}
+                      className={`w-full text-start px-5 py-3 text-sm font-bold transition-colors hover:bg-surface-secondary dark:hover:bg-slate-700 ${
+                        selectedSpecialtyFilter === spec 
+                          ? "bg-primary-light dark:bg-emerald-900/30 text-primary-base dark:text-emerald-400" 
+                          : "text-text-muted dark:text-slate-300"
+                      }`}
+                    >
+                      {spec === "All" ? "All Specialties" : spec}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           {canCreate && (
             <button onClick={() => setShowCreateModal(true)}
-              className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-3xl bg-primary-base px-6 py-4 text-white font-black hover:bg-primary-hover transition-shadow shadow-xl">
-              <LuPlus size={20} /> {t("experts.createCard")}
+              className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-primary-base px-6 py-4 text-white font-black hover:bg-primary-hover hover:-translate-y-1 hover:shadow-emerald-500/30 active:scale-95 transition-all duration-300 shadow-xl whitespace-nowrap shrink-0">
+              <LuPlus size={20} className="shrink-0" /> 
+              <span>{t("experts.createCard")}</span>
             </button>
           )}
         </div>
@@ -448,16 +496,19 @@ const Experts = () => {
 
               <div className="space-y-6">
                 <DualImageUpload label="Profile Picture (Optional)"
-                  currentImageUrl={imagePreview}
-                  onFileSelect={(file) => {
-                    setImageFile(file);
-                    setCreateForm(prev => ({ ...prev, imageUrl: "" }));
+                  previewImage={imagePreview}
+                  value={createForm.imageUrl}
+                  onFileChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setImageFile(e.target.files[0]);
+                      setCreateForm(prev => ({ ...prev, imageUrl: "" }));
+                    }
                   }}
-                  onUrlChange={(url) => {
+                  onChange={(e) => {
                     setImageFile(null);
-                    setCreateForm(prev => ({ ...prev, imageUrl: url }));
+                    setCreateForm(prev => ({ ...prev, imageUrl: e.target.value }));
                   }}
-                  error={fieldErrors.imageUrl} />
+                />
                 
                 <div>
                   <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Name / Title</label>
@@ -478,6 +529,7 @@ const Experts = () => {
                   <div>
                     <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Hourly Rate (EGP)</label>
                     <input type="number" name="hourlyRate" value={createForm.hourlyRate} onChange={handleCreateInput}
+                      onWheel={(e) => e.target.blur()}
                       className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.hourlyRate ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
                       placeholder="e.g. 200" />
                     {fieldErrors.hourlyRate && <p className="mt-1 text-xs text-red-500 font-bold">{fieldErrors.hourlyRate}</p>}

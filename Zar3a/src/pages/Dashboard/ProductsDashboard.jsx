@@ -141,13 +141,15 @@ export default function ProductsDashboard() {
     try {
       let fetchedProducts = [];
       if (user.role === "ADMIN") {
-        const [cropRes, agriRes] = await Promise.all([
+        const [cropRes, agriRes, sensorRes] = await Promise.all([
           api.get("/marketplace/crop-products"),
-          api.get("/marketplace/agri-products")
+          api.get("/marketplace/agri-products"),
+          api.get("/marketplace/sensor-products").catch(() => ({ data: [] }))
         ]);
         fetchedProducts = [
           ...(Array.isArray(cropRes.data) ? cropRes.data : []),
-          ...(Array.isArray(agriRes.data) ? agriRes.data : [])
+          ...(Array.isArray(agriRes.data) ? agriRes.data : []),
+          ...(Array.isArray(sensorRes.data) ? sensorRes.data : [])
         ];
       } else if (user.role === "FARMER") {
         const cropRes = await api.get("/marketplace/crop-products");
@@ -444,16 +446,6 @@ export default function ProductsDashboard() {
                 {t("prodDash.allItems")}
               </button>
               <button
-                onClick={() => setActiveTypeFilter("CROP")}
-                className={`px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest transition-all ${
-                  activeTypeFilter === "CROP"
-                    ? "bg-primary-base text-white shadow-md"
-                    : "text-text-muted hover:text-gray-950 dark:hover:text-white"
-                }`}
-              >
-                {t("prodDash.cropProd")}
-              </button>
-              <button
                 onClick={() => setActiveTypeFilter("AGRI")}
                 className={`px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest transition-all ${
                   activeTypeFilter === "AGRI"
@@ -462,6 +454,16 @@ export default function ProductsDashboard() {
                 }`}
               >
                 {t("prodDash.agriShop")}
+              </button>
+              <button
+                onClick={() => setActiveTypeFilter("CROP")}
+                className={`px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest transition-all ${
+                  activeTypeFilter === "CROP"
+                    ? "bg-primary-base text-white shadow-md"
+                    : "text-text-muted hover:text-gray-950 dark:hover:text-white"
+                }`}
+              >
+                {t("prodDash.cropProd")}
               </button>
               <button
                 onClick={() => setActiveTypeFilter("SENSOR")}
