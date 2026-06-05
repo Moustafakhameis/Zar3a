@@ -585,10 +585,11 @@ const Marketplace = () => {
     <div className="max-w-7xl mx-auto space-y-6 pb-20 px-4 text-left">
 
       {/* Quote Modal */}
-      <AnimatePresence>
-        {showQuoteModal && quoteProduct && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {showQuoteModal && quoteProduct && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -650,7 +651,7 @@ const Marketplace = () => {
                 <button
                   onClick={async () => {
                     try {
-                      const res = await api.post('/api/market/inquiries', {
+                      const res = await api.post('/marketplace/inquiries', {
                         productId: quoteProduct.id,
                         quantity: quoteQuantity,
                         location: quoteLocation,
@@ -670,8 +671,10 @@ const Marketplace = () => {
               </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-surface-card dark:bg-slate-900 p-4 rounded-[2.5rem] shadow-sm border border-border-default dark:border-slate-800">
         <div className="flex w-full md:w-auto bg-surface-secondary dark:bg-slate-800 p-1.5 rounded-full relative">
@@ -756,7 +759,14 @@ const Marketplace = () => {
           )}
           {canCreate && (
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setCreateForm({ 
+                  title: "", description: "", category: "", price: "", unit: "unit", region: "", imageUrl: "", 
+                  marketplaceType: activeTab === "sensors" ? "SENSOR_MARKET" : activeTab === "shop" ? "AGRI_MARKET" : "CROP_MARKET", 
+                  productSource: "MANUAL", status: "AVAILABLE" 
+                });
+                setShowCreateModal(true);
+              }}
               className="flex items-center justify-center gap-2 bg-primary-base text-white px-8 py-4 rounded-full font-black hover:bg-primary-hover transition-transform shadow-xl w-full sm:w-auto"
             >
               <LuPlus size={20} /> {t("market.addProduct")}
@@ -1395,11 +1405,22 @@ const Marketplace = () => {
                     onChange={handleCreateInput}
                     placeholder={t("market.category") || "Category"}
                     options={[
-                      ...(user?.role !== "SUPPLIER" ? [{ label: "PRODUCE", value: "PRODUCE", name: "category" }] : []),
-                      ...(user?.role !== "FARMER" ? [
+                      ...(createForm.marketplaceType === "CROP_MARKET" ? [
+                        { label: "VEGETABLES", value: "VEGETABLES", name: "category" },
+                        { label: "FRUITS", value: "FRUITS", name: "category" },
+                        { label: "GRAINS", value: "GRAINS", name: "category" },
+                        { label: "HERBS", value: "HERBS", name: "category" },
+                        { label: "FIBERS", value: "FIBERS", name: "category" },
+                        { label: "PRODUCE", value: "PRODUCE", name: "category" }
+                      ] : createForm.marketplaceType === "AGRI_MARKET" ? [
+                        { label: "PESTICIDES", value: "PESTICIDES", name: "category" },
                         { label: "SEEDS", value: "SEEDS", name: "category" },
                         { label: "FERTILIZERS", value: "FERTILIZERS", name: "category" },
                         { label: "TOOLS", value: "TOOLS", name: "category" },
+                        { label: "EQUIPMENT", value: "EQUIPMENT", name: "category" }
+                      ] : createForm.marketplaceType === "SENSOR_MARKET" ? [
+                        { label: "SENSORS", value: "SENSORS", name: "category" },
+                        { label: "IOT DEVICES", value: "IOT DEVICES", name: "category" },
                         { label: "EQUIPMENT", value: "EQUIPMENT", name: "category" }
                       ] : []),
                       { label: "OTHER", value: "OTHER", name: "category" }

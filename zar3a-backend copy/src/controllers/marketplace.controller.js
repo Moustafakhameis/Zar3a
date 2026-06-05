@@ -22,6 +22,20 @@ export const getCropMarketProducts = async (req, res) => {
   }
 };
 
+export const getSensorMarketProducts = async (req, res) => {
+  try {
+    const products = await Product.findAll({
+      where: { marketplaceType: 'SENSOR_MARKET' },
+      include: [{ model: User, attributes: ['id', 'fullName', 'username', 'role'] }],
+      order: [['createdAt', 'DESC']],
+    });
+    return res.json(products);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 export const createCropMarketProduct = async (req, res) => {
   try {
     const user = req.user;
@@ -201,6 +215,82 @@ export const createAgriShopProduct = async (req, res) => {
     return res.status(201).json({
       ...product.toJSON(),
       message: 'Agri shop product added successfully',
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+export const createSensorMarketProduct = async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (user.role !== 'ADMIN') {
+      return res.status(403).json({
+        message: 'Only admins can add products to Sensor Market. Your role is: ' + user.role,
+      });
+    }
+
+    const { title, description, category, price, unit, region, imageUrl, productSource } =
+      req.body;
+
+    if (!title || !description || !category || !price) {
+      return res.status(400).json({
+        message: 'Title, description, category and price are required',
+      });
+    }
+
+    let finalImageUrl = imageUrl || '';
+    if (req.file) {
+      finalImageUrl = `/uploads/products/${req.file.filename}`;
+    }
+
+    const CATEGORY_MAP = {
+      sensors: 'EQUIPMENT',
+      'iot devices': 'EQUIPMENT',
+      equipment: 'EQUIPMENT',
+      other: 'OTHER',
+    };
+    const normalizedCategory = (category || '').toString().trim().toLowerCase();
+    const dbCategory = CATEGORY_MAP[normalizedCategory] || 'OTHER';
+
+    const SOURCE_MAP = { manual: 'MANUAL', sensed: 'SENSED', MANUAL: 'MANUAL', SENSED: 'SENSED' };
+    const dbSource = SOURCE_MAP[(productSource || '').toString().trim().toLowerCase()] || 'MANUAL';
+
+    const product = await Product.create({
+      userId: user.id,
+      title,
+      description,
+      category: dbCategory,
+      price: Number(price),
+      unit: unit || 'unit',
+      region: region || '',
+      imageUrl: finalImageUrl,
+      marketplaceType: 'SENSOR_MARKET',
+      productSource: dbSource,
+      isVerified: false,
+    });
+
+    await OrderTracking.create({
+      productId: product.id,
+      userId: user.id,
+      marketplaceType: product.marketplaceType,
+      productSource: product.productSource,
+      title: product.title,
+      description: product.description,
+      category: product.category,
+      price: product.price,
+      unit: product.unit,
+      region: product.region,
+      imageUrl: product.imageUrl,
+      quantity: 1,
+      status: product.status || 'AVAILABLE',
+    });
+
+    return res.status(201).json({
+      ...product.toJSON(),
+      message: 'Sensor market product added successfully',
     });
   } catch (err) {
     console.error(err);

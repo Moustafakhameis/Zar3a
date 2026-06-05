@@ -387,15 +387,22 @@ export function AuthProvider({ children }) {
   };
 
   const getProducts = async () => {
-    const [cropResponse, agriResponse] = await Promise.all([
-      marketplaceAPI.getCropMarketProducts(),
-      marketplaceAPI.getAgriShopProducts(),
-    ]);
+    try {
+      const [cropRes, agriRes, sensorRes] = await Promise.all([
+        marketplaceAPI.getCropMarketProducts(),
+        marketplaceAPI.getAgriShopProducts(),
+        marketplaceAPI.getSensorMarketProducts().catch(() => ({ data: [] }))
+      ]);
 
-    const cropProducts = cropResponse.data.products || cropResponse.data;
-    const agriProducts = agriResponse.data.products || agriResponse.data;
+      const cropProducts = cropRes.data.products || cropRes.data || [];
+      const agriProducts = agriRes.data.products || agriRes.data || [];
+      const sensorProducts = sensorRes.data.products || sensorRes.data || [];
 
-    return [...cropProducts, ...agriProducts];
+      return [...cropProducts, ...agriProducts, ...sensorProducts];
+    } catch (err) {
+      console.error("Failed to load products:", err);
+      return [];
+    }
   };
 
   const createProduct = async (productData) => {
@@ -409,6 +416,8 @@ export function AuthProvider({ children }) {
 
     if (type === "AGRI_MARKET" || type === "agri") {
       response = await marketplaceAPI.createAgriShopProduct(productData);
+    } else if (type === "SENSOR_MARKET" || type === "sensors") {
+      response = await marketplaceAPI.createSensorMarketProduct(productData);
     } else {
       response = await marketplaceAPI.createCropMarketProduct(productData);
     }

@@ -8,6 +8,8 @@ import {
   createCropMarketProduct,
   getAgriShopProducts,
   createAgriShopProduct,
+  getSensorMarketProducts,
+  createSensorMarketProduct,
   getExpertListings,
   createExpertListing,
   searchProducts,
@@ -21,6 +23,7 @@ import {
   updateExpertListing,
   deleteExpertListing,
 } from '../controllers/marketplace.controller.js';
+import { createInquiry } from '../controllers/inquiry.controller.js';
 
 const router = Router();
 
@@ -78,6 +81,30 @@ router.post(
   ],
   validate,
   createAgriShopProduct
+);
+
+// ─────────────────────────────────────────────────────────
+// SENSOR MARKET ENDPOINTS
+// ─────────────────────────────────────────────────────────
+
+// GET /marketplace/sensor-products
+// Get all Sensor Market products (public)
+router.get('/sensor-products', getSensorMarketProducts);
+
+// POST /marketplace/sensor-products
+// Add product to Sensor Market (ADMIN ONLY)
+router.post(
+  '/sensor-products',
+  authenticate,
+  uploadProductImage,
+  [
+    body('title').trim().notEmpty().withMessage('Title is required'),
+    body('description').trim().notEmpty().withMessage('Description is required'),
+    body('category').trim().notEmpty().withMessage('Category is required'),
+    body('price').isFloat({ gt: 0 }).withMessage('Price must be a positive number'),
+  ],
+  validate,
+  createSensorMarketProduct
 );
 
 // ─────────────────────────────────────────────────────────
@@ -195,5 +222,23 @@ router.put(
 // DELETE /marketplace/expert-listings/:id
 // Delete an expert listing
 router.delete('/expert-listings/:id', authenticate, deleteExpertListing);
+
+// ─────────────────────────────────────────────────────────
+// INQUIRIES ENDPOINTS
+// ─────────────────────────────────────────────────────────
+
+// POST /marketplace/inquiries
+router.post(
+  '/inquiries',
+  authenticate,
+  [
+    body('productId').isInt().withMessage('Product ID must be an integer'),
+    body('quantity').isInt({ gt: 0 }).withMessage('Quantity must be positive'),
+    body('message').trim().notEmpty().withMessage('Message is required'),
+    body('location').optional().trim(),
+  ],
+  validate,
+  createInquiry
+);
 
 export default router;

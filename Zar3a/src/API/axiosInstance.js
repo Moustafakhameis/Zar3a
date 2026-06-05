@@ -60,6 +60,13 @@ export const marketplaceAPI = {
   getAgriShopProducts: () => api.get('/marketplace/agri-products'),
   createAgriShopProduct: (data) => api.post('/marketplace/agri-products', data),
 
+  // SENSOR MARKET
+  getSensorMarketProducts: () => api.get('/marketplace/sensor-products'),
+  createSensorMarketProduct: (data) => api.post('/marketplace/sensor-products', data),
+
+  // INQUIRIES
+  createInquiry: (data) => api.post('/marketplace/inquiries', data),
+
   // SEARCH
   searchProducts: (q, marketplace, category) =>
     api.get('/marketplace/search', { params: { q, marketplace, category } }),
@@ -166,6 +173,16 @@ export const cartAPI = {
   getCart: () => api.get('/cart'),
   updateCart: (items) => api.put('/cart', { items }),
   clearCart: () => api.delete('/cart'),
+};
+
+/**
+ * ─────────────────────────────────────────────────────────
+ * ADMIN API
+ * ─────────────────────────────────────────────────────────
+ */
+export const adminAPI = {
+  getInquiries: () => api.get('/admin/inquiries'),
+  updateInquiryStatus: (id, status) => api.put(`/admin/inquiries/${id}/status`, { status }),
 };
 
 export default api;

@@ -314,3 +314,66 @@ export const approveSensorQuote = async (req, res) => {
     return res.status(500).json({ message: 'Server error during sensor approval.' });
   }
 };
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * QUOTE INQUIRIES LOGIC
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+export const getInquiries = async (req, res) => {
+  try {
+    const { Inquiry, User, Product } = await import('../models/index.js');
+    const inquiries = await Inquiry.findAll({
+      include: [
+        { model: User, attributes: ['id', 'fullName', 'email', 'role', 'phone'] },
+        { model: Product, attributes: ['id', 'title', 'price', 'imageUrl'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    res.status(200).json({ inquiries });
+  } catch (err) {
+    console.error('getInquiries error:', err);
+    res.status(500).json({ message: 'Server error fetching inquiries' });
+  }
+};
+
+export const updateInquiryStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // 'ACCEPTED' or 'REJECTED'
+
+    if (!['ACCEPTED', 'REJECTED'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    const { Inquiry, User, Product, Notification } = await import('../models/index.js');
+    const inquiry = await Inquiry.findByPk(id, {
+      include: [
+        { model: User, attributes: ['id', 'fullName'] },
+        { model: Product, attributes: ['id', 'title'] }
+      ]
+    });
+
+    if (!inquiry) {
+      return res.status(404).json({ message: 'Inquiry not found' });
+    }
+
+    await inquiry.update({ status });
+
+    // Notify farmer
+    await Notification.create({
+      userId: inquiry.userId,
+      productId: inquiry.productId,
+      type: status === 'ACCEPTED' ? 'QUOTE_APPROVED' : 'QUOTE_REJECTED',
+      title: `Quote Request ${status === 'ACCEPTED' ? 'Approved' : 'Rejected'}`,
+      message: `Your quote request for ${inquiry.quantity}x "${inquiry.Product.title}" has been ${status.toLowerCase()} by the admin.`,
+      createdBy: req.user.id
+    });
+
+    res.status(200).json({ message: `Inquiry ${status.toLowerCase()} successfully`, inquiry });
+  } catch (err) {
+    console.error('updateInquiryStatus error:', err);
+    res.status(500).json({ message: 'Server error updating inquiry status' });
+  }
+};

@@ -14,6 +14,7 @@ import ChatMessage from './ChatMessage.js';
 import OrderTracking from './OrderTracking.js';
 import Order from './Order.js';
 import OrderItem from './OrderItem.js';
+import Inquiry from './Inquiry.js';
 import Cart from './Cart.js';
 import ProductReview from './ProductReview.js';
 import Transaction from './Transaction.js';
@@ -82,6 +83,12 @@ OrderTracking.belongsTo(Product, { foreignKey: 'productId' });
 User.hasMany(OrderTracking, { foreignKey: 'userId', onDelete: 'CASCADE' });
 OrderTracking.belongsTo(User, { foreignKey: 'userId' });
 
+User.hasMany(Inquiry, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Inquiry.belongsTo(User, { foreignKey: 'userId' });
+
+Product.hasMany(Inquiry, { foreignKey: 'productId', onDelete: 'CASCADE' });
+Inquiry.belongsTo(Product, { foreignKey: 'productId' });
+
 User.hasOne(Cart, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Cart.belongsTo(User, { foreignKey: 'userId' });
 
@@ -91,4 +98,4 @@ Transaction.belongsTo(User, { foreignKey: 'userId' });
 Order.hasMany(Transaction, { foreignKey: 'orderId', onDelete: 'CASCADE' });
 Transaction.belongsTo(Order, { foreignKey: 'orderId' });
 
-export { sequelize, User, FarmerProfile, AgroExpertProfile, SupplierProfile, BuyerProfile, RefreshToken, VerificationToken, PasswordResetOTP, Product, ExpertListing, Notification, ChatMessage, OrderTracking, Order, OrderItem, Cart, ProductReview, Transaction };
+export { sequelize, User, FarmerProfile, AgroExpertProfile, SupplierProfile, BuyerProfile, RefreshToken, VerificationToken, PasswordResetOTP, Product, ExpertListing, Notification, ChatMessage, OrderTracking, Inquiry, Order, OrderItem, Cart, ProductReview, Transaction };
