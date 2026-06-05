@@ -73,18 +73,42 @@ const Home = () => {
             </div>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black text-text-main dark:text-white tracking-tight mb-6 leading-tight">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6, type: "spring" }}
+            className="text-5xl md:text-7xl font-black text-text-main dark:text-white tracking-tight mb-6 leading-tight"
+          >
             {t("home.hero.title1")} <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-500 to-teal-400">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-500 to-teal-400 inline-block drop-shadow-sm">
               {t("home.hero.title2")}
             </span>
-          </h1>
+          </motion.h1>
 
-          <p className="text-lg md:text-xl text-text-muted dark:text-text-disabled max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
+          <motion.p 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+            className="text-xl md:text-2xl text-emerald-600 dark:text-emerald-400 font-black italic tracking-wide mb-6"
+          >
+            "Farm smarter, Not Harder."
+          </motion.p>
+
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="text-lg md:text-xl text-text-muted dark:text-text-disabled max-w-2xl mx-auto mb-10 font-medium leading-relaxed"
+          >
             {t("home.hero.subtitle")}
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, type: "spring" }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
             {!user && (
               <Link to="/login" className="w-full sm:w-auto">
                 <button className="w-full px-8 py-4 bg-primary-base hover:bg-primary-hover text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 text-lg group">
@@ -98,7 +122,7 @@ const Home = () => {
                 {t("home.hero.explore")}
               </button>
             </Link>
-          </div>
+          </motion.div>
         </motion.div>
       </motion.div>
 

@@ -235,7 +235,7 @@ export default function Admin() {
     return userRole === pendingRoleFilter;
   });
 
-  if (authLoading || loading) {
+  if (authLoading || (user && loading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-secondary dark:bg-slate-900">
         <div className="text-center">
