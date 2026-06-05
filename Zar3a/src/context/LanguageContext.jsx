@@ -571,6 +571,8 @@ const translations = {
   "prodDash.deleteSuccess": { en: "Product deleted successfully.", ar: "تم حذف المنتج بنجاح." },
   "prodDash.loadFailed":    { en: "Failed to retrieve marketplace products.", ar: "فشل استرداد منتجات السوق." },
   "prodDash.deleteFailed":    { en: "Failed to delete product.", ar: "فشل حذف المنتج." },
+  "prodDash.saveChanges":     { en: "Save Changes",              ar: "حفظ التغييرات" },
+  "prodDash.cancel":          { en: "Cancel",                    ar: "إلغاء" },
 
 
   // ── Profiles ─────────────────────────────────────────────────────────────────
