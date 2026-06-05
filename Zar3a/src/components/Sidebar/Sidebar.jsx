@@ -16,6 +16,7 @@ import {
   FcManager,
   FcCancel,
   FcAbout,
+  FcHome,
 } from "react-icons/fc";
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -59,6 +60,11 @@ const Sidebar = ({ isOpen, onClose }) => {
   const profileLink = getProfileLink();
   const menuItems = [];
 
+  // Home: Only when NOT logged in
+  if (!user) {
+    menuItems.push({ path: "/", label: t("nav.home") || "Home", icon: <FcHome /> });
+  }
+
   // Dashboard: Only for FARMER, ADMIN (NOT for EXPERT, SUPPLIER, or BUYER)
   if (user?.role && !['AGRO_EXPERT', 'SUPPLIER', 'BUYER'].includes(user.role)) {
     menuItems.push({ path: "/dashboard", label: t("nav.dashboard"), icon: <FcDataSheet /> });
@@ -66,6 +72,11 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   // Marketplace: Everyone (including unregistered)
   menuItems.push({ path: "/marketplace", label: t("nav.marketplace"), icon: <FcShop /> });
+
+  // About: Only when NOT logged in
+  if (!user) {
+    menuItems.push({ path: "/about", label: t("nav.aboutUs") || "About Us", icon: <FcAbout /> });
+  }
 
   // Track Orders: For all registered users
   if (user?.role) {
