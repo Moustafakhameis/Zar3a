@@ -33,6 +33,15 @@ const ExpertListing = sequelize.define('ExpertListings', {
   imageUrl: {
     type: DataTypes.TEXT,
   },
+  academicDegree: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+  experienceYears: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
+  },
   isVerified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

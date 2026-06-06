@@ -13,9 +13,12 @@ const authenticate = async (req, res, next) => {
     return res.status(401).json({ message: "No token provided" });
 
   const payload = decodeAccessToken(authHeader.split(" ")[1]);
+  console.log("[authenticate] Payload received:", payload);
 
-  if (!payload || payload.type !== "access")
+  if (!payload || payload.type !== "access") {
+    console.log(`[authenticate] Rejecting token. Payload:`, payload);
     return res.status(401).json({ message: "Invalid or expired token" });
+  }
 
   const user = await User.findByPk(Number(payload.sub));
 

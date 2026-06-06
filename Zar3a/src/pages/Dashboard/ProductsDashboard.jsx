@@ -18,9 +18,11 @@ import {
 import { FiAlertCircle, FiCheckCircle, FiEdit } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../API/axiosInstance";
+import { PuffLoader } from "react-spinners";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useLanguage } from "../../context/LanguageContext";
+
 const CustomSelect = ({ value, onChange, options, icon: Icon, label }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null);
@@ -40,7 +42,7 @@ const CustomSelect = ({ value, onChange, options, icon: Icon, label }) => {
       <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
         <Icon size={14} /> {label}
       </label>
-      <div className="relative">
+      <div className={`relative ${isOpen ? 'z-50' : 'z-10'}`}>
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
@@ -578,10 +580,8 @@ export default function ProductsDashboard() {
 
         {/* Product List Grid */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-32 space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-            <p className="text-text-muted font-bold dark:text-text-disabled">{t("prodDash.loading")}</p>
-
+          <div className="flex justify-center items-center h-64">
+            <PuffLoader color="#059669" size={60} />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

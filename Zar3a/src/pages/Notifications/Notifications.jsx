@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LuBell, LuCheck, LuTrash2, LuSettings, LuX,
-  LuShoppingBag, LuPackage, LuRefreshCw
+  LuShoppingBag, LuPackage
 } from "react-icons/lu";
+import { ClipLoader } from "react-spinners";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
@@ -146,7 +147,7 @@ const Notifications = () => {
           {notifications.length > 0 && (
             <button onClick={handleMarkAllAsRead} disabled={loading || unreadCount === 0}
               className="px-5 py-2.5 bg-surface-card dark:bg-slate-800 border border-border-default dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm hover:bg-surface-secondary transition-all disabled:opacity-50 flex items-center gap-2">
-              {loading && <LuRefreshCw size={14} className="animate-spin" />}
+              {loading && <ClipLoader size={14} color="#10b981" />}
               {t("notif.markRead")}
             </button>
           )}

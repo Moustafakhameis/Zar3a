@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { LuUsers, LuShoppingCart, LuCpu, LuShieldCheck, LuActivity, LuWifi, LuDroplets, LuLeaf, LuPlus, LuMinus, LuArrowUp, LuArrowDown, LuArrowLeft, LuArrowRight } from 'react-icons/lu';
+import { PuffLoader } from "react-spinners";
 
 const NODES = [
   { id: 'alex', lat: 31.20, lng: 29.91, name: 'Alexandria Hub', status: 'Optimal', type: 'pulse', farmers: '1,200+', market: 'High', experts: '45', iot: '98%' },
@@ -490,9 +491,8 @@ const EgyptMapSection = () => {
             {!isLeafletLoaded && (
               <div className="absolute inset-0 z-[2000] flex items-center justify-center backdrop-blur-sm bg-slate-50/80 dark:bg-[#050a11]/80">
                 <div className="flex flex-col items-center gap-5">
-                  <div className="relative w-16 h-16">
-                    <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full"></div>
-                    <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                    <PuffLoader color="#10b981" size={80} />
                     <LuLeaf size={20} className="absolute inset-0 m-auto text-emerald-500 animate-pulse" />
                   </div>
                   <span className="text-sm font-bold tracking-widest uppercase animate-pulse text-emerald-600 dark:text-emerald-500">

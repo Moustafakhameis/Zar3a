@@ -44,6 +44,7 @@ import {
   Line,
   Legend,
 } from "recharts";
+import { ClipLoader } from "react-spinners";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
@@ -1265,7 +1266,7 @@ const Dashboard = () => {
                 </p>
               </div>
               {isWeatherLoading && (
-                <div className="w-5 h-5 border-2 border-slate-300 dark:border-white/30 border-t-slate-800 dark:border-t-white rounded-full animate-spin"></div>
+                <ClipLoader size={20} color="#10b981" />
               )}
             </div>
 

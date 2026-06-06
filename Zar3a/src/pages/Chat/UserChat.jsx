@@ -17,6 +17,7 @@ import {
 } from "react-icons/lu";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { ClipLoader } from "react-spinners";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5002";
 
@@ -286,7 +287,7 @@ const UserChat = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className={`animate-spin rounded-full h-10 w-10 border-b-2 ${theme.spinnerBorder}`}></div>
+        <ClipLoader color={theme.accent === "emerald" ? "#059669" : "#4f46e5"} size={40} />
       </div>
     );
   }
@@ -330,7 +331,7 @@ const UserChat = () => {
         <div className="flex-1 overflow-y-auto">
           {convoLoading ? (
             <div className="flex flex-col items-center justify-center py-20 space-y-3">
-              <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${theme.spinnerBorder}`}></div>
+              <ClipLoader color={theme.accent === "emerald" ? "#059669" : "#4f46e5"} size={32} />
               <p className="text-xs text-text-disabled font-bold">{t("chat.loadingMsgs") || "Loading..."}</p>
             </div>
           ) : filteredConversations.length === 0 ? (
@@ -455,7 +456,7 @@ const UserChat = () => {
 
               {chatLoading ? (
                 <div className="flex flex-col items-center justify-center py-20 space-y-3">
-                  <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${theme.spinnerBorder}`}></div>
+                  <ClipLoader color={theme.accent === "emerald" ? "#059669" : "#4f46e5"} size={32} />
                   <p className="text-xs text-text-disabled font-bold">{t("chat.loadingMsgs") || "Loading..."}</p>
                 </div>
               ) : (

@@ -5,12 +5,12 @@ import {
   LuCreditCard, 
   LuCheck, 
   LuSmartphone, 
-  LuLoader, 
   LuTrendingUp, 
   LuShieldCheck,
   LuShoppingCart,
   LuBanknote
 } from 'react-icons/lu';
+import { PuffLoader, ClipLoader } from "react-spinners";
 import { FiAlertTriangle } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../hooks/useCart';
@@ -193,8 +193,8 @@ const Payment = () => {
         <div className="max-w-md w-full bg-surface-card dark:bg-slate-900 rounded-3xl border border-border-default dark:border-slate-800 shadow-2xl p-8 text-center space-y-6 animate-fade-in">
           {confirmStatus === 'verifying' ? (
             <>
-              <div className="relative w-20 h-20 mx-auto flex items-center justify-center bg-primary-light dark:bg-emerald-950/30 rounded-full">
-                <LuLoader size={40} className="text-primary-base dark:text-emerald-400 animate-spin" />
+              <div className="w-16 h-16 bg-primary-light dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <PuffLoader color="#10b981" size={50} />
               </div>
               <h2 className="text-2xl font-black text-text-main dark:text-white">{t("pay.confirming")}</h2>
               <p className="text-sm text-text-muted dark:text-text-disabled">
@@ -486,10 +486,7 @@ const Payment = () => {
                 className="w-full rounded-2xl bg-primary-base hover:bg-primary-hover text-white py-4 font-black uppercase tracking-wider transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/10 cursor-pointer"
               >
                 {isSubmitting ? (
-                  <>
-                    <LuLoader className="animate-spin" size={18} />
-                    {t("pay.redirecting")}
-                  </>
+                    <ClipLoader color="#ffffff" size={18} />
                 ) : (
                   <>
                     {t("pay.confirmPay")}

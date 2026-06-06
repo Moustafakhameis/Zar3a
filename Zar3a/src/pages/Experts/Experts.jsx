@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import DualImageUpload from "../../components/DualImageUpload";
+import { PuffLoader } from "react-spinners";
 
 const normalizeListing = (listing) => {
   const name = listing.name || listing.User?.fullName || listing.User?.username || "Expert";
@@ -50,7 +51,7 @@ const Experts = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [createForm, setCreateForm] = useState({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "" });
+  const [createForm, setCreateForm] = useState({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "", academicDegree: "", experienceYears: "" });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [formError, setFormError] = useState("");
@@ -129,6 +130,8 @@ const Experts = () => {
         formData.append("description", createForm.description);
         formData.append("hourlyRate", Number(createForm.hourlyRate));
         formData.append("location", createForm.location);
+        if (createForm.academicDegree) formData.append("academicDegree", createForm.academicDegree);
+        if (createForm.experienceYears) formData.append("experienceYears", Number(createForm.experienceYears));
         formData.append("imageFile", imageFile);
         if (isEditing) {
           newListing = await updateExpertListing(editId, formData);
@@ -137,9 +140,9 @@ const Experts = () => {
         }
       } else {
         if (isEditing) {
-          newListing = await updateExpertListing(editId, { ...createForm, hourlyRate: Number(createForm.hourlyRate) });
+          newListing = await updateExpertListing(editId, { ...createForm, hourlyRate: Number(createForm.hourlyRate), experienceYears: createForm.experienceYears ? Number(createForm.experienceYears) : 0 });
         } else {
-          newListing = await createExpertListing({ ...createForm, hourlyRate: Number(createForm.hourlyRate) });
+          newListing = await createExpertListing({ ...createForm, hourlyRate: Number(createForm.hourlyRate), experienceYears: createForm.experienceYears ? Number(createForm.experienceYears) : 0 });
         }
       }
       
@@ -162,7 +165,7 @@ const Experts = () => {
     setShowCreateModal(false);
     setIsEditing(false);
     setEditId(null);
-    setCreateForm({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "" });
+    setCreateForm({ title: "", specialty: "", description: "", hourlyRate: "", location: "", imageUrl: "", academicDegree: "", experienceYears: "" });
     setImageFile(null);
     setImagePreview("");
     setFieldErrors({});
@@ -177,7 +180,9 @@ const Experts = () => {
       description: expert.description,
       hourlyRate: expert.hourlyRate.toString(),
       location: expert.location,
-      imageUrl: expert.image
+      imageUrl: expert.image,
+      academicDegree: expert.academicDegree || "",
+      experienceYears: expert.experienceYears ? expert.experienceYears.toString() : ""
     });
     setImagePreview(expert.image);
     setShowCreateModal(true);
@@ -243,9 +248,9 @@ const Experts = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-text-muted font-bold">{t("experts.loading")}</p>
+        <div className="flex flex-col items-center justify-center py-20">
+          <PuffLoader color="#10b981" size={60} className="mx-auto" />
+          <p className="text-text-muted font-bold mt-4">{t("experts.loading")}</p>
         </div>
       </div>
     );
@@ -542,6 +547,22 @@ const Experts = () => {
                     className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.location ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
                     placeholder="e.g. Cairo, Egypt" />
                   {fieldErrors.location && <p className="mt-1 text-xs text-red-500 font-bold">{fieldErrors.location}</p>}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Degree</label>
+                    <input type="text" name="academicDegree" value={createForm.academicDegree || ""} onChange={handleCreateInput}
+                      className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.academicDegree ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
+                      placeholder="e.g. PhD in Agronomy" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-text-main dark:text-slate-200 mb-2">Years of Experience</label>
+                    <input type="number" name="experienceYears" value={createForm.experienceYears || ""} onChange={handleCreateInput}
+                      onWheel={(e) => e.target.blur()}
+                      className={`w-full px-4 py-3 bg-surface-secondary dark:bg-slate-800 border ${fieldErrors.experienceYears ? "border-red-500" : "border-border-default dark:border-slate-700"} rounded-xl outline-none focus:ring-2 focus:ring-primary-base dark:text-white`}
+                      placeholder="e.g. 5" />
+                  </div>
                 </div>
 
                 <div>

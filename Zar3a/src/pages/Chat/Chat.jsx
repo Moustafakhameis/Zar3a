@@ -17,6 +17,8 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../API/axiosInstance";
 import { useLanguage } from "../../context/LanguageContext";
 
+import { ClipLoader } from "react-spinners";
+
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5002";
 
 const isImageUrl = (url) => {
@@ -263,9 +265,9 @@ const Chat = () => {
         </div>
 
         {chatLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-3">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
-            <p className="text-sm text-text-disabled font-bold">{t("chat.loadingMsgs")}</p>
+          <div className="flex justify-center items-center h-screen bg-slate-50 dark:bg-slate-900">
+          <ClipLoader color="#16a34a" size={40} />
+          <p className="text-sm text-text-disabled font-bold">{t("chat.loadingMsgs")}</p>
           </div>
         ) : (
           <AnimatePresence initial={false}>

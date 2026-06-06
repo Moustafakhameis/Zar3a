@@ -17,6 +17,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
+import { PuffLoader } from "react-spinners";
+
 export default function FarmerProfile() {
   const { t } = useLanguage();
   const { user, updateProfile } = useAuth();
@@ -34,8 +36,8 @@ export default function FarmerProfile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-base"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <PuffLoader color="#10b981" size={60} />
       </div>
     );
   }

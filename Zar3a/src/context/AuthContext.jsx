@@ -8,6 +8,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser]     = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -76,6 +77,14 @@ export function AuthProvider({ children }) {
   };
 
   /**
+   * Check if username or email is available.
+   */
+  const checkAvailability = async (email, username) => {
+    const { data } = await api.post("/auth/check-availability", { email, username });
+    return data;
+  };
+
+  /**
    * Step 2 – Choose role for a just-registered user.
    * role: 'FARMER' | 'BUYER' | 'SUPPLIER' | 'AGRO_EXPERT'
    */
@@ -119,11 +128,25 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const login = async (email, password) => {
-    const { data } = await api.post("/auth/login", { email, password });
+  /**
+   * Unified Registration – Registers user, sets role, and creates profile in one step.
+   */
+  const registerFull = async (formData) => {
+    // formData is a FormData object because it might include a CV file
+    const { data } = await api.post("/auth/register-full", formData);
+    return data;
+  };
+
+  const login = async (email, password, rememberMe = false) => {
+    const { data } = await api.post("/auth/login", { email, password, rememberMe });
 
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
+    if (rememberMe) {
+      localStorage.setItem("rememberedEmail", email);
+    } else {
+      localStorage.removeItem("rememberedEmail");
+    }
 
     try {
       const { data: currentUser } = await api.get("/auth/me");
@@ -137,19 +160,21 @@ export function AuthProvider({ children }) {
 
   /** Logout: revokes refresh token on server, clears local state, redirects to home. */
   const logout = () => {
+    setIsLoggingOut(true);
     const refreshToken = localStorage.getItem("refreshToken");
     if (refreshToken) {
       // Fire and forget logout to avoid freezing the UI
       api.post("/auth/logout", { refreshToken }).catch(() => {});
     }
     
-    // Instantly clear local state for immediate UI feedback
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    setUser(null);
-    
-    // Redirect to login page instantly
-    window.location.href = '/login';
+    // Delay to let the smooth animation play
+    setTimeout(() => {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      setUser(null);
+      setIsLoggingOut(false);
+      window.location.href = '/login';
+    }, 1000);
   };
 
   /** Re-fetch the current user from the server. */
@@ -469,6 +494,7 @@ export function AuthProvider({ children }) {
       value={{
         user,
         loading,
+        isLoggingOut,
         isAuthenticated: !!user,
         login,
         logout,
@@ -478,6 +504,8 @@ export function AuthProvider({ children }) {
         completeBuyerProfile,
         completeSupplierProfile,
         completeExpertProfile,
+        registerFull,
+        checkAvailability,
         refreshUser,
         setUser,
         updateProfile,
