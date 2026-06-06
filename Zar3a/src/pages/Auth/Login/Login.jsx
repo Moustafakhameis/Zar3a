@@ -43,11 +43,11 @@ export default function Login() {
       const user = await login(data.email, data.password, rememberMe);
       const roleToUse = user.role || user.pendingRole;
           
-      if (roleToUse === "AGRO_EXPERT" && user.status === "PENDING") {
+      if (roleToUse === "AGRO_EXPERT" && user.status === "pending") {
         navigate("/profile/expert");
-      } else if (roleToUse === "FARMER" && user.status === "PENDING") {
+      } else if (roleToUse === "FARMER" && user.status === "pending") {
         navigate("/profile/farmer");
-      } else if (roleToUse === "SUPPLIER" && user.status === "PENDING") {
+      } else if (roleToUse === "SUPPLIER" && user.status === "pending") {
         navigate("/profile/supplier");
       } else {
         navigate("/dashboard");

@@ -52,7 +52,7 @@ import LiveTicker from "./LiveTicker";
 import LiveClock from "../../components/LiveClock/LiveClock";
 
 const Dashboard = () => {
-  const { t } = useLanguage();
+  const { t, isArabic } = useLanguage();
   const { user, updateProfile } = useAuth();
   const [selectedAiCrop, setSelectedAiCrop] = useState(null);
 
@@ -94,21 +94,21 @@ const Dashboard = () => {
       icon: "🌾",
       min: 40,
       max: 60,
-      duration: "150 days",
-      nutrients: "Urea",
-      irrigation: "4-5 times/season",
-      season: "Winter",
+      duration: isArabic ? "١٥٠ يوم" : "150 days",
+      nutrients: isArabic ? "يوريا" : "Urea",
+      irrigation: isArabic ? "٤-٥ مرات/موسم" : "4-5 times/season",
+      season: isArabic ? "الشتاء" : "Winter",
       yieldTons: 3,
       pricePerTon: 13000,
       soilPh: "6.0 - 7.0",
-      sunlight: "Full Sun",
-      diseases: "Rust",
-      info: "Critical moisture needed during flowering.",
-      plantingDates: "November - December",
-      whyPlanted: "Essential food security crop; Egypt's most critical strategic staple for bread.",
-      difficulty: "Medium",
-      funFact: "Wheat was one of the first crops ever cultivated by humans, dating back over 10,000 years!",
-      tools: ["Seed drill", "Sickle", "Harvester"],
+      sunlight: isArabic ? "شمس كاملة" : "Full Sun",
+      diseases: isArabic ? "الصدأ" : "Rust",
+      info: isArabic ? "رطوبة حيوية أثناء الإزهار." : "Critical moisture needed during flowering.",
+      plantingDates: isArabic ? "نوفمبر - ديسمبر" : "November - December",
+      whyPlanted: isArabic ? "محصول أساسي للأمن الغذائي؛ أهم محصول استراتيجي للخبز في مصر." : "Essential food security crop; Egypt's most critical strategic staple for bread.",
+      difficulty: isArabic ? "متوسط" : "Medium",
+      funFact: isArabic ? "القمح كان من أوائل المحاصيل التي زرعها الإنسان قبل أكثر من ١٠٠٠٠ عام!" : "Wheat was one of the first crops ever cultivated by humans, dating back over 10,000 years!",
+      tools: isArabic ? ["آلة بذر", "منجل", "حصادة"] : ["Seed drill", "Sickle", "Harvester"],
     },
     "Sugar Cane": {
       icon: "🎋",
@@ -134,21 +134,21 @@ const Dashboard = () => {
       icon: "🍅",
       min: 60,
       max: 80,
-      duration: "90 days",
+      duration: isArabic ? "٩٠ يوم" : "90 days",
       nutrients: "NPK 15-15-15",
-      irrigation: "Daily early morning",
-      season: "All seasons",
+      irrigation: isArabic ? "يومياً في الصباح الباكر" : "Daily early morning",
+      season: isArabic ? "كل الفصول" : "All seasons",
       yieldTons: 20,
       pricePerTon: 6000,
       soilPh: "6.0 - 6.8",
-      sunlight: "Full Sun",
-      diseases: "Blight",
-      info: "Consistent moisture prevents fruit cracking.",
-      plantingDates: "Multiple (Feb-Mar, Sep-Oct)",
-      whyPlanted: "Extremely high local demand year-round; versatile crop for fresh market and processing.",
-      difficulty: "Moderate",
-      funFact: "Did you know tomatoes are technically berries?",
-      tools: ["Hand trowel", "Pruning shears", "Tomato cages"],
+      sunlight: isArabic ? "شمس كاملة" : "Full Sun",
+      diseases: isArabic ? "اللفحة" : "Blight",
+      info: isArabic ? "الرطوبة المستمرة تمنع تشقق الثمار." : "Consistent moisture prevents fruit cracking.",
+      plantingDates: isArabic ? "متعدد (فبراير-مارس، سبتمبر-أكتوبر)" : "Multiple (Feb-Mar, Sep-Oct)",
+      whyPlanted: isArabic ? "طلب محلي مرتفع جداً طوال العام؛ محصول متعدد الاستخدامات للسوق الطازجة والتصنيع." : "Extremely high local demand year-round; versatile crop for fresh market and processing.",
+      difficulty: isArabic ? "معتدل" : "Moderate",
+      funFact: isArabic ? "هل تعلم أن الطماطم من الناحية النباتية تعتبر من التوتيات؟" : "Did you know tomatoes are technically berries?",
+      tools: isArabic ? ["مجرفة يدوية", "مقصات تقليم", "أقفاص طماطم"] : ["Hand trowel", "Pruning shears", "Tomato cages"],
     },
     Citrus: {
       icon: "🍊",
@@ -1359,7 +1359,7 @@ const Dashboard = () => {
                       {t("crop." + weather.bestCrop) || weather.bestCrop}
                     </span>
                     <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                      Maximum yield probability
+                      {t("dash.maxYieldProb")}
                     </span>
                  </div>
                  
@@ -2020,23 +2020,23 @@ const Dashboard = () => {
                   {/* Style 1: Why AI Approach */}
                   <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl">
                     <h4 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
-                      <LuActivity /> Why AI Chose This
+                      <LuActivity /> {t("dash.whyAiChoseThis")}
                     </h4>
                     <p className="text-sm text-text-main dark:text-slate-200 leading-relaxed font-bold">
-                      Based on real-time soil moisture sensors and current regional weather patterns, <span className="text-blue-600 dark:text-blue-400">{t("crop." + selectedAiCrop) || selectedAiCrop}</span> offers the highest yield and profitability for your exact location today!
+                      {isArabic ? `بناءً على مستشعرات رطوبة التربة في الوقت الفعلي وأنماط الطقس الإقليمية الحالية، يقدم محصول ${t("crop." + selectedAiCrop) || selectedAiCrop} أعلى إنتاجية وربحية لموقعك الحالي اليوم!` : `Based on real-time soil moisture sensors and current regional weather patterns, ${t("crop." + selectedAiCrop) || selectedAiCrop} offers the highest yield and profitability for your exact location today!`}
                     </p>
                   </div>
 
                   {/* Style 2: Quick Facts Card */}
                   <div className="bg-surface-secondary dark:bg-slate-800 p-4 rounded-2xl border border-border-default dark:border-slate-700 shadow-inner">
                     <h4 className="text-[10px] font-black text-text-muted dark:text-slate-400 uppercase tracking-widest mb-3">
-                      Quick Facts
+                      {t("dash.quickFacts")}
                     </h4>
                     <ul className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs font-bold text-text-main dark:text-slate-200">
-                      <li className="flex items-center gap-1.5">🌱 <span className="text-text-muted">Duration:</span> <span className="truncate">{cropsData[selectedAiCrop]?.duration}</span></li>
-                      <li className="flex items-center gap-1.5">☀️ <span className="text-text-muted">Sunlight:</span> <span className="truncate">{cropsData[selectedAiCrop]?.sunlight}</span></li>
-                      <li className="flex items-center gap-1.5">💧 <span className="text-text-muted">Watering:</span> <span className="truncate">{cropsData[selectedAiCrop]?.irrigation?.split(' ')[0]}</span></li>
-                      <li className="flex items-center gap-1.5">💪 <span className="text-text-muted">Difficulty:</span> <span className="truncate">{cropsData[selectedAiCrop]?.difficulty}</span></li>
+                      <li className="flex items-center gap-1.5">🌱 <span className="text-text-muted">{t("dash.duration")}</span> <span className="truncate">{cropsData[selectedAiCrop]?.duration}</span></li>
+                      <li className="flex items-center gap-1.5">☀️ <span className="text-text-muted">{t("dash.sunlight")}</span> <span className="truncate">{cropsData[selectedAiCrop]?.sunlight}</span></li>
+                      <li className="flex items-center gap-1.5">💧 <span className="text-text-muted">{t("dash.watering")}</span> <span className="truncate">{cropsData[selectedAiCrop]?.irrigation?.split(' ')[0]}</span></li>
+                      <li className="flex items-center gap-1.5">💪 <span className="text-text-muted">{t("dash.difficulty")}</span> <span className="truncate">{cropsData[selectedAiCrop]?.difficulty}</span></li>
                     </ul>
                   </div>
 
@@ -2044,7 +2044,7 @@ const Dashboard = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-2xl">
                       <h4 className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-2 flex items-center gap-1">
-                        <LuSettings2 size={12} /> Tools Needed
+                        <LuSettings2 size={12} /> {t("dash.toolsNeeded")}
                       </h4>
                       <ul className="list-disc list-inside text-xs font-bold text-text-main dark:text-slate-300 space-y-1">
                         {cropsData[selectedAiCrop]?.tools.map((t, i) => <li key={i}>{t}</li>)}
@@ -2052,7 +2052,7 @@ const Dashboard = () => {
                     </div>
                     <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl">
                       <h4 className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1">
-                        <LuFlaskConical size={12} /> Fertilizers
+                        <LuFlaskConical size={12} /> {t("dash.fertilizers")}
                       </h4>
                       <p className="text-xs font-bold text-text-main dark:text-slate-300 leading-snug">
                         {cropsData[selectedAiCrop]?.nutrients}
@@ -2066,7 +2066,7 @@ const Dashboard = () => {
                       "{cropsData[selectedAiCrop]?.funFact}"
                     </p>
                     <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mt-3 opacity-80">
-                      Plant seeds now & track growth!
+                      {t("dash.plantSeedsNow")}
                     </p>
                   </div>
                 </div>

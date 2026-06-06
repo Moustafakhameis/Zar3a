@@ -238,7 +238,8 @@ export default function Admin() {
       setError("");
       setSuccess("");
       await approveUser(userId);
-      setPendingUsers((prev) => prev.filter((u) => u.id !== userId));
+      const pendingList = await getPendingUsers();
+      setPendingUsers(pendingList || []);
       setSuccess("User approved successfully.");
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to approve user.");
@@ -253,7 +254,8 @@ export default function Admin() {
       setError("");
       setSuccess("");
       await rejectUser(userId);
-      setPendingUsers((prev) => prev.filter((u) => u.id !== userId));
+      const pendingList = await getPendingUsers();
+      setPendingUsers(pendingList || []);
       setSuccess("User request rejected successfully.");
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to reject user request.");
@@ -567,92 +569,140 @@ export default function Admin() {
             <div className="p-10 text-center text-text-muted dark:text-text-disabled">{pendingUsers.length === 0 ? t("admin.noPending") : "No pending requests match this filter."}</div>
           ) : (
             <div className="space-y-4 p-6">
-              {filteredPendingUsers.map((item) => {
+              {filteredPendingUsers.flatMap((item) => {
                 const isFarmer = item.role === "FARMER" || item.pendingRole === "FARMER";
                 const isSupplier = item.role === "SUPPLIER" || item.pendingRole === "SUPPLIER";
                 const isExpert = item.role === "AGRO_EXPERT" || item.pendingRole === "AGRO_EXPERT";
 
-                return (
-                  <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-border-default bg-surface-secondary p-5 dark:border-slate-700 dark:bg-slate-900">
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-text-main dark:text-white">{item.fullName}</h3>
-                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                            isFarmer ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400" :
-                            isSupplier ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-400" :
-                            "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
-                          }`}>
-                            {isFarmer ? "Farmer 🌾" : isSupplier ? "Supplier 📦" : "Expert 🎓"}
-                          </span>
-                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                            item.status === 'pending_second_approval' ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400" :
-                            item.status === 'pending_sensor' ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400" :
-                            "bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400"
-                          }`}>
-                            {item.status === 'pending_second_approval' ? "Pending Sensor ID Approval 📡" :
-                             item.status === 'pending_sensor' ? "Waiting for Sensor ID 🔒" :
-                             "Pending Profile Approval ⏳"}
-                          </span>
+                const elements = [];
+
+                // 1. Profile Approval Card (Only show if status is pending)
+                if (item.status === 'pending' || !isFarmer || (!item.FarmerProfile?.sensorId && item.status !== 'pending_second_approval')) {
+                  elements.push(
+                    <motion.div key={`${item.id}_profile`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-border-default bg-surface-secondary p-5 dark:border-slate-700 dark:bg-slate-900">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-text-main dark:text-white">{item.fullName}</h3>
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                              isFarmer ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400" :
+                              isSupplier ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-400" :
+                              "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
+                            }`}>
+                              {isFarmer ? "Farmer 🌾" : isSupplier ? "Supplier 📦" : "Expert 🎓"}
+                            </span>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400">
+                              Pending Profile Approval ⏳
+                            </span>
+                          </div>
+                          <p className="text-sm text-text-muted dark:text-text-disabled">{item.email} | {item.phone}</p>
+                          
+                          {isFarmer && item.FarmerProfile && (
+                            <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                              {/* Don't show Sensor ID in the profile card if they have one, to avoid confusion with the separate sensor card */}
+                              {!item.FarmerProfile.sensorId && (
+                                <p><strong>Sensor ID:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">N/A</span></p>
+                              )}
+                              <p><strong>Location:</strong> {item.FarmerProfile.location || "N/A"}</p>
+                              <p><strong>Soil Type:</strong> {item.FarmerProfile.soilType || "N/A"}</p>
+                              <p><strong>Farm Size:</strong> {item.FarmerProfile.farmSize || "N/A"}</p>
+                            </div>
+                          )}
+
+                          {isSupplier && item.SupplierProfile && (
+                            <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                              <p><strong>Trade License:</strong> <span className="bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400 px-2 py-0.5 rounded font-mono font-bold">{item.SupplierProfile.tradeLicense || "N/A"}</span></p>
+                              <p><strong>Business Location:</strong> {item.SupplierProfile.location || "N/A"}</p>
+                            </div>
+                          )}
+
+                          {isExpert && item.AgroExpertProfile && (
+                            <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                              <p><strong>{t("admin.degree")}:</strong> {item.AgroExpertProfile.academicDegree || t("admin.cvNA")}</p>
+                              <p><strong>{t("admin.experience")}:</strong> {item.AgroExpertProfile.experienceYears ?? '0'} {t("admin.cvYears")}</p>
+                              <p><strong>{t("admin.bio")}:</strong> {item.AgroExpertProfile.bio || t("admin.noBio")}</p>
+                              {(item.AgroExpertProfile.cvFilePath || item.cv) && (
+                                <p>
+                                  <strong>CV:</strong>{' '}
+                                  <a
+                                    href={`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/${item.AgroExpertProfile.cvFilePath || item.cv}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-emerald-500 hover:underline font-bold"
+                                  >
+                                    {t("admin.viewCv")}
+                                  </a>
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <p className="text-sm text-text-muted dark:text-text-disabled">{item.email} | {item.phone}</p>
-                        
-                        {isFarmer && item.FarmerProfile && (
-                          <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
-                            <p><strong>Sensor ID:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">{item.FarmerProfile.sensorId || "N/A"}</span></p>
-                            <p><strong>Location:</strong> {item.FarmerProfile.location || "N/A"}</p>
-                            <p><strong>Soil Type:</strong> {item.FarmerProfile.soilType || "N/A"}</p>
-                            <p><strong>Farm Size:</strong> {item.FarmerProfile.farmSize || "N/A"}</p>
-                          </div>
-                        )}
-
-                        {isSupplier && item.SupplierProfile && (
-                          <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
-                            <p><strong>Trade License:</strong> <span className="bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400 px-2 py-0.5 rounded font-mono font-bold">{item.SupplierProfile.tradeLicense || "N/A"}</span></p>
-                            <p><strong>Business Location:</strong> {item.SupplierProfile.location || "N/A"}</p>
-                          </div>
-                        )}
-
-                        {isExpert && item.AgroExpertProfile && (
-                          <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
-                            <p><strong>{t("admin.degree")}:</strong> {item.AgroExpertProfile.academicDegree || t("admin.cvNA")}</p>
-                            <p><strong>{t("admin.experience")}:</strong> {item.AgroExpertProfile.experienceYears ?? '0'} {t("admin.cvYears")}</p>
-                            <p><strong>{t("admin.bio")}:</strong> {item.AgroExpertProfile.bio || t("admin.noBio")}</p>
-                            {(item.AgroExpertProfile.cvFilePath || item.cv) && (
-                              <p>
-                                <strong>CV:</strong>{' '}
-                                <a
-                                  href={`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/${item.AgroExpertProfile.cvFilePath || item.cv}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-emerald-500 hover:underline font-bold"
-                                >
-                                  {t("admin.viewCv")}
-                                </a>
-                              </p>
-                            )}
-                          </div>
-                        )}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            disabled={actionLoading === item.id}
+                            onClick={() => handleApprove(item.id)}
+                            className="rounded-2xl bg-emerald-500 px-4 py-2 text-white transition hover:bg-primary-base disabled:opacity-50 font-bold text-xs"
+                          >
+                            {t("admin.approve")}
+                          </button>
+                          <button
+                            disabled={actionLoading === item.id}
+                            onClick={() => handleReject(item.id)}
+                            className="rounded-2xl bg-rose-500 px-4 py-2 text-white transition hover:bg-rose-600 disabled:opacity-50 font-bold text-xs"
+                          >
+                            {t("admin.reject")}
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <button
-                          disabled={actionLoading === item.id}
-                          onClick={() => handleApprove(item.id)}
-                          className="rounded-2xl bg-emerald-500 px-4 py-2 text-white transition hover:bg-primary-base disabled:opacity-50 font-bold text-xs"
-                        >
-                          {t("admin.approve")}
-                        </button>
-                        <button
-                          disabled={actionLoading === item.id}
-                          onClick={() => handleReject(item.id)}
-                          className="rounded-2xl bg-rose-500 px-4 py-2 text-white transition hover:bg-rose-600 disabled:opacity-50 font-bold text-xs"
-                        >
-                          {t("admin.reject")}
-                        </button>
+                    </motion.div>
+                  );
+                }
+
+                // 2. Sensor ID Card (Show locked if pending, unlocked if pending_second_approval)
+                if (isFarmer && item.FarmerProfile?.sensorId) {
+                  const isLocked = item.status === 'pending';
+                  
+                  elements.push(
+                    <motion.div key={`${item.id}_sensor`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-3xl border ${isLocked ? 'border-dashed border-border-default bg-surface-secondary/50 opacity-60' : 'border-border-default bg-surface-secondary'} p-5 dark:border-slate-700 ${isLocked ? 'dark:bg-slate-900/50' : 'dark:bg-slate-900'}`}>
+                      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-text-main dark:text-white">{item.fullName}</h3>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                              Farmer 🌾
+                            </span>
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${isLocked ? 'bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400'}`}>
+                              Pending Sensor ID Approval 📡 {isLocked ? '(Locked)' : ''}
+                            </span>
+                          </div>
+                          <p className="text-sm text-text-muted dark:text-text-disabled">{item.email} | {item.phone}</p>
+                          <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                            <p><strong>Sensor ID:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">{item.FarmerProfile.sensorId}</span></p>
+                            {isLocked && <p className="italic mt-1">⚠️ This sensor request will unlock after the farmer's profile is approved.</p>}
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button 
+                            disabled={isLocked || actionLoading === item.id} 
+                            onClick={() => !isLocked && handleApprove(item.id)}
+                            className={`rounded-2xl bg-emerald-500 px-4 py-2 text-white font-bold text-xs ${isLocked ? 'opacity-30 cursor-not-allowed' : 'transition hover:bg-primary-base disabled:opacity-50'}`}
+                          >
+                            {t("admin.approve")}
+                          </button>
+                          <button 
+                            disabled={isLocked || actionLoading === item.id} 
+                            onClick={() => !isLocked && handleReject(item.id)}
+                            className={`rounded-2xl bg-rose-500 px-4 py-2 text-white font-bold text-xs ${isLocked ? 'opacity-30 cursor-not-allowed' : 'transition hover:bg-rose-600 disabled:opacity-50'}`}
+                          >
+                            {t("admin.reject")}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                );
+                    </motion.div>
+                  );
+                }
+
+                return elements;
               })}
             </div>
           )}
