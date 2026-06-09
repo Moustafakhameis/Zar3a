@@ -1103,67 +1103,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Hardware Panel */}
-          <div
-            className={`p-6 rounded-[2.5rem] border transition-all ${activeSector.isAuto ? "bg-surface-secondary dark:bg-slate-800/50 border-border-default dark:border-slate-800 opacity-60" : "bg-surface-card dark:bg-slate-900 border-green-200 dark:border-green-900/50 shadow-lg"}`}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h4 className="font-black dark:text-white flex items-center gap-2">
-                <LuSettings2 className="text-text-disabled" /> {t("dash.hardwareControl")}
-              </h4>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <button
-                onClick={() => toggleHardware("pump")}
-                className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all border ${hardware.pump ? "bg-blue-500 border-blue-600 text-white" : "bg-surface-secondary dark:bg-slate-800 text-text-disabled"}`}
-              >
-                <LuDroplet
-                  size={24}
-                  className={hardware.pump ? "animate-bounce" : ""}
-                />
-                <span className="text-[10px] font-black uppercase mt-2">
-                  {t("dash.pump")}
-                </span>
-              </button>
-              <button
-                onClick={() => toggleHardware("vent")}
-                className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all border ${hardware.vent ? "bg-emerald-500 border-emerald-600 text-white" : "bg-surface-secondary dark:bg-slate-800 text-text-disabled"}`}
-              >
-                <LuWind
-                  size={24}
-                  className={hardware.vent ? "animate-spin-slow" : ""}
-                />
-                <span className="text-[10px] font-black uppercase mt-2">
-                  {t("dash.vent")}
-                </span>
-              </button>
-              <button
-                onClick={() => toggleHardware("fertilizer")}
-                className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all border ${hardware.fertilizer ? "bg-purple-500 border-purple-600 text-white" : "bg-surface-secondary dark:bg-slate-800 text-text-disabled"}`}
-              >
-                <LuFlaskConical
-                  size={24}
-                  className={hardware.fertilizer ? "animate-pulse" : ""}
-                />
-                <span className="text-[10px] font-black uppercase mt-2">
-                  {t("dash.fertilizer")}
-                </span>
-              </button>
-              <button
-                onClick={() => toggleHardware("ph")}
-                className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all border ${hardware.ph ? "bg-yellow-500 border-yellow-600 text-white" : "bg-surface-secondary dark:bg-slate-800 text-text-disabled"}`}
-              >
-                <LuThermometer
-                  size={24}
-                  className={hardware.ph ? "animate-pulse" : ""}
-                />
-                <span className="text-[10px] font-black uppercase mt-2">
-                  {t("dash.phPump") || "pH Mod"}
-                </span>
-              </button>
-            </div>
-          </div>
-
           {/* Crop Insights Card */}
           <div className="bg-surface-card dark:bg-slate-900 p-6 rounded-[2.5rem] border border-border-default dark:border-slate-800 shadow-sm">
             <h4 className="font-black dark:text-white flex items-center gap-2 mb-4">
@@ -1245,6 +1184,67 @@ const Dashboard = () => {
                   {cropsData[activeSector.crop].irrigation}
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Hardware Panel */}
+          <div
+            className={`p-6 rounded-[2.5rem] border transition-all ${activeSector.isAuto ? "bg-surface-secondary dark:bg-slate-800/50 border-border-default dark:border-slate-800 opacity-60" : "bg-surface-card dark:bg-slate-900 border-green-200 dark:border-green-900/50 shadow-lg"}`}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="font-black dark:text-white flex items-center gap-2">
+                <LuSettings2 className="text-text-disabled" /> {t("dash.hardwareControl")}
+              </h4>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <button
+                onClick={() => toggleHardware("pump")}
+                className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all border ${hardware.pump ? "bg-blue-500 border-blue-600 text-white" : "bg-surface-secondary dark:bg-slate-800 text-text-disabled"}`}
+              >
+                <LuDroplet
+                  size={24}
+                  className={hardware.pump ? "animate-bounce" : ""}
+                />
+                <span className="text-[10px] font-black uppercase mt-2">
+                  {t("dash.pump")}
+                </span>
+              </button>
+              <button
+                onClick={() => toggleHardware("vent")}
+                className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all border ${hardware.vent ? "bg-emerald-500 border-emerald-600 text-white" : "bg-surface-secondary dark:bg-slate-800 text-text-disabled"}`}
+              >
+                <LuWind
+                  size={24}
+                  className={hardware.vent ? "animate-spin-slow" : ""}
+                />
+                <span className="text-[10px] font-black uppercase mt-2">
+                  {t("dash.vent")}
+                </span>
+              </button>
+              <button
+                onClick={() => toggleHardware("fertilizer")}
+                className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all border ${hardware.fertilizer ? "bg-purple-500 border-purple-600 text-white" : "bg-surface-secondary dark:bg-slate-800 text-text-disabled"}`}
+              >
+                <LuFlaskConical
+                  size={24}
+                  className={hardware.fertilizer ? "animate-pulse" : ""}
+                />
+                <span className="text-[10px] font-black uppercase mt-2">
+                  {t("dash.fertilizer")}
+                </span>
+              </button>
+              <button
+                onClick={() => toggleHardware("ph")}
+                className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all border ${hardware.ph ? "bg-yellow-500 border-yellow-600 text-white" : "bg-surface-secondary dark:bg-slate-800 text-text-disabled"}`}
+              >
+                <LuThermometer
+                  size={24}
+                  className={hardware.ph ? "animate-pulse" : ""}
+                />
+                <span className="text-[10px] font-black uppercase mt-2">
+                  {t("dash.phPump") || "pH Mod"}
+                </span>
+              </button>
             </div>
           </div>
         </div>
