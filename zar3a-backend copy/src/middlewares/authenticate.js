@@ -13,20 +13,19 @@ const authenticate = async (req, res, next) => {
     return res.status(401).json({ message: "No token provided" });
 
   const payload = decodeAccessToken(authHeader.split(" ")[1]);
+  console.log("[authenticate] Payload received:", payload);
 
-  if (!payload || payload.type !== "access")
+  if (!payload || payload.type !== "access") {
+    console.log(`[authenticate] Rejecting token. Payload:`, payload);
     return res.status(401).json({ message: "Invalid or expired token" });
+  }
 
   const user = await User.findByPk(Number(payload.sub));
 
   if (!user || !user.isActive)
     return res.status(401).json({ message: "User not found or inactive" });
 
-  const approvalRequiredRoles = ['FARMER', 'SUPPLIER', 'AGRO_EXPERT'];
-  const hasApprovalRole = approvalRequiredRoles.includes(user.role) || approvalRequiredRoles.includes(user.pendingRole);
 
-  if (user.role !== 'ADMIN' && hasApprovalRole && !user.isApproved)
-    return res.status(403).json({ message: "Account pending approval" });
 
   req.user = user;
   next();

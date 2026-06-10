@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiUserCheck,
@@ -21,53 +22,111 @@ import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { adminAPI } from "../../API/axiosInstance";
+import { PuffLoader } from "react-spinners";
 
-const CustomSelect = ({ value, onChange, options, className }) => {
+const CustomSelect = ({ value, onChange, options, className, onOpenChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null);
+  const menuRef = useRef(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setIsOpen(false);
+      if (
+        (ref.current && ref.current.contains(e.target)) ||
+        (menuRef.current && menuRef.current.contains(e.target))
+      ) {
+        return;
+      }
+      setIsOpen(false);
+      if (onOpenChange) onOpenChange(false);
     };
+
+    const handleScroll = () => {
+      if (isOpen) {
+        setIsOpen(false);
+        if (onOpenChange) onOpenChange(false);
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    window.addEventListener("scroll", handleScroll, { capture: true, passive: true });
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, { capture: true });
+    };
+  }, [isOpen, onOpenChange]);
+
+  const handleToggle = () => {
+    if (!isOpen && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+      setIsOpen(true);
+      if (onOpenChange) onOpenChange(true);
+    } else {
+      setIsOpen(false);
+      if (onOpenChange) onOpenChange(false);
+    }
+  };
 
   const selectedOption = options.find((o) => o.value === value) || options[0];
 
   return (
-    <div className={`relative ${className}`} ref={ref}>
+    <div className={`relative ${className || ''}`} ref={ref}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all cursor-pointer"
+        onClick={handleToggle}
+        className="w-full flex items-center justify-between bg-surface-secondary dark:bg-slate-900/50 border border-border-default dark:border-slate-700 rounded-2xl px-4 py-2.5 text-sm font-medium text-text-main dark:text-white hover:border-emerald-400 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all cursor-pointer shadow-sm"
       >
         <span className="truncate">{selectedOption.label}</span>
         <FiChevronDown className={`ml-2 flex-shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} size={16} />
       </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 top-full left-0 mt-2 w-full min-w-[140px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden py-1"
-          >
-            {options.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors ${value === opt.value ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <div
+              ref={menuRef}
+              style={{
+                position: 'absolute',
+                top: `${coords.top + 8}px`,
+                left: `${coords.left}px`,
+                width: `${coords.width}px`,
+                zIndex: 999999
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.15 }}
+                className="w-full min-w-[140px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden py-1"
               >
-                {opt.label}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+                {options.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => { 
+                      onChange(opt.value); 
+                      setIsOpen(false); 
+                      if (onOpenChange) onOpenChange(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${value === opt.value ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };
@@ -90,6 +149,8 @@ export default function Admin() {
   const [inquiries, setInquiries] = useState([]);
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
+  const [openRowId, setOpenRowId] = useState(null);
+  const [filters, setFilters] = useState({ role: "", status: "", search: "" });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState("");
@@ -99,6 +160,7 @@ export default function Admin() {
   const [userRoleFilter, setUserRoleFilter] = useState("ALL");
   const [userStatusFilter, setUserStatusFilter] = useState("ALL");
   const [pendingRoleFilter, setPendingRoleFilter] = useState("ALL");
+  const [activeTab, setActiveTab] = useState("users");
 
   useEffect(() => {
     if (!user) return;
@@ -176,7 +238,8 @@ export default function Admin() {
       setError("");
       setSuccess("");
       await approveUser(userId);
-      setPendingUsers((prev) => prev.filter((u) => u.id !== userId));
+      const pendingList = await getPendingUsers();
+      setPendingUsers(pendingList || []);
       setSuccess("User approved successfully.");
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to approve user.");
@@ -191,7 +254,8 @@ export default function Admin() {
       setError("");
       setSuccess("");
       await rejectUser(userId);
-      setPendingUsers((prev) => prev.filter((u) => u.id !== userId));
+      const pendingList = await getPendingUsers();
+      setPendingUsers(pendingList || []);
       setSuccess("User request rejected successfully.");
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to reject user request.");
@@ -238,8 +302,8 @@ export default function Admin() {
   if (authLoading || (user && loading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-secondary dark:bg-slate-900">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4" />
+        <div className="flex flex-col items-center justify-center h-[50vh]">
+          <PuffLoader color="#10b981" size={60} className="mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-text-subtle dark:text-slate-300 mb-2">{t("admin.loading")}</h2>
           <p className="text-text-muted dark:text-text-disabled">{t("admin.loadingDesc")}</p>
         </div>
@@ -281,9 +345,14 @@ export default function Admin() {
             <h1 className="text-4xl font-black text-text-main dark:text-white">{t("admin.manageUsers")}</h1>
             <p className="mt-2 max-w-2xl text-text-subtle dark:text-text-disabled">{t("admin.manageDesc")}</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/products-dashboard" className="inline-flex items-center gap-2 rounded-2xl bg-primary-base px-5 py-3 text-white shadow-lg transition hover:bg-primary-hover font-bold text-sm">{t("admin.prodDash")}</Link>
-            <Link to="/dashboard" className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-white shadow-lg transition hover:bg-slate-700 font-bold text-sm"><FiArrowLeft size={18} /> {t("admin.backDash")}</Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link to="/dashboard" className="inline-flex items-center gap-2 rounded-xl bg-surface-secondary border border-border-default px-4 py-2.5 text-sm font-bold text-text-main transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700 shadow-sm">
+              <FiArrowLeft size={16} /> 
+              {t("admin.backDash")}
+            </Link>
+            <Link to="/products-dashboard" className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-2.5 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30 dark:text-emerald-400 dark:hover:bg-emerald-900/40 shadow-sm">
+              {t("admin.prodDash")}
+            </Link>
           </div>
         </header>
 
@@ -323,6 +392,44 @@ export default function Admin() {
         {error && <div className="rounded-3xl bg-rose-50 p-5 text-rose-700 border border-rose-100">{error}</div>}
         {success && <div className="rounded-3xl bg-primary-light p-5 text-emerald-700 border border-emerald-100">{success}</div>}
 
+        <div className="flex flex-wrap p-1.5 gap-2 bg-surface-secondary border border-border-default dark:bg-slate-900/50 dark:border-slate-700/80 rounded-2xl mb-6 w-fit mx-auto shadow-sm">
+          {[
+            { id: 'users', label: t("admin.usersTable") },
+            { id: 'pending_requests', label: t("admin.pendingRequests"), badge: pendingUsers.length, badgeColor: 'rose' },
+            { id: 'quote_requests', label: 'Pending Quote Requests', badge: inquiries.length, badgeColor: 'amber' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`relative px-5 py-2.5 text-sm font-bold rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                activeTab === tab.id 
+                  ? 'text-text-main dark:text-white' 
+                  : 'text-text-muted hover:text-text-main dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+            >
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="admin-active-tab"
+                  className="absolute inset-0 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700"
+                  initial={false}
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-2">
+                {tab.label}
+                {tab.badge > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] text-white ${
+                    tab.badgeColor === 'rose' ? 'bg-rose-500' : 'bg-amber-500'
+                  }`}>
+                    {tab.badge}
+                  </span>
+                )}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'users' && (
         <section className="rounded-3xl overflow-hidden bg-surface-card shadow-sm border border-border-default dark:bg-slate-800 dark:border-slate-700">
           <div className="border-b border-border-default px-6 py-5 dark:border-slate-700 bg-surface-secondary dark:bg-slate-900 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
@@ -369,7 +476,7 @@ export default function Admin() {
               </div>
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto min-h-[300px] pb-24">
             <table className="min-w-full text-left text-sm text-text-subtle dark:text-slate-300">
               <thead className="bg-surface-secondary text-text-muted uppercase tracking-[0.2em] text-xs dark:bg-slate-900 dark:text-text-disabled">
                 <tr>
@@ -389,7 +496,7 @@ export default function Admin() {
                   </tr>
                 ) : (
                   filteredUsers.map((item) => (
-                  <tr key={item.id} className="border-t border-border-default dark:border-slate-700">
+                  <tr key={item.id} className={`border-t border-border-default dark:border-slate-700 transition-colors ${openRowId === item.id ? 'bg-slate-50/50 dark:bg-slate-800/50 relative z-[99]' : 'relative z-10'}`}>
                     <td className="px-6 py-4 font-semibold text-text-main dark:text-white">{item.fullName}</td>
                     <td className="px-6 py-4">{item.email}</td>
                     <td className="px-6 py-4">
@@ -437,7 +544,9 @@ export default function Admin() {
             </table>
           </div>
         </section>
+        )}
 
+        {activeTab === 'pending_requests' && (
         <section className="rounded-3xl overflow-hidden bg-surface-card shadow-sm border border-border-default dark:bg-slate-800 dark:border-slate-700">
           <div className="border-b border-border-default px-6 py-5 dark:border-slate-700 bg-surface-secondary dark:bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -460,100 +569,150 @@ export default function Admin() {
             <div className="p-10 text-center text-text-muted dark:text-text-disabled">{pendingUsers.length === 0 ? t("admin.noPending") : "No pending requests match this filter."}</div>
           ) : (
             <div className="space-y-4 p-6">
-              {filteredPendingUsers.map((item) => {
+              {filteredPendingUsers.flatMap((item) => {
                 const isFarmer = item.role === "FARMER" || item.pendingRole === "FARMER";
                 const isSupplier = item.role === "SUPPLIER" || item.pendingRole === "SUPPLIER";
                 const isExpert = item.role === "AGRO_EXPERT" || item.pendingRole === "AGRO_EXPERT";
 
-                return (
-                  <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-border-default bg-surface-secondary p-5 dark:border-slate-700 dark:bg-slate-900">
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-text-main dark:text-white">{item.fullName}</h3>
-                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                            isFarmer ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400" :
-                            isSupplier ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-400" :
-                            "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
-                          }`}>
-                            {isFarmer ? "Farmer 🌾" : isSupplier ? "Supplier 📦" : "Expert 🎓"}
-                          </span>
-                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                            item.status === 'pending_second_approval' ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400" :
-                            item.status === 'pending_sensor' ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400" :
-                            "bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400"
-                          }`}>
-                            {item.status === 'pending_second_approval' ? "Pending Sensor ID Approval 📡" :
-                             item.status === 'pending_sensor' ? "Waiting for Sensor ID 🔒" :
-                             "Pending Profile Approval ⏳"}
-                          </span>
+                const elements = [];
+
+                // 1. Profile Approval Card (Only show if status is pending)
+                if (item.status === 'pending' || !isFarmer || (!item.FarmerProfile?.sensorId && item.status !== 'pending_second_approval')) {
+                  elements.push(
+                    <motion.div key={`${item.id}_profile`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-border-default bg-surface-secondary p-5 dark:border-slate-700 dark:bg-slate-900">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-text-main dark:text-white">{item.fullName}</h3>
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                              isFarmer ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400" :
+                              isSupplier ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-400" :
+                              "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
+                            }`}>
+                              {isFarmer ? "Farmer 🌾" : isSupplier ? "Supplier 📦" : "Expert 🎓"}
+                            </span>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400">
+                              Pending Profile Approval ⏳
+                            </span>
+                          </div>
+                          <p className="text-sm text-text-muted dark:text-text-disabled">{item.email} | {item.phone}</p>
+                          
+                          {isFarmer && item.FarmerProfile && (
+                            <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                              {/* Don't show Sensor ID in the profile card if they have one, to avoid confusion with the separate sensor card */}
+                              {!item.FarmerProfile.sensorId && (
+                                <p><strong>Sensor ID:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">N/A</span></p>
+                              )}
+                              <p><strong>Location:</strong> {item.FarmerProfile.location || "N/A"}</p>
+                              <p><strong>Soil Type:</strong> {item.FarmerProfile.soilType || "N/A"}</p>
+                              <p><strong>Farm Size:</strong> {item.FarmerProfile.farmSize || "N/A"}</p>
+                            </div>
+                          )}
+
+                          {isSupplier && item.SupplierProfile && (
+                            <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                              <p><strong>Trade License:</strong> <span className="bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400 px-2 py-0.5 rounded font-mono font-bold">{item.SupplierProfile.tradeLicense || "N/A"}</span></p>
+                              <p><strong>Business Location:</strong> {item.SupplierProfile.location || "N/A"}</p>
+                            </div>
+                          )}
+
+                          {isExpert && item.AgroExpertProfile && (
+                            <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                              <p><strong>{t("admin.degree")}:</strong> {item.AgroExpertProfile.academicDegree || t("admin.cvNA")}</p>
+                              <p><strong>{t("admin.experience")}:</strong> {item.AgroExpertProfile.experienceYears ?? '0'} {t("admin.cvYears")}</p>
+                              <p><strong>{t("admin.bio")}:</strong> {item.AgroExpertProfile.bio || t("admin.noBio")}</p>
+                              {(item.AgroExpertProfile.cvFilePath || item.cv) && (
+                                <p>
+                                  <strong>CV:</strong>{' '}
+                                  <a
+                                    href={`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/${item.AgroExpertProfile.cvFilePath || item.cv}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-emerald-500 hover:underline font-bold"
+                                  >
+                                    {t("admin.viewCv")}
+                                  </a>
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <p className="text-sm text-text-muted dark:text-text-disabled">{item.email} | {item.phone}</p>
-                        
-                        {isFarmer && item.FarmerProfile && (
-                          <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
-                            <p><strong>Sensor ID:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">{item.FarmerProfile.sensorId || "N/A"}</span></p>
-                            <p><strong>Location:</strong> {item.FarmerProfile.location || "N/A"}</p>
-                            <p><strong>Soil Type:</strong> {item.FarmerProfile.soilType || "N/A"}</p>
-                            <p><strong>Farm Size:</strong> {item.FarmerProfile.farmSize || "N/A"}</p>
-                          </div>
-                        )}
-
-                        {isSupplier && item.SupplierProfile && (
-                          <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
-                            <p><strong>Trade License:</strong> <span className="bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400 px-2 py-0.5 rounded font-mono font-bold">{item.SupplierProfile.tradeLicense || "N/A"}</span></p>
-                            <p><strong>Business Location:</strong> {item.SupplierProfile.location || "N/A"}</p>
-                          </div>
-                        )}
-
-                        {isExpert && item.AgroExpertProfile && (
-                          <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
-                            <p><strong>{t("admin.degree")}:</strong> {item.AgroExpertProfile.academicDegree || t("admin.cvNA")}</p>
-                            <p><strong>{t("admin.experience")}:</strong> {item.AgroExpertProfile.experienceYears ?? '0'} {t("admin.cvYears")}</p>
-                            <p><strong>{t("admin.bio")}:</strong> {item.AgroExpertProfile.bio || t("admin.noBio")}</p>
-                            {(item.AgroExpertProfile.cvFilePath || item.cv) && (
-                              <p>
-                                <strong>CV:</strong>{' '}
-                                <a
-                                  href={`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/${item.AgroExpertProfile.cvFilePath || item.cv}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-emerald-500 hover:underline font-bold"
-                                >
-                                  {t("admin.viewCv")}
-                                </a>
-                              </p>
-                            )}
-                          </div>
-                        )}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            disabled={actionLoading === item.id}
+                            onClick={() => handleApprove(item.id)}
+                            className="rounded-2xl bg-emerald-500 px-4 py-2 text-white transition hover:bg-primary-base disabled:opacity-50 font-bold text-xs"
+                          >
+                            {t("admin.approve")}
+                          </button>
+                          <button
+                            disabled={actionLoading === item.id}
+                            onClick={() => handleReject(item.id)}
+                            className="rounded-2xl bg-rose-500 px-4 py-2 text-white transition hover:bg-rose-600 disabled:opacity-50 font-bold text-xs"
+                          >
+                            {t("admin.reject")}
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <button
-                          disabled={actionLoading === item.id}
-                          onClick={() => handleApprove(item.id)}
-                          className="rounded-2xl bg-emerald-500 px-4 py-2 text-white transition hover:bg-primary-base disabled:opacity-50 font-bold text-xs"
-                        >
-                          {t("admin.approve")}
-                        </button>
-                        <button
-                          disabled={actionLoading === item.id}
-                          onClick={() => handleReject(item.id)}
-                          className="rounded-2xl bg-rose-500 px-4 py-2 text-white transition hover:bg-rose-600 disabled:opacity-50 font-bold text-xs"
-                        >
-                          {t("admin.reject")}
-                        </button>
+                    </motion.div>
+                  );
+                }
+
+                // 2. Sensor ID Card (Show locked if pending, unlocked if pending_second_approval)
+                if (isFarmer && item.FarmerProfile?.sensorId) {
+                  const isLocked = item.status === 'pending';
+                  
+                  elements.push(
+                    <motion.div key={`${item.id}_sensor`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-3xl border ${isLocked ? 'border-dashed border-border-default bg-surface-secondary/50 opacity-60' : 'border-border-default bg-surface-secondary'} p-5 dark:border-slate-700 ${isLocked ? 'dark:bg-slate-900/50' : 'dark:bg-slate-900'}`}>
+                      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-text-main dark:text-white">{item.fullName}</h3>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                              Farmer 🌾
+                            </span>
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${isLocked ? 'bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400'}`}>
+                              Pending Sensor ID Approval 📡 {isLocked ? '(Locked)' : ''}
+                            </span>
+                          </div>
+                          <p className="text-sm text-text-muted dark:text-text-disabled">{item.email} | {item.phone}</p>
+                          <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
+                            <p><strong>Sensor ID:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">{item.FarmerProfile.sensorId}</span></p>
+                            {isLocked && <p className="italic mt-1">⚠️ This sensor request will unlock after the farmer's profile is approved.</p>}
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button 
+                            disabled={isLocked || actionLoading === item.id} 
+                            onClick={() => !isLocked && handleApprove(item.id)}
+                            className={`rounded-2xl bg-emerald-500 px-4 py-2 text-white font-bold text-xs ${isLocked ? 'opacity-30 cursor-not-allowed' : 'transition hover:bg-primary-base disabled:opacity-50'}`}
+                          >
+                            {t("admin.approve")}
+                          </button>
+                          <button 
+                            disabled={isLocked || actionLoading === item.id} 
+                            onClick={() => !isLocked && handleReject(item.id)}
+                            className={`rounded-2xl bg-rose-500 px-4 py-2 text-white font-bold text-xs ${isLocked ? 'opacity-30 cursor-not-allowed' : 'transition hover:bg-rose-600 disabled:opacity-50'}`}
+                          >
+                            {t("admin.reject")}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                );
+                    </motion.div>
+                  );
+                }
+
+                return elements;
               })}
             </div>
           )}
         </section>
+        )}
 
         {/* ───────────────────────────────────────────────────────── */}
         {/* PENDING QUOTE REQUESTS SECTION */}
         {/* ───────────────────────────────────────────────────────── */}
+        {activeTab === 'quote_requests' && (
         <section className="rounded-3xl overflow-hidden bg-surface-card shadow-sm border border-border-default dark:bg-slate-800 dark:border-slate-700">
           <div className="border-b border-border-default px-6 py-5 dark:border-slate-700 bg-surface-secondary dark:bg-slate-900">
             <h2 className="text-xl font-bold text-text-main dark:text-white">Pending Quote Requests</h2>
@@ -605,6 +764,7 @@ export default function Admin() {
             </div>
           )}
         </section>
+        )}
       </div>
     </div>
   );

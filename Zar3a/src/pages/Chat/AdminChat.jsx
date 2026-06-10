@@ -19,6 +19,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import api from "../../API/axiosInstance";
 import { useLanguage } from "../../context/LanguageContext";
+import { ClipLoader } from "react-spinners";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5002";
 
@@ -185,8 +186,8 @@ const AdminChat = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
+      <div className="flex justify-center items-center h-screen bg-slate-50 dark:bg-slate-900">
+        <ClipLoader color="#059669" size={40} />
       </div>
     );
   }
@@ -229,9 +230,8 @@ const AdminChat = () => {
         {/* Conversation List */}
         <div className="flex-1 overflow-y-auto">
           {convoLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 space-y-3">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-              <p className="text-xs text-text-disabled font-bold">{t("chat.loadingMsgs") || "Loading..."}</p>
+            <div className="flex justify-center p-8">
+              <ClipLoader color="#4f46e5" size={32} />
             </div>
           ) : filteredConversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 space-y-3 text-text-disabled">
@@ -285,13 +285,35 @@ const AdminChat = () => {
       {/* ─── Right Panel: Chat Window ─── */}
       <div className={`${activeUserId ? "flex" : "hidden md:flex"} flex-col flex-1 bg-surface-card dark:bg-slate-950`}>
         {!activeUserId ? (
-          /* Empty State */
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-300 dark:text-slate-700 space-y-4">
-            <div className="w-24 h-24 bg-surface-secondary dark:bg-slate-900 rounded-[2rem] flex items-center justify-center">
-              <LuMessageSquare size={40} />
-            </div>
-            <p className="font-bold text-lg">{t("admin.selectConversation") || "Select a conversation"}</p>
-            <p className="text-sm text-text-disabled">{t("admin.selectConversationHint") || "Choose a user from the left to start chatting"}</p>
+          /* Enhanced Empty State */
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, type: "spring", bounce: 0.4 }}
+              className="relative"
+            >
+              <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-20 rounded-full" />
+              <div className="w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 border border-indigo-200 dark:border-indigo-800 rounded-[2.5rem] flex items-center justify-center shadow-2xl relative z-10 mb-8">
+                <LuMessageSquare size={56} className="text-indigo-600 dark:text-indigo-400" />
+              </div>
+            </motion.div>
+            <motion.h3 
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="font-black text-2xl text-slate-800 dark:text-white mb-3"
+            >
+              {t("admin.selectConversation") || "Select a conversation"}
+            </motion.h3>
+            <motion.p 
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-slate-500 dark:text-slate-400 max-w-sm font-medium"
+            >
+              {t("admin.selectConversationHint") || "Choose a user from the left to start chatting"}
+            </motion.p>
           </div>
         ) : (
           <>
@@ -324,6 +346,20 @@ const AdminChat = () => {
                   <span className="text-[10px] text-text-disabled">{activeUser?.email}</span>
                 </div>
               </div>
+
+              {/* Close Conversation Button */}
+              <button
+                onClick={() => {
+                  setActiveUserId(null);
+                  setActiveUser(null);
+                  setMessages([]);
+                  setSearchParams({});
+                }}
+                className="hidden md:flex p-2.5 text-text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                title={t("chat.close") || "Close conversation"}
+              >
+                <LuX size={20} />
+              </button>
             </header>
 
             {/* Chat Messages */}
@@ -332,9 +368,8 @@ const AdminChat = () => {
               className="flex-1 overflow-y-auto p-6 space-y-6 bg-surface-secondary/30 dark:bg-slate-950/30"
             >
               {chatLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 space-y-3">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                  <p className="text-xs text-text-disabled font-bold">{t("chat.loadingMsgs") || "Loading..."}</p>
+                <div className="flex justify-center p-8">
+                  <ClipLoader color="#4f46e5" size={32} />
                 </div>
               ) : (
                 <AnimatePresence initial={false}>

@@ -104,6 +104,18 @@ const ensureProductionColumns = async (sequelizeInstance) => {
       console.log("✅ 'subscriptionExpiresAt' column added.");
     }
 
+    // Check academicDegree and experienceYears on ExpertListings
+    const [academicDegreeCols] = await sequelizeInstance.query("SHOW COLUMNS FROM `ExpertListings` LIKE 'academicDegree';");
+    if (academicDegreeCols.length === 0) {
+      console.log("Adding 'academicDegree' and 'experienceYears' columns to ExpertListings...");
+      await sequelizeInstance.query(`
+        ALTER TABLE \`ExpertListings\` 
+        ADD COLUMN \`academicDegree\` VARCHAR(255) NULL,
+        ADD COLUMN \`experienceYears\` INT NULL DEFAULT 0;
+      `);
+      console.log("✅ 'academicDegree' and 'experienceYears' columns added to ExpertListings.");
+    }
+
     // Ensure imageUrl column lengths are modified to TEXT to support long base64 and URLs
     const tablesToAlter = [
       { table: 'ExpertListings', column: 'imageUrl' },

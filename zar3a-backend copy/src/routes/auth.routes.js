@@ -7,6 +7,8 @@ import authenticate   from "../middlewares/authenticate.js";
 import adminOnly      from "../middlewares/adminOnly.js";
 import {
   register,
+  registerFull,
+  checkAvailability,
   chooseRole,
   completeExpertProfile,
   completeFarmerProfile,
@@ -74,6 +76,14 @@ const chooseRoleRules = [
 // POST /auth/register
 router.post("/register",
   registerRules, validate, register
+);
+
+// POST /auth/check-availability
+router.post("/check-availability", checkAvailability);
+
+// POST /auth/register-full
+router.post("/register-full",
+  uploadCV, validate, registerFull
 );
 
 // POST /auth/choose-role/:userId

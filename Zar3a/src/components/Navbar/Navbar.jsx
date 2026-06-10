@@ -262,6 +262,17 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
                         </Link>
                       )}
 
+                      {user?.role === 'ADMIN' && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-surface-secondary dark:hover:bg-slate-700 transition-all"
+                        >
+                          <LuShield size={18} />
+                          <span className="font-semibold">{t("nav.adminPanel") || "Admin Panel"}</span>
+                        </Link>
+                      )}
+
                       <Link
                         to="/settings"
                         onClick={() => setIsProfileDropdownOpen(false)}

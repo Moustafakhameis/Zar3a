@@ -12,6 +12,7 @@ import Logo2 from "../../../assets/Logo2.png";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import { useTheme } from "../../../context/ThemeContext";
+import { ClipLoader } from "react-spinners";
 
 const loginSchema = z.object({
   email: z.string().min(1, { message: "Email or username is required" }).refine((v) => {
@@ -24,7 +25,7 @@ const loginSchema = z.object({
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(localStorage.getItem("rememberedEmail") ? true : false);
   const [apiError, setApiError] = useState("");
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -33,20 +34,20 @@ export default function Login() {
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: localStorage.getItem("rememberedEmail") || "", password: "" },
   });
 
   const onSubmit = async (data) => {
     setApiError("");
     try {
-      const user = await login(data.email, data.password);
+      const user = await login(data.email, data.password, rememberMe);
       const roleToUse = user.role || user.pendingRole;
           
-      if (roleToUse === "AGRO_EXPERT" && user.status === "PENDING") {
+      if (roleToUse === "AGRO_EXPERT" && user.status === "pending") {
         navigate("/profile/expert");
-      } else if (roleToUse === "FARMER" && user.status === "PENDING") {
+      } else if (roleToUse === "FARMER" && user.status === "pending") {
         navigate("/profile/farmer");
-      } else if (roleToUse === "SUPPLIER" && user.status === "PENDING") {
+      } else if (roleToUse === "SUPPLIER" && user.status === "pending") {
         navigate("/profile/supplier");
       } else {
         navigate("/dashboard");
@@ -154,8 +155,8 @@ export default function Login() {
 
             <div className="flex justify-between items-center text-xs px-1">
               <label className="flex items-center gap-2 cursor-pointer group">
-                <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)}
-                  className="w-4 h-4 rounded text-primary-base focus:ring-emerald-500 bg-transparent" />
+                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 border-slate-300 dark:border-slate-600 dark:bg-slate-800 cursor-pointer" />
                 <span className="text-text-muted dark:text-text-disabled font-bold">{t("login.keepSignedIn")}</span>
               </label>
               <button type="button" onClick={() => navigate("/forgot-password")} className="text-primary-base font-black hover:underline">
@@ -164,8 +165,17 @@ export default function Login() {
             </div>
 
             <motion.button disabled={isSubmitting} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}
-              className="w-full bg-primary-base hover:bg-primary-hover text-white py-4.5 rounded-2xl font-black text-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-3 transition-all mt-4">
-              {isSubmitting ? t("login.loading") : <>{t("login.signIn")} <FiArrowRight /></>}
+              className="w-full bg-primary-base hover:bg-primary-hover text-white py-4 rounded-2xl font-black text-xl shadow-[0_8px_20px_rgba(16,185,129,0.25)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.35)] flex items-center justify-center gap-3 transition-all mt-4 disabled:opacity-70 disabled:hover:y-0">
+              {isSubmitting ? (
+                <>
+                  <ClipLoader color="#ffffff" size={24} />
+                  {t("login.loading")}
+                </>
+              ) : (
+                <>
+                  {t("login.signIn")} <FiArrowRight />
+                </>
+              )}
             </motion.button>
           </form>
 

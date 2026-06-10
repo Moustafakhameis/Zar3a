@@ -7,6 +7,7 @@ import { useCart } from "../../hooks/useCart";
 import { useLanguage } from "../../context/LanguageContext";
 import api from "../../API/axiosInstance";
 import { toast } from "sonner";
+import { ClipLoader } from "react-spinners";
 import {
   LuSearch,
   LuShoppingCart,
@@ -159,7 +160,7 @@ const CustomSelect = ({ value, onChange, options, disabled, placeholder }) => {
   const selectedLabel = options.find(opt => opt.value === value)?.label || placeholder || "Select...";
 
   return (
-    <div className={`relative w-full ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`} ref={dropdownRef}>
+    <div className={`relative w-full ${isOpen ? 'z-50' : 'z-10'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`} ref={dropdownRef}>
       <div
         className="w-full bg-surface-secondary dark:bg-slate-800/50 border-2 border-border-default/60 dark:border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-bold text-text-main dark:text-white outline-none cursor-pointer flex justify-between items-center focus:border-green-500 focus:ring-4 focus:ring-green-500/10 hover:border-gray-300 dark:hover:border-slate-600 transition-all shadow-sm"
         onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -1185,8 +1186,9 @@ const Marketplace = () => {
                     {/* Reviews List */}
                     <div className="space-y-4">
                       {reviewsLoading ? (
-                        <div className="flex items-center justify-center py-6">
-                          <div className="animate-spin h-6 w-6 border-2 border-green-500 border-t-transparent rounded-full" />
+                        <div className="flex items-center gap-2">
+                          <ClipLoader color="#22c55e" size={24} />
+                          <span>{t("marketplace.loadingMore")}</span>
                         </div>
                       ) : reviewsData.reviews.length === 0 ? (
                         <p className="text-xs font-bold text-text-disabled italic py-4 text-center">

@@ -18,9 +18,9 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ── Helper: mint + store token pair ──────────────────────────────────────────
 
-const issueTokens = async (user) => {
-  const accessToken = createAccessToken(user.id, user.role);
-  const { token: refreshToken, expiresAt } = createRefreshToken(user.id);
+const issueTokens = async (user, rememberMe = false) => {
+  const accessToken = createAccessToken(user.id, user.role, rememberMe);
+  const { token: refreshToken, expiresAt } = createRefreshToken(user.id, rememberMe);
 
   await RefreshToken.create({
     userId: user.id,
@@ -273,6 +273,152 @@ export const register = async (req, res) => {
   }
 };
 
+// ── POST /auth/check-availability ────────────────────────────────────────
+
+export const checkAvailability = async (req, res) => {
+  try {
+    const { email, username } = req.body;
+    if (email) {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (await User.findOne({ where: { email: normalizedEmail } })) {
+        return res.status(409).json({ message: "Email already registered" });
+      }
+    }
+    if (username) {
+      const normalizedUsername = username.trim();
+      if (await User.findOne({ where: { username: normalizedUsername } })) {
+        return res.status(409).json({ message: "Username already taken" });
+      }
+    }
+    res.status(200).json({ message: "Available" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error checking availability" });
+  }
+};
+
+// ── POST /auth/register-full (Unified Registration) ──────────────────────
+
+export const registerFull = async (req, res) => {
+  const transaction = await User.sequelize.transaction();
+  try {
+    const { 
+      fullName, username, email, phone, password, role,
+      farmSize, soilType, location, businessLocation, sensorId, tradeLicense,
+      academicDegree, experienceYears, bio 
+    } = req.body;
+
+    if (!fullName || !username || !email || !phone || !password || !role) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Basic fields and role are required" });
+    }
+
+    if (!validateFullName(fullName)) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Full name must be 3-50 letters and spaces only" });
+    }
+    if (!validateUsername(username)) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Username must be 3-20 characters, containing only letters, numbers, underscores, or hyphens" });
+    }
+    if (!validateEmail(email)) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Please enter a valid, realistic email address (temporary domains are not allowed)" });
+    }
+    if (!validatePhone(phone)) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Phone must be exactly 12 digits (e.g. 201012345678)" });
+    }
+    if (!validatePassword(password)) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Password must be at least 8 characters, and contain uppercase, lowercase, numbers, and special characters" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedUsername = username.trim();
+
+    if (await User.findOne({ where: { email: normalizedEmail } })) {
+      await transaction.rollback();
+      return res.status(409).json({ message: "Email already registered" });
+    }
+    if (await User.findOne({ where: { username: normalizedUsername } })) {
+      await transaction.rollback();
+      return res.status(409).json({ message: "Username already taken" });
+    }
+
+    const user = await User.create({
+      fullName: fullName.trim(),
+      username: normalizedUsername,
+      email: normalizedEmail,
+      phone: phone.trim().replace(/^\+/, ""),
+      passwordHash: await hashPassword(password),
+      role: role === 'BUYER' ? 'BUYER' : null,
+      pendingRole: role === 'BUYER' ? null : role,
+      isApproved: role === 'BUYER',
+      status: role === 'BUYER' ? 'approved' : 'pending',
+    }, { transaction });
+
+    // Handle Profile Creation based on Role
+    if (role === 'FARMER') {
+      if (!soilType || !soilType.trim() || !location || !location.trim()) {
+        await transaction.rollback();
+        return res.status(400).json({ message: "Soil type and location are required for Farmer registration" });
+      }
+      const trimmedSensor = sensorId ? sensorId.trim() : null;
+      if (trimmedSensor) {
+        const existingSensor = await FarmerProfile.findOne({ where: { sensorId: trimmedSensor } });
+        if (existingSensor) {
+          await transaction.rollback();
+          return res.status(400).json({ message: "Sensor ID is already assigned to another farmer. Please enter a unique Sensor ID." });
+        }
+      }
+      await FarmerProfile.create({
+        farmSize, soilType, location, sensorId: trimmedSensor || null, userId: user.id
+      }, { transaction });
+    } else if (role === 'SUPPLIER') {
+      const finalLocation = location || businessLocation;
+      if (!tradeLicense || !tradeLicense.trim() || !finalLocation || !finalLocation.trim()) {
+        await transaction.rollback();
+        return res.status(400).json({ message: "Trade license and business location are required for Supplier registration" });
+      }
+      await SupplierProfile.create({
+        tradeLicense, location: finalLocation, userId: user.id
+      }, { transaction });
+    } else if (role === 'AGRO_EXPERT') {
+      if (!academicDegree || !experienceYears || !bio) {
+        await transaction.rollback();
+        return res.status(400).json({ message: "Academic degree, experience, and bio are required" });
+      }
+      if (!req.file) {
+        await transaction.rollback();
+        return res.status(400).json({ message: "CV file is required for Agro-Experts" });
+      }
+      await AgroExpertProfile.create({
+        academicDegree, experienceYears, bio, cvUrl: req.file.path, userId: user.id
+      }, { transaction });
+    } else if (role === 'BUYER') {
+      // No extra profile fields currently needed
+    } else {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    await transaction.commit();
+
+    try {
+      await sendVerificationEmail(user);
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError.message);
+    }
+
+    res.status(201).json({ userId: user.id, message: 'Registration complete. Verification email sent.' });
+  } catch (err) {
+    await transaction.rollback();
+    console.error(err);
+    res.status(400).json({ error: "Registration failed" });
+  }
+};
+
 // ── POST /auth/choose-role/:userId ─────────────────────────────────────
 
 export const chooseRole = async (req, res) => {
@@ -450,7 +596,8 @@ export const completeSupplierProfile = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
+    console.log("[login endpoint] req.body:", req.body);
     const identifier = email.trim();
     const isEmail = identifier.includes("@");
     const normalizedEmail = identifier.toLowerCase();
@@ -505,7 +652,7 @@ export const login = async (req, res) => {
     }
 
     console.log(`[login] Success — issuing tokens for user ${user.id} (role: ${user.role})`);
-    return res.json({ user: safeUser(user), ...(await issueTokens(user)) });
+    return res.json({ user: safeUser(user), ...(await issueTokens(user, rememberMe)) });
   } catch (err) {
     console.error("[login] Unhandled error — message:", err.message);
     console.error("[login] Unhandled error — stack:", err.stack);
@@ -1069,6 +1216,11 @@ export const requestPasswordResetOTP = async (req, res) => {
     // Generate OTP
     const plainOTP = generateOTP();
     const hashedOTP = await hashOTP(plainOTP);
+    
+    // Log OTP to backend console for easy testing locally
+    console.log(`\n=================================================`);
+    console.log(`🔑 [DEVELOPMENT] OTP for ${user.email}: ${plainOTP}`);
+    console.log(`=================================================\n`);
     
     // Calculate expiration (10 minutes from now)
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);

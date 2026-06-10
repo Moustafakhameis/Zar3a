@@ -70,6 +70,11 @@ const Sidebar = ({ isOpen, onClose }) => {
     menuItems.push({ path: "/dashboard", label: t("nav.dashboard"), icon: <FcDataSheet /> });
   }
 
+  // AI Assistant: Hide from unregistered users
+  if (user?.role) {
+    menuItems.push({ path: "/chatbot", label: t("nav.aiAssistant"), icon: <FcAssistant /> });
+  }
+
   // Marketplace: Everyone (including unregistered)
   menuItems.push({ path: "/marketplace", label: t("nav.marketplace"), icon: <FcShop /> });
 
@@ -83,25 +88,13 @@ const Sidebar = ({ isOpen, onClose }) => {
     menuItems.push({ path: "/track-orders", label: t("nav.trackOrders"), icon: <FcShipped /> });
   }
 
-  // AI Assistant: Hide from unregistered users
-  if (user?.role) {
-    menuItems.push({ path: "/chatbot", label: t("nav.aiAssistant"), icon: <FcAssistant /> });
-  }
+
 
   // Experts: Hide from BUYER and unregistered users
   if (user?.role && user.role !== 'BUYER') {
     menuItems.push({ path: "/experts", label: t("nav.experts"), icon: <FcConferenceCall /> });
   }
 
-  // Notifications: Hide from unregistered users
-  if (user?.role) {
-    menuItems.push({ path: "/notifications", label: t("nav.notifications"), icon: <FcAdvertising /> });
-  }
-
-  // Admin Panel: Only for ADMIN
-  if (user?.role === 'ADMIN') {
-    menuItems.push({ path: "/admin", label: t("nav.adminPanel"), icon: <FcPrivacy /> });
-  }
 
   // Animation variants
   const mobileVariants = {

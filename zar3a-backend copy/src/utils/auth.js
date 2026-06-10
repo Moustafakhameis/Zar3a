@@ -14,15 +14,15 @@ export const generateToken = () => crypto.randomBytes(32).toString("hex");
 const accessSecret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || "zar3a-access-secret-fallback";
 const refreshSecret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || "zar3a-refresh-secret-fallback";
 
-export const createAccessToken = (userId, role) =>
+export const createAccessToken = (userId, role, rememberMe = false) =>
   jwt.sign(
     { sub: String(userId), role, type: "access" },
     accessSecret,
-    { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "7d" }
+    { expiresIn: rememberMe ? "30d" : (process.env.JWT_ACCESS_EXPIRES_IN || "1d") }
   );
 
-export const createRefreshToken = (userId) => {
-  const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+export const createRefreshToken = (userId, rememberMe = false) => {
+  const expiresIn = rememberMe ? "30d" : (process.env.JWT_REFRESH_EXPIRES_IN || "1d");
 
   const token = jwt.sign(
     { sub: String(userId), type: "refresh" },

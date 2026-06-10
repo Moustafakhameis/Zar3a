@@ -15,6 +15,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
+import { PuffLoader } from "react-spinners";
+
 export default function ExpertProfile() {
   const { t } = useLanguage();
   const { user } = useAuth();
@@ -28,8 +30,8 @@ export default function ExpertProfile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-surface-secondary dark:bg-slate-950">
+        <PuffLoader color="#7c3aed" size={60} />
       </div>
     );
   }

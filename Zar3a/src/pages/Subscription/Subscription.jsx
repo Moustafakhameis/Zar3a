@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { LuCheck, LuLock, LuLoader } from "react-icons/lu";
+import { LuCheck, LuLock } from "react-icons/lu";
 import { FiAlertTriangle } from "react-icons/fi";
+import { PuffLoader, ClipLoader } from "react-spinners";
 import { paymentsAPI } from "../../API/axiosInstance";
 import { useLanguage } from "../../context/LanguageContext";
 
@@ -148,10 +149,7 @@ export default function Subscription() {
                 className="w-full mt-8 py-4 rounded-2xl font-black text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loadingTier === "STARTER" ? (
-                  <>
-                    <LuLoader className="animate-spin" size={16} />
-                    {t("sub.redirecting")}
-                  </>
+                  <ClipLoader color="#94a3b8" size={16} />
                 ) : (
                   t("sub.btn.starter")
                 )}
@@ -232,10 +230,7 @@ export default function Subscription() {
                 className="w-full mt-8 py-4 rounded-2xl font-black text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loadingTier === "GROWTH" ? (
-                  <>
-                    <LuLoader className="animate-spin" size={16} />
-                    {t("sub.redirecting")}
-                  </>
+                  <ClipLoader color="#059669" size={16} />
                 ) : (
                   t("sub.btn.growth")
                 )}
@@ -327,10 +322,7 @@ export default function Subscription() {
                 className="w-full mt-8 py-4 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-xl shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loadingTier === "PRO" ? (
-                  <>
-                    <LuLoader className="animate-spin" size={16} />
-                    {t("sub.redirecting")}
-                  </>
+                  <ClipLoader color="#ffffff" size={16} />
                 ) : (
                   t("sub.btn.pro")
                 )}

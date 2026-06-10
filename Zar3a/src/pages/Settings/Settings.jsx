@@ -4,16 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import {
-   LuUser,
-   LuShield,
-   LuBell,
-   LuMonitor,
-   LuLogOut,
-   LuTrash2,
-   LuCamera,
-   LuCheck,
-   LuX,
- } from "react-icons/lu";
+  LuUser,
+  LuBell,
+  LuShield,
+  LuLogOut,
+  LuTrash2,
+  LuCamera,
+  LuCheck,
+  LuX,
+  LuMonitor,
+} from "react-icons/lu";
+import { ClipLoader } from "react-spinners";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -714,7 +715,7 @@ const Settings = () => {
               className="flex items-center gap-2 px-8 py-3 bg-primary-base text-white font-bold rounded-xl shadow-[0_8px_20px_rgba(16,185,129,0.25)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.35)] active:scale-95 transition-all disabled:opacity-70 disabled:active:scale-100"
             >
               {isSaving ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <ClipLoader color="#ffffff" size={20} />
               ) : (
                 <LuCheck size={18} />
               )}

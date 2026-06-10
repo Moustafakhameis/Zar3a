@@ -13,8 +13,10 @@ import {
   FiChevronRight
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
+
+import { PuffLoader } from "react-spinners";
 
 export default function AdminProfile() {
   const { t } = useLanguage();
@@ -59,8 +61,8 @@ export default function AdminProfile() {
 
   if (loading || authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface-secondary dark:bg-slate-950">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <PuffLoader color="#10b981" size={60} />
       </div>
     );
   }

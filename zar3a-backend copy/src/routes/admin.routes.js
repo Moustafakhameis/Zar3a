@@ -27,7 +27,7 @@ router.get('/users', getAllUsers);
 router.get('/users/:userId', getUserDetails);
 router.post(
   '/users/:userId/role',
-  [body('newRole').isIn(['FARMER', 'SUPPLIER', 'BUYER', 'ADMIN']).withMessage('Invalid role')],
+  [body('newRole').isIn(['FARMER', 'SUPPLIER', 'BUYER', 'ADMIN', 'AGRO_EXPERT']).withMessage('Invalid role')],
   validate,
   changeUserRole
 );

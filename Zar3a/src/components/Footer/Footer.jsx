@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
+import { ClipLoader } from "react-spinners";
 import {
   LuLeaf,
   LuMail,
@@ -102,7 +103,7 @@ const Footer = () => {
                 subscribed ? "bg-emerald-500" : "bg-slate-900 dark:bg-primary-base hover:opacity-90"
               }`}
             >
-              {isSubscribing ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : subscribed ? t("footer.newsletter.done") : <>{t("footer.newsletter.btn")} <LuArrowRight /></>}
+              {isSubscribing ? <ClipLoader size={20} color="#ffffff" /> : subscribed ? t("footer.newsletter.done") : <>{t("footer.newsletter.btn")} <LuArrowRight /></>}
             </button>
           </form>
         </motion.div>

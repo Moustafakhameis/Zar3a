@@ -104,7 +104,7 @@ const Field = ({ icon: Icon, error, children }) => (
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function Register() {
   const navigate = useNavigate();
-  const { register: registerUser, chooseRole, completeFarmerProfile, completeBuyerProfile, completeSupplierProfile, completeExpertProfile } = useAuth();
+  const { registerFull, checkAvailability } = useAuth();
   const { t } = useLanguage();
 
   const [step, setStep] = useState(1); // 1 | 2 | 3 | 4(success)
@@ -145,10 +145,7 @@ export default function Register() {
   // Sensor ID for farmers
   const [sensorId, setSensorId] = useState("");
 
-  // Stored userId after step 1 succeeds
-  const [userId, setUserId] = useState(null);
-
-
+  // Stored userId not needed until the end.
 
   // ── Validation ────────────────────────────────────────────────────────────
   const validateStep1 = () => {
@@ -311,28 +308,18 @@ export default function Register() {
     setLoading(true);
     setApiError("");
     try {
-      const data = await registerUser(form1);
-      setUserId(data.userId);
+      await checkAvailability(form1.email, form1.username);
       setStep(2);
     } catch (err) {
-      setApiError(parseError(err, "Registration failed. Please try again."));
+      setApiError(parseError(err, "Username or Email already taken"));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStep2 = async () => {
+  const handleStep2 = () => {
     if (!selectedRole) { setApiError("Please select a role"); return; }
-    setLoading(true);
-    setApiError("");
-    try {
-      await chooseRole(userId, selectedRole);
-      setStep(3);
-    } catch (err) {
-      setApiError(parseError(err, "Failed to set role. Please try again."));
-    } finally {
-      setLoading(false);
-    }
+    setStep(3);
   };
 
   const handleStep3 = async () => {
@@ -340,23 +327,35 @@ export default function Register() {
     setLoading(true);
     setApiError("");
     try {
+      const fd = new FormData();
+      // Basic info
+      fd.append("fullName", form1.fullName);
+      fd.append("username", form1.username);
+      fd.append("email", form1.email);
+      fd.append("phone", form1.phone);
+      fd.append("password", form1.password);
+      fd.append("role", selectedRole);
+      
+      // Profile info
       if (selectedRole === "FARMER") {
-        await completeFarmerProfile(userId, { farmSize, soilType, location, sensorId });
-      } else if (selectedRole === "BUYER") {
-        await completeBuyerProfile(userId);
+        fd.append("farmSize", farmSize);
+        fd.append("soilType", soilType);
+        fd.append("location", location);
+        fd.append("sensorId", sensorId);
       } else if (selectedRole === "SUPPLIER") {
-        await completeSupplierProfile(userId, { tradeLicense, location });
+        fd.append("tradeLicense", tradeLicense);
+        fd.append("location", location);
       } else if (selectedRole === "AGRO_EXPERT") {
-        const fd = new FormData();
         fd.append("academicDegree", academicDegree);
         fd.append("experienceYears", experienceYears);
         fd.append("bio", bio);
         if (cvFilePath) fd.append("cv", cvFilePath);
-        await completeExpertProfile(userId, fd);
       }
+
+      await registerFull(fd);
       setStep(4);
     } catch (err) {
-      setApiError(parseError(err, "Profile completion failed."));
+      setApiError(parseError(err, "Registration failed. Please check your information and try again."));
     } finally {
       setLoading(false);
     }
@@ -556,7 +555,7 @@ export default function Register() {
                   onClick={handleStep1}
                   className="w-full bg-primary-base hover:bg-primary-hover text-white py-5 rounded-4xl font-black text-xl shadow-[0_20px_40px_-10px_rgba(16,185,129,0.3)] flex items-center justify-center gap-3 transition-all disabled:opacity-60"
                 >
-                  {loading ? t("reg.creating") : <>{t("reg.continue")} <FiArrowRight size={22} /></>}
+                  {loading ? t("reg.checking") || "Checking..." : <>{t("reg.continue")} <FiArrowRight size={22} /></>}
                 </motion.button>
 
                 <p className="text-center text-text-disabled text-sm font-bold">
@@ -607,13 +606,21 @@ export default function Register() {
 
                 <div className="flex gap-3">
                   <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setStep(1)}
+                    className="flex shrink-0 items-center justify-center w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-surface-secondary dark:bg-slate-800 text-text-subtle hover:text-primary-base transition-colors border border-border-default dark:border-slate-700 shadow-sm"
+                  >
+                    <FiArrowLeft size={22} />
+                  </motion.button>
+                  <motion.button
                     whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={loading || !selectedRole}
                     onClick={handleStep2}
                     className="flex-1 bg-primary-base hover:bg-primary-hover text-white py-4 rounded-2xl font-black text-lg shadow-[0_20px_40px_-10px_rgba(16,185,129,0.3)] flex items-center justify-center gap-3 transition-all disabled:opacity-60"
                   >
-                    {loading ? t("reg.saving") : <>{t("reg.continue")} <FiArrowRight /></>}
+                    {t("reg.continue")} <FiArrowRight />
                   </motion.button>
                 </div>
               </motion.div>
@@ -709,11 +716,19 @@ export default function Register() {
 
                 <div className="flex gap-3">
                   <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setStep(2)}
+                    className="flex shrink-0 items-center justify-center w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-surface-secondary dark:bg-slate-800 text-text-subtle hover:text-primary-base transition-colors border border-border-default dark:border-slate-700 shadow-sm"
+                  >
+                    <FiArrowLeft size={22} />
+                  </motion.button>
+                  <motion.button
                     whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={loading}
                     onClick={handleStep3}
-                    className="w-full bg-primary-base hover:bg-primary-hover text-white py-4 rounded-2xl font-black text-lg shadow-[0_20px_40px_-10px_rgba(16,185,129,0.3)] flex items-center justify-center gap-3 transition-all disabled:opacity-60"
+                    className="flex-1 bg-primary-base hover:bg-primary-hover text-white py-4 rounded-2xl font-black text-lg shadow-[0_20px_40px_-10px_rgba(16,185,129,0.3)] flex items-center justify-center gap-3 transition-all disabled:opacity-60"
                   >
                     {loading ? t("reg.finishing") : <>{t("reg.finishSetup")} <FiArrowRight /></>}
                   </motion.button>

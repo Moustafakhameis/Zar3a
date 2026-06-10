@@ -330,8 +330,8 @@ export const getExpertListings = async (req, res) => {
         ...data,
         name: data.User?.fullName || data.User?.username || 'Expert',
         specialization: data.specialty,
-        academicDegree: data.User?.AgroExpertProfile?.academicDegree || '',
-        experienceYears: data.User?.AgroExpertProfile?.experienceYears || 0,
+        academicDegree: data.academicDegree || data.User?.AgroExpertProfile?.academicDegree || '',
+        experienceYears: data.experienceYears || data.User?.AgroExpertProfile?.experienceYears || 0,
       };
     });
 
@@ -365,7 +365,7 @@ export const createExpertListing = async (req, res) => {
     //   });
     // }
 
-    const { title, specialty, description, hourlyRate, location, imageUrl } = req.body;
+    const { title, specialty, description, hourlyRate, location, imageUrl, academicDegree, experienceYears } = req.body;
 
     if (!title || !specialty || !description || !hourlyRate) {
       return res.status(400).json({
@@ -385,6 +385,8 @@ export const createExpertListing = async (req, res) => {
       description,
       hourlyRate: Number(hourlyRate),
       location: location || '',
+      academicDegree: academicDegree || null,
+      experienceYears: experienceYears ? Number(experienceYears) : 0,
       imageUrl: finalImageUrl,
       isVerified: true,
     });
@@ -408,7 +410,7 @@ export const updateExpertListing = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    const { title, specialty, description, hourlyRate, location, imageUrl } = req.body;
+    const { title, specialty, description, hourlyRate, location, imageUrl, academicDegree, experienceYears } = req.body;
     let finalImageUrl = imageUrl || listing.imageUrl;
     
     if (req.file) {
@@ -421,6 +423,8 @@ export const updateExpertListing = async (req, res) => {
       description: description || listing.description,
       hourlyRate: hourlyRate ? Number(hourlyRate) : listing.hourlyRate,
       location: location !== undefined ? location : listing.location,
+      academicDegree: academicDegree !== undefined ? academicDegree : listing.academicDegree,
+      experienceYears: experienceYears !== undefined ? Number(experienceYears) : listing.experienceYears,
       imageUrl: finalImageUrl,
     });
 

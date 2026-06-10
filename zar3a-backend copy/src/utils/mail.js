@@ -1,58 +1,33 @@
-import axios from 'axios';
-
-let rawKey = process.env.BREVO_API_KEY || 
-             process.env.brevo_api_key || 
-             process.env.Brevo_Api_Key || 
-             process.env.BERVO_API_KEY || 
-             process.env.bervo_api_key ||
-             process.env.SENDINBLUE_API_KEY ||
-             process.env.sendinblue_api_key;
-if (rawKey) {
-  rawKey = rawKey.trim().replace(/^["']|["']$/g, '');
-}
-const BREVO_API_KEY = rawKey;
-const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
-console.log("🚨 BREVO_API_KEY loaded:", BREVO_API_KEY ? `${BREVO_API_KEY.slice(0, 12)}...` : "undefined");
-if (!BREVO_API_KEY) {
-  console.warn('Warning: BREVO_API_KEY environment variable is not set');
-}
+import nodemailer from 'nodemailer';
 
 export const sendMail = async ({ to, subject, html, text }) => {
   try {
-    const emailData = {
-      sender: {
-        name: 'Zar3a Team',
-        email: 'mjkk605@gmail.com'
-      },
-      to: [{ email: to }],
-      subject,
-      htmlContent: html,
-      textContent: text,
-    };
-
-    const response = await axios.post(BREVO_API_URL, emailData, {
-      headers: {
-        'accept': 'application/json',
-        'api-key': BREVO_API_KEY,
-        'content-type': 'application/json',
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
       },
     });
 
-    console.log('📧 Email sent successfully via Brevo:', response.data);
-    return response.data;
+    const mailOptions = {
+      from: `"Zar3a Team" <${process.env.GMAIL_USER}>`,
+      to,
+      subject,
+      text,
+      html,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('📧 Email sent successfully via Gmail:', info.messageId);
+    return info;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message;
-    console.error('❌ Failed to send email via Brevo:', errorMessage);
-
-    // Check for IP authorization error
-    if (error.response?.status === 401 && errorMessage.includes('unrecognised IP address')) {
-      console.error('🔐 Brevo API Key requires IP whitelisting. Please add your IP address to the authorized IPs in your Brevo account: https://app.brevo.com/security/authorised_ips');
-    }
-
+    console.error('❌ Failed to send email via Gmail:', error.message);
+    
     // Fallback: log email content for development
     console.log('💌 Email fallback (not sent):');
     console.log({ to, subject, html, text });
 
-    throw new Error(`Email service error: ${errorMessage}`);
+    throw new Error(`Email service error: ${error.message}`);
   }
 };
