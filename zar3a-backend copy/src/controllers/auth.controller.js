@@ -632,18 +632,29 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email/username or password" });
     }
 
-    let passwordValid;
+    let verificationResult;
     try {
-      passwordValid = await verifyPassword(password, user.passwordHash, user.email);
-      console.log(`[login] Password verification for user ${user.id}: ${passwordValid ? "passed" : "failed"}`);
+      verificationResult = await verifyPassword(password, user.passwordHash, user.email);
+      console.log(`[login] Password verification for user ${user.id}: ${verificationResult.valid ? "passed" : "failed"}`);
     } catch (hashErr) {
       console.error(`[login] Error during password verification for user ${user.id}:`, hashErr.message);
       console.error("[login] Hash error stack:", hashErr.stack);
       throw hashErr;
     }
 
-    if (!passwordValid) {
+    if (!verificationResult.valid) {
       return res.status(401).json({ message: "Invalid email/username or password" });
+    }
+
+    // Auto-migrate legacy hashes to peppered format
+    if (verificationResult.needsRehash) {
+      try {
+        const newHash = await hashPassword(password, user.email);
+        await User.update({ passwordHash: newHash }, { where: { id: user.id } });
+        console.log(`[login] Successfully migrated legacy password hash to peppered format for user ${user.id}`);
+      } catch (rehashErr) {
+        console.error(`[login] Non-blocking error migrating user ${user.id} password hash:`, rehashErr.message);
+      }
     }
 
     if (!user.isActive) {
@@ -882,7 +893,8 @@ export const changePassword = async (req, res) => {
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     if (!user.passwordHash) return res.status(400).json({ message: 'Password change unavailable for this account' });
-    if (!(await verifyPassword(currentPassword, user.passwordHash, user.email))) {
+    const verificationResult = await verifyPassword(currentPassword, user.passwordHash, user.email);
+    if (!verificationResult.valid) {
       return res.status(400).json({ message: 'Current password is incorrect' });
     }
     await User.update({ passwordHash: await hashPassword(newPassword, user.email) }, { where: { id: req.user.id } });
