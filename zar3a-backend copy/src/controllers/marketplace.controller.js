@@ -1,3 +1,4 @@
+import sequelize, { Op, literal } from 'sequelize';
 import { Product, ExpertListing, User, AgroExpertProfile, OrderTracking, Order, OrderItem, ProductReview } from '../models/index.js';
 import notificationService from './notification.controller.js';
 
@@ -13,7 +14,11 @@ export const getCropMarketProducts = async (req, res) => {
     const products = await Product.findAll({
       where: { marketplaceType: 'CROP_MARKET' },
       include: [{ model: User, attributes: ['id', 'fullName', 'username', 'role'] }],
-      order: [['createdAt', 'DESC']],
+      order: [
+        // Active boosts (boostExpiryDate is in the future OR null-boosted) float to top
+        [literal('CASE WHEN isBoosted = 1 AND (boostExpiryDate IS NULL OR boostExpiryDate > NOW()) THEN 0 ELSE 1 END'), 'ASC'],
+        ['createdAt', 'DESC'],
+      ],
     });
     return res.json(products);
   } catch (err) {
@@ -27,7 +32,10 @@ export const getSensorMarketProducts = async (req, res) => {
     const products = await Product.findAll({
       where: { marketplaceType: 'SENSOR_MARKET' },
       include: [{ model: User, attributes: ['id', 'fullName', 'username', 'role'] }],
-      order: [['createdAt', 'DESC']],
+      order: [
+        [literal('CASE WHEN isBoosted = 1 AND (boostExpiryDate IS NULL OR boostExpiryDate > NOW()) THEN 0 ELSE 1 END'), 'ASC'],
+        ['createdAt', 'DESC'],
+      ],
     });
     return res.json(products);
   } catch (err) {
@@ -131,7 +139,10 @@ export const getAgriShopProducts = async (req, res) => {
     const products = await Product.findAll({
       where: { marketplaceType: 'AGRI_MARKET' },
       include: [{ model: User, attributes: ['id', 'fullName', 'username', 'role'] }],
-      order: [['createdAt', 'DESC']],
+      order: [
+        [literal('CASE WHEN isBoosted = 1 AND (boostExpiryDate IS NULL OR boostExpiryDate > NOW()) THEN 0 ELSE 1 END'), 'ASC'],
+        ['createdAt', 'DESC'],
+      ],
     });
     return res.json(products);
   } catch (err) {
@@ -470,23 +481,28 @@ export const searchProducts = async (req, res) => {
     if (marketplace === 'agri') where.marketplaceType = 'AGRI_MARKET';
     if (category) where.category = category.toUpperCase();
 
+    // Add search query using Op.or instead of sequelize.where helpers
     if (q) {
-      where.$or = [
-        sequelize.where(sequelize.fn('LOWER', sequelize.col('title')), 'LIKE', `%${q.toLowerCase()}%`),
-        sequelize.where(sequelize.fn('LOWER', sequelize.col('description')), 'LIKE', `%${q.toLowerCase()}%`),
+      const searchTerm = `%${q.toLowerCase()}%`;
+      where[Op.or] = [
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('title')), Op.like, searchTerm),
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('description')), Op.like, searchTerm),
       ];
     }
 
     const products = await Product.findAll({
       where,
       include: [{ model: User, attributes: ['id', 'fullName', 'username', 'role'] }],
-      order: [['createdAt', 'DESC']],
+      order: [
+        [literal('CASE WHEN isBoosted = 1 AND (boostExpiryDate IS NULL OR boostExpiryDate > NOW()) THEN 0 ELSE 1 END'), 'ASC'],
+        ['createdAt', 'DESC'],
+      ],
       limit: 50,
     });
 
     return res.json(products);
   } catch (err) {
-    console.error(err);
+    console.error('searchProducts error:', err);
     return res.status(500).json({ message: 'Server error' });
   }
 };
@@ -769,6 +785,118 @@ export const deleteProductReview = async (req, res) => {
     return res.json({ message: 'Review deleted successfully' });
   } catch (err) {
     console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * POST /marketplace/products/:productId/boost
+ * Boost a single product (must be owned by the user, or user is Admin)
+ */
+export const boostUserProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const user = req.user;
+
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    if (product.userId !== user.id && user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Unauthorized to boost this product' });
+    }
+
+    const oldBoostExpiryDate = product.boostExpiryDate;
+    const now = new Date();
+    let newBoostExpiryDate;
+
+    if (!oldBoostExpiryDate || new Date(oldBoostExpiryDate) < now) {
+      newBoostExpiryDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
+    } else {
+      newBoostExpiryDate = new Date(new Date(oldBoostExpiryDate).getTime() + 365 * 24 * 60 * 60 * 1000); // extend by 1 year
+    }
+
+    // Set boosting fields on a single product instance (SQL UPDATE ... WHERE id = :productId)
+    await product.update({
+      isBoosted: true,
+      boostLevel: 500,
+      boostExpiryDate: newBoostExpiryDate,
+    });
+
+    // Reload from database to verify and log the final persisted value
+    await product.reload();
+
+    console.log(`[DEBUG] Product ID: ${productId} - Title: "${product.title}"`);
+    console.log(`[DEBUG] Old boostExpiryDate: ${oldBoostExpiryDate}`);
+    console.log(`[DEBUG] New boostExpiryDate: ${product.boostExpiryDate}`);
+    console.log(`✅ Product boosted by owner: "${product.title}" (ID: ${productId})`);
+
+    return res.json({
+      message: 'Product boosted successfully',
+      product,
+    });
+  } catch (err) {
+    console.error('boostUserProduct error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * POST /marketplace/products/boost-batch
+ * Boost multiple products at once (must be owned by the user, or user is Admin)
+ */
+export const boostProductsBatch = async (req, res) => {
+  try {
+    const { productIds } = req.body;
+    const user = req.user;
+
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+      return res.status(400).json({ message: 'productIds array is required' });
+    }
+
+    const whereClause = {
+      id: { [Op.in]: productIds },
+    };
+    if (user.role !== 'ADMIN') {
+      whereClause.userId = user.id;
+    }
+
+    const products = await Product.findAll({ where: whereClause });
+    const now = new Date();
+    let updatedCount = 0;
+
+    for (const product of products) {
+      const oldBoostExpiryDate = product.boostExpiryDate;
+      let newBoostExpiryDate;
+
+      if (!oldBoostExpiryDate || new Date(oldBoostExpiryDate) < now) {
+        newBoostExpiryDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
+      } else {
+        newBoostExpiryDate = new Date(new Date(oldBoostExpiryDate).getTime() + 365 * 24 * 60 * 60 * 1000); // extend 1 year
+      }
+
+      await product.update({
+        isBoosted: true,
+        boostLevel: 500,
+        boostExpiryDate: newBoostExpiryDate,
+      });
+
+      await product.reload();
+      console.log(`[DEBUG] Batch boost product ID ${product.id} - Title: "${product.title}"`);
+      console.log(`[DEBUG] Old boostExpiryDate: ${oldBoostExpiryDate}`);
+      console.log(`[DEBUG] New boostExpiryDate: ${product.boostExpiryDate}`);
+      updatedCount++;
+    }
+
+    console.log(`✅ Batch boosted ${updatedCount} products for User ID: ${user.id}`);
+
+    return res.json({
+      message: `Successfully boosted ${updatedCount} products`,
+      updatedCount,
+    });
+  } catch (err) {
+    console.error('boostProductsBatch error:', err);
     return res.status(500).json({ message: 'Server error' });
   }
 };

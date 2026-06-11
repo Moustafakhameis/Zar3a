@@ -196,6 +196,15 @@ export const notifyUsersOnProductAdded = async (product, addedByUser) => {
 
 export const triggerOrderNotifications = async (order, items) => {
   try {
+    // ── Idempotency Guard: Skip if notifications already exist for this order ──
+    const existingCount = await Notification.count({
+      where: { orderId: order.id, type: 'order' },
+    });
+    if (existingCount > 0) {
+      console.log(`⚠️ Notifications already exist for Order #${order.id} (${existingCount} found). Skipping duplicate creation.`);
+      return;
+    }
+
     // Convert Sequelize instances to plain objects if needed
     const plainItems = items.map(item => 
       typeof item.get === 'function' ? item.get({ plain: true }) : item
@@ -295,8 +304,16 @@ export const triggerOrderNotifications = async (order, items) => {
     });
 
     if (uniqueNotifications.length > 0) {
-      await Notification.bulkCreate(uniqueNotifications);
-      console.log(`✅ Dispatched ${uniqueNotifications.length} order notifications for Order #${order.id}`);
+      try {
+        await Notification.bulkCreate(uniqueNotifications);
+        console.log(`✅ Dispatched ${uniqueNotifications.length} order notifications for Order #${order.id}`);
+      } catch (bulkErr) {
+        if (bulkErr.name === 'SequelizeUniqueConstraintError' || bulkErr.message.includes('Duplicate entry')) {
+          console.log(`ℹ️ Concurrency guard: Unique constraint prevented duplicate order notifications for Order #${order.id}.`);
+        } else {
+          throw bulkErr;
+        }
+      }
     }
   } catch (err) {
     console.error('triggerOrderNotifications error:', err);

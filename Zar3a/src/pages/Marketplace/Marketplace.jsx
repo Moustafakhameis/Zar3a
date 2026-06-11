@@ -113,6 +113,10 @@ const renderProductImage = (imageSrc, title, className = "w-full h-full object-c
   return <span className={textClassName}>{srcStr}</span>;
 };
 
+const isActiveBoosted = (p) =>
+  (p.isBoosted === true || p.isBoosted === 1) &&
+  (!p.boostExpiryDate || new Date(p.boostExpiryDate) > new Date());
+
 const normalizeProduct = (product) => {
   const marketplaceType = product.marketplaceType || product.type || "CROP_MARKET";
   return {
@@ -129,6 +133,8 @@ const normalizeProduct = (product) => {
     unit: product.unit || "unit",
     rating: product.rating || 4.5,
     marketplaceType,
+    isBoosted: product.isBoosted,
+    boostExpiryDate: product.boostExpiryDate,
     marketType:
       marketplaceType === "SENSOR_MARKET"
         ? "sensors"
@@ -141,6 +147,7 @@ const normalizeProduct = (product) => {
         : "market",
   };
 };
+
 
 
 const CustomSelect = ({ value, onChange, options, disabled, placeholder }) => {
@@ -454,6 +461,8 @@ const Marketplace = () => {
     ...categoriesRaw.filter(c => c === "OTHER" || c === "Other")
   ];
 
+  const isProductBoosted = (item) => isActiveBoosted(item);
+
   const filteredData = activeData
     .filter(
       (item) =>
@@ -463,6 +472,13 @@ const Marketplace = () => {
     .filter((item) => item.price <= maxPrice)
     .filter((item) => (selectedCategory === "All" ? true : item.category === selectedCategory))
     .sort((a, b) => {
+      // Float boosted products to the top
+      const aBoost = isProductBoosted(a);
+      const bBoost = isProductBoosted(b);
+      if (aBoost && !bBoost) return -1;
+      if (!aBoost && bBoost) return 1;
+
+      // Secondary sorting
       if (sortBy === "Price: Low to High") return a.price - b.price;
       if (sortBy === "Price: High to Low") return b.price - a.price;
       if (sortBy === "Top Rated") return b.rating - a.rating;
@@ -471,9 +487,8 @@ const Marketplace = () => {
 
   const canCreate = user?.role === "SUPPLIER" || user?.role === "FARMER" || user?.role === "ADMIN";
 
-  const boostedIds = JSON.parse(localStorage.getItem("boosted_products") || "[]");
-  const featuredProducts = filteredData.filter((item) => boostedIds.includes(item.id));
-  const regularProducts = filteredData.filter((item) => !boostedIds.includes(item.id));
+  const featuredProducts = filteredData.filter((item) => isProductBoosted(item));
+  const regularProducts = filteredData.filter((item) => !isProductBoosted(item));
 
   const renderProductCard = (item, isPremium = false) => (
     <motion.div
@@ -863,7 +878,7 @@ const Marketplace = () => {
         <AnimatePresence mode="popLayout">
           {filteredData.map((item) => {
             const isOwnProduct = user && (user.role === "FARMER" || user.role === "SUPPLIER") && item.ownerId === user.id;
-            const isPremium = boostedIds.includes(item.id);
+            const isPremium = isProductBoosted(item);
 
             return (
               <motion.div

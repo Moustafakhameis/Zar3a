@@ -5,6 +5,7 @@ import { body, validationResult } from "express-validator";
 import { uploadCV }   from "../middlewares/upload.js";
 import authenticate   from "../middlewares/authenticate.js";
 import adminOnly      from "../middlewares/adminOnly.js";
+import { rejectPasswordHash, loginRateLimiter } from "../middlewares/authValidation.js";
 import {
   register,
   registerFull,
@@ -38,6 +39,9 @@ import {
 } from "../controllers/auth.controller.js";
 
 const router = Router();
+
+// Apply passwordHash rejection globally on all authentication routes
+router.use(rejectPasswordHash);
 
 // ── Validation runner ────────────────────────────────────────────────────────
 
@@ -186,6 +190,7 @@ router.post("/admin/promote/:userId",
 
 // POST /auth/login
 router.post("/login",
+  loginRateLimiter,
   [
     body("email")
       .trim()

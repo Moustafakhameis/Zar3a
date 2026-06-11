@@ -18,6 +18,8 @@ import Inquiry from './Inquiry.js';
 import Cart from './Cart.js';
 import ProductReview from './ProductReview.js';
 import Transaction from './Transaction.js';
+import AuditLog from './AuditLog.js';
+import PasswordHistory from './PasswordHistory.js';
 
 // Associations
 User.hasOne(FarmerProfile, { foreignKey: 'userId', onDelete: 'CASCADE' });
@@ -98,4 +100,11 @@ Transaction.belongsTo(User, { foreignKey: 'userId' });
 Order.hasMany(Transaction, { foreignKey: 'orderId', onDelete: 'CASCADE' });
 Transaction.belongsTo(Order, { foreignKey: 'orderId' });
 
-export { sequelize, User, FarmerProfile, AgroExpertProfile, SupplierProfile, BuyerProfile, RefreshToken, VerificationToken, PasswordResetOTP, Product, ExpertListing, Notification, ChatMessage, OrderTracking, Inquiry, Order, OrderItem, Cart, ProductReview, Transaction };
+// Security: Audit logs & password history
+User.hasMany(AuditLog, { foreignKey: 'userId', onDelete: 'SET NULL' });
+AuditLog.belongsTo(User, { foreignKey: 'userId' });
+
+User.hasMany(PasswordHistory, { foreignKey: 'userId', onDelete: 'CASCADE' });
+PasswordHistory.belongsTo(User, { foreignKey: 'userId' });
+
+export { sequelize, User, FarmerProfile, AgroExpertProfile, SupplierProfile, BuyerProfile, RefreshToken, VerificationToken, PasswordResetOTP, Product, ExpertListing, Notification, ChatMessage, OrderTracking, Inquiry, Order, OrderItem, Cart, ProductReview, Transaction, AuditLog, PasswordHistory };

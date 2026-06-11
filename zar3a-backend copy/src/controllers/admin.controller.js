@@ -262,6 +262,132 @@ export const getAdminStats = async (req, res) => {
   }
 };
 
+/**
+ * POST /admin/products/:productId/boost
+ * Set a product as premium/boosted (appears at top of marketplace)
+ * Body: { boostExpiryDate: '2026-12-31' } (optional, null = permanent boost)
+ */
+export const boostProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { boostLevel, boostExpiryDate } = req.body;
+
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const oldBoostExpiryDate = product.boostExpiryDate;
+
+    // Parse expiry date if provided, default to cumulative 1 year from now/existing
+    let finalExpiry = null;
+    const expiryInput = boostExpiryDate;
+    if (expiryInput) {
+      finalExpiry = new Date(expiryInput);
+      if (isNaN(finalExpiry.getTime())) {
+        return res.status(400).json({ message: 'Invalid date format' });
+      }
+    } else {
+      const now = new Date();
+      if (!oldBoostExpiryDate || new Date(oldBoostExpiryDate) < now) {
+        finalExpiry = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
+      } else {
+        finalExpiry = new Date(new Date(oldBoostExpiryDate).getTime() + 365 * 24 * 60 * 60 * 1000); // extend 1 year
+      }
+    }
+
+    const level = boostLevel !== undefined ? Number(boostLevel) : 500;
+
+    // Set boosting attributes on the single product instance (updates only this product)
+    await product.update({
+      isBoosted: true,
+      boostLevel: level,
+      boostExpiryDate: finalExpiry,
+    });
+
+    await product.reload();
+
+    console.log(`[DEBUG] Admin Boost - Product ID: ${productId} - Title: "${product.title}"`);
+    console.log(`[DEBUG] Old boostExpiryDate: ${oldBoostExpiryDate}`);
+    console.log(`[DEBUG] New boostExpiryDate: ${product.boostExpiryDate}`);
+    console.log(`✅ Product boosted: "${product.title}" (ID: ${productId}, level: ${level})`);
+
+    res.status(200).json({
+      message: 'Product boosted successfully',
+      product: {
+        id: product.id,
+        title: product.title,
+        marketplaceType: product.marketplaceType,
+        isBoosted: product.isBoosted,
+        boostLevel: product.boostLevel,
+        boostExpiryDate: product.boostExpiryDate,
+      },
+    });
+  } catch (err) {
+    console.error('boostProduct error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * DELETE /admin/products/:productId/boost
+ * Remove premium boost from a product
+ */
+export const removeBoost = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    await product.update({
+      isBoosted: false,
+      boostLevel: 0,
+      boostExpiryDate: null,
+    });
+
+    console.log(`✅ Product boost removed: "${product.title}" (ID: ${productId})`);
+
+    res.status(200).json({
+      message: 'Product boost removed successfully',
+      product: {
+        id: product.id,
+        title: product.title,
+        isBoosted: product.isBoosted,
+        boostLevel: product.boostLevel,
+        boostExpiryDate: product.boostExpiryDate,
+      },
+    });
+  } catch (err) {
+    console.error('removeBoost error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * GET /admin/products/boosted
+ * Get all currently boosted products
+ */
+export const getBoostedProducts = async (req, res) => {
+  try {
+    const boostedProducts = await Product.findAll({
+      where: { isBoosted: true },
+      include: [{ model: User, attributes: ['id', 'fullName', 'username', 'role'] }],
+      order: [['marketplaceType', 'ASC'], ['createdAt', 'DESC']],
+    });
+
+    res.status(200).json({
+      total: boostedProducts.length,
+      products: boostedProducts,
+    });
+  } catch (err) {
+    console.error('getBoostedProducts error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 export default {
   getAllUsers,
   getUserDetails,
@@ -269,6 +395,9 @@ export default {
   deleteUser,
   deleteProduct,
   getAdminStats,
+  boostProduct,
+  removeBoost,
+  getBoostedProducts,
 };
 
 

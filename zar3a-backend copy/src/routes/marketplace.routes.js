@@ -22,6 +22,8 @@ import {
   deleteProductReview,
   updateExpertListing,
   deleteExpertListing,
+  boostUserProduct,
+  boostProductsBatch,
 } from '../controllers/marketplace.controller.js';
 import { createInquiry } from '../controllers/inquiry.controller.js';
 
@@ -240,5 +242,15 @@ router.post(
   validate,
   createInquiry
 );
+
+// ─────────────────────────────────────────────────────────
+// BOOSTING ENDPOINTS
+// ─────────────────────────────────────────────────────────
+
+// POST /marketplace/products/boost-batch
+router.post('/products/boost-batch', authenticate, boostProductsBatch);
+
+// POST /marketplace/products/:productId/boost
+router.post('/products/:productId/boost', authenticate, boostUserProduct);
 
 export default router;

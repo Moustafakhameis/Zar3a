@@ -1,11 +1,16 @@
 import { Product, ExpertListing, User, OrderTracking } from '../models/index.js';
+import { literal } from 'sequelize';
 import notificationService from './notification.controller.js';
 
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.findAll({
       include: [{ model: User, attributes: ['id', 'fullName', 'username', 'role'] }],
-      order: [['createdAt', 'DESC']],
+      order: [
+        // Boosted products float to top (isBoosted = 1 AND not expired)
+        [literal('CASE WHEN isBoosted = 1 AND (boostExpiryDate IS NULL OR boostExpiryDate > NOW()) THEN 0 ELSE 1 END'), 'ASC'],
+        ['createdAt', 'DESC'],
+      ],
     });
     return res.json(products);
   } catch (err) {

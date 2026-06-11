@@ -5,8 +5,41 @@ import bcrypt   from "bcryptjs";
 
 // ── Password ──────────────────────────────────────────────────────────────────
 
-export const hashPassword   = (plain)         => bcrypt.hash(plain, 12);
-export const verifyPassword = (plain, hashed) => bcrypt.compare(plain, hashed);
+/**
+ * Hash a password with an email-specific pepper.
+ * All NEW hashes use this format: bcrypt(password:email)
+ */
+export const hashPassword = (plain, email) => {
+  const pepper = email ? `:${email.toLowerCase().trim()}` : '';
+  const input = `${plain}${pepper}`;
+  return bcrypt.hash(input, 12);
+};
+
+/**
+ * Verify a password against a stored hash.
+ * 
+ * Backward-compatible: tries the peppered format first (password:email),
+ * then falls back to legacy format (plain password only) for users
+ * whose hashes were created before the pepper was added.
+ * 
+ * Returns { valid: boolean, needsRehash: boolean }
+ */
+export const verifyPassword = async (plain, hashed, email) => {
+  if (!hashed) return { valid: false, needsRehash: false };
+
+  // 1) Try new peppered format first
+  if (email) {
+    const pepperedInput = `${plain}:${email.toLowerCase().trim()}`;
+    const pepperedMatch = await bcrypt.compare(pepperedInput, hashed);
+    if (pepperedMatch) return { valid: true, needsRehash: false };
+  }
+
+  // 2) Fallback: try legacy format (plain password, no pepper)
+  const legacyMatch = await bcrypt.compare(plain, hashed);
+  if (legacyMatch) return { valid: true, needsRehash: true };
+
+  return { valid: false, needsRehash: false };
+};
 
 export const generateToken = () => crypto.randomBytes(32).toString("hex");
 

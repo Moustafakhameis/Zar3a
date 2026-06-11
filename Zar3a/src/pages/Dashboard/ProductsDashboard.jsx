@@ -13,11 +13,12 @@ import {
   LuMapPin,
   LuBanknote,
   LuChevronDown,
-  LuFilter
+  LuFilter,
+  LuZap
 } from "react-icons/lu";
 import { FiAlertCircle, FiCheckCircle, FiEdit } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
-import api from "../../API/axiosInstance";
+import api, { marketplaceAPI } from "../../API/axiosInstance";
 import { PuffLoader } from "react-spinners";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -77,6 +78,10 @@ const CustomSelect = ({ value, onChange, options, icon: Icon, label }) => {
   );
 };
 
+const isActiveBoosted = (p) =>
+  (p.isBoosted === true || p.isBoosted === 1) &&
+  (!p.boostExpiryDate || new Date(p.boostExpiryDate) > new Date());
+
 export default function ProductsDashboard() {
   const { t } = useLanguage();
   const { user } = useAuth();
@@ -84,10 +89,7 @@ export default function ProductsDashboard() {
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
-  const [boostedProducts, setBoostedProducts] = useState(() => {
-    const saved = localStorage.getItem("boosted_products");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [boostedProducts, setBoostedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTypeFilter, setActiveTypeFilter] = useState("ALL"); // "ALL" | "CROP" | "AGRI"
@@ -340,15 +342,43 @@ export default function ProductsDashboard() {
       return matchesSearch && matchesType && matchesCategory && matchesStatus && matchesRegion && matchesMinPrice && matchesMaxPrice;
     });
 
-  const handleBoostAll = () => {
-    setBoostedProducts((prev) => {
+  const handleBoostAll = async () => {
+    try {
       const allProductIds = filteredProducts.map(p => p.id);
-      const newBoosted = [...new Set([...prev, ...allProductIds])];
-      localStorage.setItem("boosted_products", JSON.stringify(newBoosted));
-      setMessage("✨ Success! Your products have been Premium Boosted and are now at the top of the Marketplace.");
+      if (allProductIds.length === 0) return;
+
+      const response = await marketplaceAPI.boostProductsBatch(allProductIds);
+      
+      // Update local state so UI updates immediately
+      setBoostedProducts((prev) => [...new Set([...prev, ...allProductIds])]);
+
+      // Reload products to fetch new DB values
+      await loadProducts();
+
+      toast.success(t("prodDash.boostSuccess") || `Successfully boosted ${allProductIds.length} products in the database!`);
+      setMessage("✨ Success! Your products have been Premium Boosted in the database and are now at the top of the Marketplace.");
       setTimeout(() => setMessage(null), 3500);
-      return newBoosted;
-    });
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Failed to premium boost products");
+    }
+  };
+
+  const handleBoostSingle = async (productId) => {
+    try {
+      await marketplaceAPI.boostProduct(productId);
+      
+      // Update local state
+      setBoostedProducts((prev) => [...new Set([...prev, productId])]);
+
+      // Reload products
+      await loadProducts();
+
+      toast.success("Product premium boosted successfully in the database! ✨");
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Failed to boost product");
+    }
   };
 
   return (
@@ -589,7 +619,7 @@ export default function ProductsDashboard() {
               {filteredProducts.map((product) => {
                 const isCrop = product.marketplaceType === "CROP_MARKET";
                 const isDeletable = canDeleteProduct(product);
-                const isBoosted = boostedProducts.includes(product.id);
+                const isBoosted = isActiveBoosted(product) || boostedProducts.includes(product.id);
 
                 const isUserFarmerOrSupplier = user && (user.role === "FARMER" || user.role === "SUPPLIER");
 
@@ -682,6 +712,15 @@ export default function ProductsDashboard() {
 
                       {isDeletable ? (
                         <div className="flex gap-2">
+                          {!isBoosted && (
+                            <button
+                              onClick={() => handleBoostSingle(product.id)}
+                              className="w-12 h-12 bg-blue-50 dark:bg-blue-950/20 text-blue-500 rounded-2xl flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all active:scale-95 shadow-sm"
+                              title="Premium Boost"
+                            >
+                              <LuZap size={18} />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleOpenEditModal(product)}
                             className="w-12 h-12 bg-primary-light dark:bg-emerald-950/20 text-primary-base dark:text-emerald-400 rounded-2xl flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all active:scale-95 shadow-sm"

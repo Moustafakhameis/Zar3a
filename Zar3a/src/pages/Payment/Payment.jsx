@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   LuArrowLeft, 
@@ -36,6 +36,9 @@ const Payment = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [confirmStatus, setConfirmStatus] = useState('idle'); // 'idle' | 'verifying' | 'success' | 'failed'
 
+  // Guard to prevent duplicate confirmation calls (React Strict Mode / re-renders)
+  const confirmationCalledRef = useRef(false);
+
   // Check if we are handling a callback from Stripe/Paymob redirect
   useEffect(() => {
     const isSuccess = searchParams.get('success');
@@ -49,6 +52,18 @@ const Payment = () => {
     const tier = searchParams.get('tier');
 
     if (isSuccess === 'true' && (orderId || type === 'subscription')) {
+      // Prevent duplicate calls from React Strict Mode double-mount or re-renders
+      if (confirmationCalledRef.current) return;
+
+      const lockKey = orderId ? `confirm_order_${orderId}` : `confirm_sub_${tier || 'tier'}`;
+      if (sessionStorage.getItem(lockKey)) {
+        console.log("Payment confirmation already handled or in progress for lock key:", lockKey);
+        setConfirmStatus('success');
+        return;
+      }
+      sessionStorage.setItem(lockKey, "true");
+      confirmationCalledRef.current = true;
+
       handlePaymentConfirmation({
         orderId: orderId ? Number(orderId) : null,
         gateway,

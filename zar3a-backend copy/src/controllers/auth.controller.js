@@ -253,7 +253,7 @@ export const register = async (req, res) => {
       username: normalizedUsername,
       email: normalizedEmail,
       phone: phone.trim().replace(/^\+/, ""),
-      passwordHash: await hashPassword(password),
+      passwordHash: await hashPassword(password, normalizedEmail),
       role: null,
       isApproved: false,
     });
@@ -351,7 +351,7 @@ export const registerFull = async (req, res) => {
       username: normalizedUsername,
       email: normalizedEmail,
       phone: phone.trim().replace(/^\+/, ""),
-      passwordHash: await hashPassword(password),
+      passwordHash: await hashPassword(password, normalizedEmail),
       role: role === 'BUYER' ? 'BUYER' : null,
       pendingRole: role === 'BUYER' ? null : role,
       isApproved: role === 'BUYER',
@@ -634,7 +634,7 @@ export const login = async (req, res) => {
 
     let passwordValid;
     try {
-      passwordValid = await verifyPassword(password, user.passwordHash);
+      passwordValid = await verifyPassword(password, user.passwordHash, user.email);
       console.log(`[login] Password verification for user ${user.id}: ${passwordValid ? "passed" : "failed"}`);
     } catch (hashErr) {
       console.error(`[login] Error during password verification for user ${user.id}:`, hashErr.message);
@@ -882,10 +882,10 @@ export const changePassword = async (req, res) => {
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     if (!user.passwordHash) return res.status(400).json({ message: 'Password change unavailable for this account' });
-    if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+    if (!(await verifyPassword(currentPassword, user.passwordHash, user.email))) {
       return res.status(400).json({ message: 'Current password is incorrect' });
     }
-    await User.update({ passwordHash: await hashPassword(newPassword) }, { where: { id: req.user.id } });
+    await User.update({ passwordHash: await hashPassword(newPassword, user.email) }, { where: { id: req.user.id } });
     return res.json({ message: 'Password updated successfully' });
   } catch (err) {
     console.error(err);
@@ -922,7 +922,7 @@ export const resetPassword = async (req, res) => {
     }
     const user = await User.findByPk(record.userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    await User.update({ passwordHash: await hashPassword(newPassword) }, { where: { id: user.id } });
+    await User.update({ passwordHash: await hashPassword(newPassword, user.email) }, { where: { id: user.id } });
     await VerificationToken.update({ used: true }, { where: { id: record.id } });
     return res.json({ message: 'Password reset successfully' });
   } catch (err) {
@@ -1388,7 +1388,7 @@ export const resetPasswordWithOTP = async (req, res) => {
     }
 
     // Update password
-    const hashedPassword = await hashPassword(newPassword);
+    const hashedPassword = await hashPassword(newPassword, user.email);
     await User.update(
       { passwordHash: hashedPassword },
       { where: { id: user.id } }

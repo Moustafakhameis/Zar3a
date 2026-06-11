@@ -11,6 +11,9 @@ import {
   getAdminStats,
   getInquiries,
   updateInquiryStatus,
+  boostProduct,
+  removeBoost,
+  getBoostedProducts,
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -33,6 +36,14 @@ router.post(
 );
 router.delete('/users/:userId', deleteUser);
 router.delete('/products/:productId', deleteProduct);
+router.get('/products/boosted', getBoostedProducts);
+router.post(
+  '/products/:productId/boost',
+  [body('boostExpiryDate').optional().isISO8601().withMessage('Invalid date format')],
+  validate,
+  boostProduct
+);
+router.delete('/products/:productId/boost', removeBoost);
 router.get('/stats', getAdminStats);
 
 router.get('/inquiries', getInquiries);

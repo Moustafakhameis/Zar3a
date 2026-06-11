@@ -1,0 +1,51 @@
+### Premium Boost Feature - API Tests
+# Copy this to REST Client extension (VS Code) to test the endpoints
+
+@baseUrl = http://localhost:3000
+@adminToken = your_admin_token_here
+
+### Test 1: Get All Boosted Products
+GET {{baseUrl}}/admin/products/boosted
+Authorization: Bearer {{adminToken}}
+
+### Test 2: Boost a Product (Permanent)
+POST {{baseUrl}}/admin/products/21/boost
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "boostExpiryDate": null
+}
+
+### Test 3: Boost a Product with Expiry Date
+POST {{baseUrl}}/admin/products/22/boost
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "boostExpiryDate": "2026-12-31"
+}
+
+### Test 4: Boost Product (No Body - Uses Default)
+POST {{baseUrl}}/admin/products/23/boost
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{}
+
+### Test 5: Remove Boost from Product
+DELETE {{baseUrl}}/admin/products/21/boost
+Authorization: Bearer {{adminToken}}
+
+### Test 6: Get Crop Market Products (Should Show Boosted First)
+GET {{baseUrl}}/marketplace/products/crop-market
+
+### Test 7: Get Agri Shop Products (Should Show Boosted First)
+GET {{baseUrl}}/marketplace/products/agri-shop
+
+### Test 8: Get Sensor Market Products
+GET {{baseUrl}}/marketplace/products/sensor-market
+
+### Test 9: Admin Stats (Verify Total Products)
+GET {{baseUrl}}/admin/stats
+Authorization: Bearer {{adminToken}}

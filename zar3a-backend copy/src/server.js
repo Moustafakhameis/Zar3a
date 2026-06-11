@@ -104,22 +104,32 @@ const ensureProductionColumns = async (sequelizeInstance) => {
       console.log("✅ 'subscriptionExpiresAt' column added.");
     }
 
-    // Check academicDegree and experienceYears on ExpertListings
-    const [academicDegreeCols] = await sequelizeInstance.query("SHOW COLUMNS FROM `ExpertListings` LIKE 'academicDegree';");
-    if (academicDegreeCols.length === 0) {
-      console.log("Adding 'academicDegree' and 'experienceYears' columns to ExpertListings...");
+    // Check failedLoginAttempts column (account locking)
+    const [failedCols] = await sequelizeInstance.query("SHOW COLUMNS FROM `Users` LIKE 'failedLoginAttempts';");
+    if (failedCols.length === 0) {
+      console.log("Adding 'failedLoginAttempts' column to Users...");
       await sequelizeInstance.query(`
-        ALTER TABLE \`ExpertListings\` 
-        ADD COLUMN \`academicDegree\` VARCHAR(255) NULL,
-        ADD COLUMN \`experienceYears\` INT NULL DEFAULT 0;
+        ALTER TABLE \`Users\` 
+        ADD COLUMN \`failedLoginAttempts\` INT NOT NULL DEFAULT 0;
       `);
-      console.log("✅ 'academicDegree' and 'experienceYears' columns added to ExpertListings.");
+      console.log("✅ 'failedLoginAttempts' column added.");
+    }
+
+    // Check lockedUntil column (account locking)
+    const [lockedCols] = await sequelizeInstance.query("SHOW COLUMNS FROM `Users` LIKE 'lockedUntil';");
+    if (lockedCols.length === 0) {
+      console.log("Adding 'lockedUntil' column to Users...");
+      await sequelizeInstance.query(`
+        ALTER TABLE \`Users\` 
+        ADD COLUMN \`lockedUntil\` DATETIME NULL DEFAULT NULL;
+      `);
+      console.log("✅ 'lockedUntil' column added.");
     }
 
     // Ensure imageUrl column lengths are modified to TEXT to support long base64 and URLs
     const tablesToAlter = [
       { table: 'ExpertListings', column: 'imageUrl' },
-      { table: 'Products', column: 'imageUrl' },
+      { table: 'products', column: 'imageUrl' },
       { table: 'OrderItems', column: 'imageUrl' },
       { table: 'OrderTracking', column: 'imageUrl' }
     ];
@@ -137,6 +147,28 @@ const ensureProductionColumns = async (sequelizeInstance) => {
         }
       } catch (colErr) {
         console.error(`⚠️ Could not alter column ${item.column} in table ${item.table}:`, colErr.message);
+      }
+    }
+
+    // Ensure products, OrderTracking and OrderItems marketplaceType ENUM values include SENSOR_MARKET
+    const enumTables = [
+      { table: 'products', column: 'marketplaceType' },
+      { table: 'OrderTracking', column: 'marketplaceType' },
+      { table: 'OrderItems', column: 'marketplaceType' }
+    ];
+    for (const item of enumTables) {
+      try {
+        const [cols] = await sequelizeInstance.query(`SHOW COLUMNS FROM \`${item.table}\` LIKE '${item.column}';`);
+        if (cols.length > 0) {
+          const type = cols[0].Type.toLowerCase();
+          if (!type.includes('sensor_market')) {
+            console.log(`Altering \`${item.table}\`.\`${item.column}\` to allow SENSOR_MARKET...`);
+            await sequelizeInstance.query(`ALTER TABLE \`${item.table}\` MODIFY COLUMN \`${item.column}\` ENUM('CROP_MARKET', 'AGRI_MARKET', 'SENSOR_MARKET') DEFAULT 'CROP_MARKET';`);
+            console.log(`✅ \`${item.table}\`.\`${item.column}\` updated to support SENSOR_MARKET.`);
+          }
+        }
+      } catch (colErr) {
+        console.error(`⚠️ Could not alter enum column ${item.column} in table ${item.table}:`, colErr.message);
       }
     }
   } catch (err) {

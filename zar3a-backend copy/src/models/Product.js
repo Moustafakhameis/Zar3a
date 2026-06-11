@@ -62,6 +62,24 @@ const Product = sequelize.define('Product', {
     defaultValue: true,
   },
 
+  isBoosted: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+
+  boostLevel: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+
+  boostExpiryDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+  },
+
   marketplaceType: {
     type: DataTypes.ENUM('CROP_MARKET', 'AGRI_MARKET', 'SENSOR_MARKET'),
     defaultValue: 'CROP_MARKET',
@@ -88,7 +106,7 @@ const Product = sequelize.define('Product', {
   }
 
 }, {
-  tableName: 'Products',
+  tableName: 'products',
   timestamps: true,
 });
 

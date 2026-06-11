@@ -64,6 +64,10 @@ export const marketplaceAPI = {
   getSensorMarketProducts: () => api.get('/marketplace/sensor-products'),
   createSensorMarketProduct: (data) => api.post('/marketplace/sensor-products', data),
 
+  // BOOSTING
+  boostProductsBatch: (productIds) => api.post('/marketplace/products/boost-batch', { productIds }),
+  boostProduct: (productId) => api.post(`/marketplace/products/${productId}/boost`),
+
   // INQUIRIES
   createInquiry: (data) => api.post('/marketplace/inquiries', data),
 

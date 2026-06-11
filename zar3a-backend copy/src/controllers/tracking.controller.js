@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, literal } from 'sequelize';
 import { OrderTracking, Product, User, Order, OrderItem } from '../models/index.js';
 
 /**
@@ -81,7 +81,11 @@ export const getOrderTracking = async (req, res) => {
     const products = await Product.findAll({
       where: prodWhere,
       include: [{ model: User, attributes: ['id', 'fullName', 'username', 'email'] }],
-      order: [['createdAt', 'DESC']],
+      order: [
+        // Boosted products float to top
+        [literal('CASE WHEN isBoosted = 1 AND (boostExpiryDate IS NULL OR boostExpiryDate > NOW()) THEN 0 ELSE 1 END'), 'ASC'],
+        ['createdAt', 'DESC'],
+      ],
       ...(limitVal ? { limit: limitVal } : {}),
       ...(offsetVal ? { offset: offsetVal } : {}),
     });
