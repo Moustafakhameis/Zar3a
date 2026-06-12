@@ -1,0 +1,615 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model agroexpertprofile {
+  id              Int     @id @default(autoincrement())
+  userId          Int     @unique(map: "AgroExpertProfile_userId_key")
+  academicDegree  String? @db.VarChar(200)
+  experienceYears Int?
+  cvFilePath      String? @db.VarChar(500)
+  bio             String? @db.Text
+  user            user    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "AgroExpertProfile_userId_fkey")
+}
+
+model agroexpertprofiles {
+  id              Int     @id @default(autoincrement())
+  userId          Int     @unique(map: "userId")
+  academicDegree  String? @db.VarChar(255)
+  experienceYears Int?
+  cvFilePath      String? @db.VarChar(255)
+  bio             String? @db.Text
+  users           users   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "agroexpertprofiles_ibfk_1")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model auditlogs {
+  id        Int       @id @default(autoincrement())
+  userId    Int?
+  action    String    @db.VarChar(100)
+  details   String?   @db.Text
+  ipAddress String?   @db.VarChar(45)
+  userAgent String?   @db.VarChar(500)
+  createdAt DateTime? @db.DateTime(0)
+  users     users?    @relation(fields: [userId], references: [id], map: "auditlogs_ibfk_1")
+
+  @@index([action], map: "audit_logs_action")
+  @@index([createdAt], map: "audit_logs_created_at")
+  @@index([userId], map: "audit_logs_user_id")
+}
+
+model buyerprofiles {
+  id           Int     @id @default(autoincrement())
+  userId       Int     @unique(map: "userId")
+  companyName  String? @db.VarChar(255)
+  businessType String? @db.VarChar(255)
+  location     String? @db.VarChar(255)
+  users        users   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "buyerprofiles_ibfk_1")
+}
+
+model carts {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique(map: "userId")
+  items       Json
+  totalAmount Decimal  @default(0.00) @db.Decimal(12, 2)
+  createdAt   DateTime @db.DateTime(0)
+  updatedAt   DateTime @db.DateTime(0)
+  users       users    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "carts_ibfk_1")
+}
+
+model chatmessages {
+  id                                   Int       @id @default(autoincrement())
+  senderId                             Int
+  receiverId                           Int
+  message                              String    @db.Text
+  attachmentUrl                        String?   @db.VarChar(500)
+  isRead                               Boolean?  @default(false)
+  readAt                               DateTime? @db.DateTime(0)
+  createdAt                            DateTime  @db.DateTime(0)
+  updatedAt                            DateTime  @db.DateTime(0)
+  users_chatmessages_senderIdTousers   users     @relation("chatmessages_senderIdTousers", fields: [senderId], references: [id], onDelete: Cascade, map: "chatmessages_ibfk_1")
+  users_chatmessages_receiverIdTousers users     @relation("chatmessages_receiverIdTousers", fields: [receiverId], references: [id], onDelete: Cascade, map: "chatmessages_ibfk_2")
+
+  @@index([receiverId], map: "receiverId")
+  @@index([senderId], map: "senderId")
+}
+
+model expertlistings {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  title           String   @db.VarChar(255)
+  specialty       String   @db.VarChar(150)
+  description     String   @db.Text
+  hourlyRate      Float    @db.Float
+  location        String?  @db.VarChar(150)
+  imageUrl        String?  @db.Text
+  isVerified      Boolean? @default(false)
+  createdAt       DateTime @db.DateTime(0)
+  updatedAt       DateTime @db.DateTime(0)
+  academicDegree  String?  @db.VarChar(255)
+  experienceYears Int?     @default(0)
+  users           users    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "expertlistings_ibfk_1")
+
+  @@index([userId], map: "userId")
+}
+
+model farmerprofile {
+  id       Int     @id @default(autoincrement())
+  userId   Int     @unique(map: "FarmerProfile_userId_key")
+  farmSize String? @db.VarChar(255)
+  soilType String? @db.VarChar(255)
+  location String? @db.VarChar(255)
+  user     user    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FarmerProfile_userId_fkey")
+}
+
+model farmerprofiles {
+  id       Int     @id @default(autoincrement())
+  userId   Int     @unique(map: "userId")
+  farmSize String? @db.VarChar(255)
+  soilType String? @db.VarChar(255)
+  location String? @db.VarChar(255)
+  sensorId String? @unique(map: "sensorId") @db.VarChar(255)
+  users    users   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "farmerprofiles_ibfk_1")
+}
+
+model inquiries {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  productId Int
+  quantity  Int              @default(1)
+  location  String?          @db.VarChar(255)
+  message   String?          @db.Text
+  status    inquiries_status @default(PENDING)
+  createdAt DateTime         @db.DateTime(0)
+  updatedAt DateTime         @db.DateTime(0)
+  users     users            @relation(fields: [userId], references: [id], onDelete: Cascade, map: "inquiries_ibfk_1")
+  products  products         @relation(fields: [productId], references: [id], onDelete: Cascade, map: "inquiries_ibfk_2")
+
+  @@index([productId], map: "productId")
+  @@index([userId], map: "userId")
+}
+
+model notifications {
+  id                                   Int       @id @default(autoincrement())
+  userId                               Int
+  productId                            Int?
+  orderId                              Int?
+  type                                 String    @default("PRODUCT_ADDED") @db.VarChar(50)
+  title                                String    @db.VarChar(255)
+  message                              String    @db.Text
+  isRead                               Boolean?  @default(false)
+  quantity                             Int?      @default(1)
+  createdBy                            Int?
+  createdAt                            DateTime  @db.DateTime(0)
+  updatedAt                            DateTime  @db.DateTime(0)
+  users_notifications_userIdTousers    users     @relation("notifications_userIdTousers", fields: [userId], references: [id], onDelete: Cascade, map: "notifications_ibfk_1")
+  products                             products? @relation(fields: [productId], references: [id], onDelete: Cascade, map: "notifications_ibfk_2")
+  orders                               orders?   @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "notifications_ibfk_3")
+  users_notifications_createdByTousers users?    @relation("notifications_createdByTousers", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "notifications_ibfk_4")
+
+  @@unique([orderId, userId, type], map: "uq_order_notif")
+  @@index([createdBy], map: "createdBy")
+  @@index([productId], map: "productId")
+  @@index([userId], map: "userId")
+}
+
+model orderitems {
+  id              Int                         @id @default(autoincrement())
+  orderId         Int
+  productId       Int
+  title           String                      @db.VarChar(255)
+  description     String?                     @db.Text
+  category        String?                     @db.VarChar(100)
+  price           Decimal                     @db.Decimal(12, 2)
+  unit            String?                     @db.VarChar(50)
+  quantity        Int                         @default(1)
+  totalPrice      Decimal                     @default(0.00) @db.Decimal(12, 2)
+  ownerId         Int
+  imageUrl        String?                     @db.Text
+  marketplaceType orderitems_marketplaceType? @default(CROP_MARKET)
+  productSource   orderitems_productSource?   @default(MANUAL)
+  region          String?                     @db.VarChar(100)
+  status          orderitems_status?          @default(PENDING)
+  createdAt       DateTime                    @db.DateTime(0)
+  updatedAt       DateTime                    @db.DateTime(0)
+  orders          orders                      @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "orderitems_ibfk_1")
+  products        products                    @relation(fields: [productId], references: [id], onDelete: Cascade, map: "orderitems_ibfk_2")
+  users           users                       @relation(fields: [ownerId], references: [id], onDelete: Cascade, map: "orderitems_ibfk_3")
+
+  @@index([orderId], map: "orderId")
+  @@index([ownerId], map: "ownerId")
+  @@index([productId], map: "productId")
+}
+
+model orders {
+  id              Int                   @id @default(autoincrement())
+  userId          Int
+  status          orders_status?        @default(PENDING)
+  paymentStatus   orders_paymentStatus? @default(PAID)
+  totalAmount     Decimal               @default(0.00) @db.Decimal(12, 2)
+  paymentMethod   String                @default("CREDIT_CARD") @db.VarChar(100)
+  shippingAddress String?               @db.Text
+  notes           String?               @db.Text
+  createdAt       DateTime              @db.DateTime(0)
+  updatedAt       DateTime              @db.DateTime(0)
+  notifications   notifications[]
+  orderitems      orderitems[]
+  users           users                 @relation(fields: [userId], references: [id], onDelete: Cascade, map: "orders_ibfk_1")
+  ordertracking   ordertracking[]
+  transactions    transactions[]
+
+  @@index([userId], map: "userId")
+}
+
+model ordertracking {
+  id              Int                            @id @default(autoincrement())
+  orderId         Int?
+  productId       Int
+  userId          Int
+  marketplaceType ordertracking_marketplaceType? @default(CROP_MARKET)
+  productSource   ordertracking_productSource?   @default(MANUAL)
+  type            ordertracking_type?            @default(LISTING)
+  title           String                         @db.VarChar(255)
+  description     String?                        @db.Text
+  category        String?                        @db.VarChar(100)
+  price           Decimal?                       @db.Decimal(10, 2)
+  unit            String?                        @db.VarChar(50)
+  region          String?                        @db.VarChar(100)
+  imageUrl        String?                        @db.Text
+  quantity        Int?                           @default(1)
+  status          ordertracking_status?          @default(AVAILABLE)
+  paymentStatus   ordertracking_paymentStatus?   @default(PAID)
+  createdAt       DateTime                       @db.DateTime(0)
+  updatedAt       DateTime                       @db.DateTime(0)
+  orders          orders?                        @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ordertracking_ibfk_1")
+  products        products                       @relation(fields: [productId], references: [id], onDelete: Cascade, map: "ordertracking_ibfk_2")
+  users           users                          @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ordertracking_ibfk_3")
+
+  @@index([orderId], map: "orderId")
+  @@index([productId], map: "productId")
+  @@index([userId], map: "userId")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model passwordhistories {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  passwordHash String    @db.VarChar(255)
+  createdAt    DateTime? @db.DateTime(0)
+  users        users     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "passwordhistories_ibfk_1")
+
+  @@index([userId], map: "password_histories_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model passwordresetotps {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  email             String    @db.VarChar(255)
+  otp               String    @db.VarChar(255)
+  otpAttempts       Int?      @default(0)
+  isVerified        Boolean?  @default(false)
+  verificationToken String?   @unique(map: "verificationToken") @db.VarChar(255)
+  expiresAt         DateTime  @db.DateTime(0)
+  createdAt         DateTime? @db.DateTime(0)
+  updatedAt         DateTime? @db.DateTime(0)
+  users             users     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "passwordresetotps_ibfk_1")
+
+  @@index([email], map: "password_reset_o_t_ps_email")
+  @@index([userId], map: "password_reset_o_t_ps_user_id")
+  @@index([verificationToken], map: "password_reset_o_t_ps_verification_token")
+}
+
+model productreviews {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  productId Int
+  rating    Int
+  comment   String    @db.Text
+  createdAt DateTime? @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  users     users     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "productreviews_ibfk_1")
+  products  products  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "productreviews_ibfk_2")
+
+  @@index([productId], map: "productId")
+  @@index([userId], map: "userId")
+}
+
+model products {
+  id              Int                       @id @default(autoincrement())
+  userId          Int
+  title           String                    @db.VarChar(255)
+  description     String?                   @db.Text
+  category        products_category?        @default(OTHER)
+  price           Decimal                   @db.Decimal(10, 2)
+  unit            String?                   @db.VarChar(50)
+  region          String?                   @db.VarChar(255)
+  imageUrl        String?                   @db.Text
+  isVerified      Boolean?                  @default(true)
+  marketplaceType products_marketplaceType? @default(CROP_MARKET)
+  productSource   products_productSource?   @default(MANUAL)
+  status          products_status?          @default(AVAILABLE)
+  createdAt       DateTime?                 @db.DateTime(0)
+  updatedAt       DateTime?                 @db.DateTime(0)
+  isBoosted       Boolean                   @default(false)
+  boostLevel      Int?                      @default(0)
+  boostExpiryDate DateTime?                 @db.DateTime(0)
+  inquiries       inquiries[]
+  notifications   notifications[]
+  orderitems      orderitems[]
+  ordertracking   ordertracking[]
+  productreviews  productreviews[]
+  users           users                     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "products_ibfk_1")
+
+  @@index([userId], map: "userId")
+}
+
+model refreshtoken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique(map: "RefreshToken_token_key") @db.VarChar(512)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "RefreshToken_userId_fkey")
+
+  @@index([userId], map: "RefreshToken_userId_fkey")
+}
+
+model refreshtokens {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  token     String    @unique(map: "token") @db.VarChar(255)
+  expiresAt DateTime  @db.DateTime(0)
+  revoked   Boolean?  @default(false)
+  createdAt DateTime? @db.DateTime(0)
+  users     users     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "refreshtokens_ibfk_1")
+
+  @@index([userId], map: "userId")
+}
+
+model supplierprofile {
+  id           Int     @id @default(autoincrement())
+  userId       Int     @unique(map: "SupplierProfile_userId_key")
+  tradeLicense String? @db.VarChar(255)
+  location     String? @db.VarChar(255)
+  user         user    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "SupplierProfile_userId_fkey")
+}
+
+model supplierprofiles {
+  id           Int     @id @default(autoincrement())
+  userId       Int     @unique(map: "userId")
+  tradeLicense String? @db.VarChar(255)
+  location     String? @db.VarChar(255)
+  users        users   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "supplierprofiles_ibfk_1")
+}
+
+model transactions {
+  id               Int                 @id @default(autoincrement())
+  userId           Int
+  orderId          Int
+  amount           Decimal             @default(0.00) @db.Decimal(12, 2)
+  currency         String              @default("EGP") @db.VarChar(10)
+  paymentMethod    String              @db.VarChar(50)
+  status           transactions_status @default(PENDING)
+  gatewayReference String?             @db.VarChar(255)
+  createdAt        DateTime            @db.DateTime(0)
+  updatedAt        DateTime            @db.DateTime(0)
+  users            users               @relation(fields: [userId], references: [id], onDelete: Cascade, map: "transactions_ibfk_1")
+  orders           orders              @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "transactions_ibfk_2")
+
+  @@index([orderId], map: "orderId")
+  @@index([userId], map: "userId")
+}
+
+model user {
+  id                Int                @id @default(autoincrement())
+  fullName          String             @db.VarChar(150)
+  username          String             @unique(map: "User_username_key") @db.VarChar(255)
+  email             String             @unique(map: "User_email_key") @db.VarChar(255)
+  phone             String             @db.VarChar(20)
+  passwordHash      String?            @db.VarChar(255)
+  role              user_role?
+  pendingRole       user_pendingRole?
+  authProvider      user_authProvider  @default(EMAIL)
+  googleId          String?            @unique(map: "User_googleId_key") @db.VarChar(255)
+  isActive          Boolean            @default(true)
+  isVerified        Boolean            @default(false)
+  isApproved        Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime
+  agroexpertprofile agroexpertprofile?
+  farmerprofile     farmerprofile?
+  refreshtoken      refreshtoken[]
+  supplierprofile   supplierprofile?
+}
+
+model users {
+  id                                           Int                    @id @default(autoincrement())
+  fullName                                     String                 @db.VarChar(255)
+  username                                     String                 @unique(map: "username") @db.VarChar(255)
+  email                                        String                 @unique(map: "email") @db.VarChar(255)
+  phone                                        String                 @db.VarChar(20)
+  passwordHash                                 String?                @db.VarChar(255)
+  role                                         users_role?
+  pendingRole                                  users_pendingRole?
+  authProvider                                 users_authProvider?    @default(EMAIL)
+  googleId                                     String?                @unique(map: "googleId") @db.VarChar(255)
+  isActive                                     Boolean?               @default(true)
+  isVerified                                   Boolean?               @default(false)
+  isApproved                                   Boolean?               @default(false)
+  cv                                           String?                @db.VarChar(255)
+  createdAt                                    DateTime?              @db.DateTime(0)
+  updatedAt                                    DateTime?              @db.DateTime(0)
+  status                                       users_status           @default(pending)
+  subscriptionTier                             users_subscriptionTier @default(FREE)
+  subscriptionExpiresAt                        DateTime?              @db.DateTime(0)
+  failedLoginAttempts                          Int                    @default(0)
+  lockedUntil                                  DateTime?              @db.DateTime(0)
+  agroexpertprofiles                           agroexpertprofiles?
+  auditlogs                                    auditlogs[]
+  buyerprofiles                                buyerprofiles?
+  carts                                        carts?
+  chatmessages_chatmessages_senderIdTousers    chatmessages[]         @relation("chatmessages_senderIdTousers")
+  chatmessages_chatmessages_receiverIdTousers  chatmessages[]         @relation("chatmessages_receiverIdTousers")
+  expertlistings                               expertlistings[]
+  farmerprofiles                               farmerprofiles?
+  inquiries                                    inquiries[]
+  notifications_notifications_userIdTousers    notifications[]        @relation("notifications_userIdTousers")
+  notifications_notifications_createdByTousers notifications[]        @relation("notifications_createdByTousers")
+  orderitems                                   orderitems[]
+  orders                                       orders[]
+  ordertracking                                ordertracking[]
+  passwordhistories                            passwordhistories[]
+  passwordresetotps                            passwordresetotps[]
+  productreviews                               productreviews[]
+  products                                     products[]
+  refreshtokens                                refreshtokens[]
+  supplierprofiles                             supplierprofiles?
+  transactions                                 transactions[]
+  verificationtokens                           verificationtokens[]
+}
+
+model verificationtokens {
+  id        Int                     @id @default(autoincrement())
+  userId    Int
+  token     String                  @unique(map: "token") @db.VarChar(255)
+  type      verificationtokens_type
+  expiresAt DateTime                @db.DateTime(0)
+  used      Boolean?                @default(false)
+  createdAt DateTime                @db.DateTime(0)
+  updatedAt DateTime                @db.DateTime(0)
+  users     users                   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "verificationtokens_ibfk_1")
+
+  @@index([userId], map: "userId")
+}
+
+enum orders_status {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum orders_paymentStatus {
+  NONE
+  PENDING
+  PAID
+  FAILED
+}
+
+enum verificationtokens_type {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+enum ordertracking_marketplaceType {
+  CROP_MARKET
+  AGRI_MARKET
+  SENSOR_MARKET
+}
+
+enum products_category {
+  SEEDS
+  FERTILIZERS
+  TOOLS
+  PRODUCE
+  EQUIPMENT
+  OTHER
+}
+
+enum ordertracking_productSource {
+  MANUAL
+  SENSED
+}
+
+enum inquiries_status {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ordertracking_type {
+  LISTING
+  PURCHASE
+  INQUIRY
+}
+
+enum transactions_status {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum user_role {
+  ADMIN
+  FARMER
+  BUYER
+  SUPPLIER
+  AGRO_EXPERT
+}
+
+enum users_role {
+  ADMIN
+  FARMER
+  BUYER
+  SUPPLIER
+  AGRO_EXPERT
+}
+
+enum user_pendingRole {
+  ADMIN
+  FARMER
+  BUYER
+  SUPPLIER
+  AGRO_EXPERT
+}
+
+enum users_pendingRole {
+  FARMER
+  SUPPLIER
+  AGRO_EXPERT
+}
+
+enum user_authProvider {
+  EMAIL
+  GOOGLE
+}
+
+enum users_authProvider {
+  EMAIL
+  GOOGLE
+}
+
+enum products_marketplaceType {
+  CROP_MARKET
+  AGRI_MARKET
+  SENSOR_MARKET
+}
+
+enum products_productSource {
+  MANUAL
+  SENSED
+}
+
+enum orderitems_marketplaceType {
+  CROP_MARKET
+  AGRI_MARKET
+  SENSOR_MARKET
+}
+
+enum products_status {
+  AVAILABLE
+  SOLD
+  DELETED
+}
+
+enum orderitems_productSource {
+  MANUAL
+  SENSED
+}
+
+enum orderitems_status {
+  AVAILABLE
+  SOLD
+  PENDING
+  INQUIRY_PENDING
+  DELETED
+}
+
+enum ordertracking_status {
+  AVAILABLE
+  SOLD
+  PENDING
+  INQUIRY_PENDING
+  DELETED
+}
+
+enum ordertracking_paymentStatus {
+  NONE
+  PENDING
+  PAID
+  FAILED
+}
+
+enum users_status {
+  pending
+  pending_sensor
+  pending_second_approval
+  approved
+}
+
+enum users_subscriptionTier {
+  FREE
+  STARTER
+  GROWTH
+  PRO
+}
