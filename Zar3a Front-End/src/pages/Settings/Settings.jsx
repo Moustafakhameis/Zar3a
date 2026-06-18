@@ -19,7 +19,7 @@ import { ClipLoader } from "react-spinners";
 const Settings = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const { user, updateProfile, changePassword, refreshUser } = useAuth();
+  const { user, updateProfile, uploadProfilePicture, changePassword, refreshUser } = useAuth();
   const { t } = useLanguage();
 
   const tabs = [
@@ -68,6 +68,7 @@ const Settings = () => {
       fullName: user.fullName || "",
       email: user.email || "",
       phone: user.phone || "",
+      avatarUrl: user.profilePicture ? `http://localhost:5002/${user.profilePicture}` : null,
       tradeLicense: user.SupplierProfile?.tradeLicense || "",
       location: user.SupplierProfile?.location || user.FarmerProfile?.location || "",
       farmSize: user.FarmerProfile?.farmSize || "",
@@ -110,12 +111,18 @@ const Settings = () => {
   };
 
   // تفعيل رفع الصورة
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, avatarUrl: url }));
-      showToast("Profile picture updated!");
+      try {
+        await uploadProfilePicture(file);
+        const url = URL.createObjectURL(file);
+        setFormData((prev) => ({ ...prev, avatarUrl: url }));
+        showToast("Profile picture updated!");
+      } catch (error) {
+        showToast("Failed to upload profile picture");
+        console.error("Upload error:", error);
+      }
     }
   };
 
@@ -322,7 +329,7 @@ const Settings = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-8"
                 >
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 bg-surface-secondary/30 dark:bg-slate-900/30 p-6 md:p-8 rounded-[2rem] border border-border-default/50 dark:border-slate-700/50">
                     <input
                       type="file"
                       accept="image/*"
@@ -333,7 +340,7 @@ const Settings = () => {
 
                     <div
                       onClick={() => fileInputRef.current.click()}
-                      className="relative group cursor-pointer w-24 h-24 bg-linear-to-br from-slate-700 to-slate-900 rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg overflow-hidden border border-border-default dark:border-slate-700"
+                      className="relative group cursor-pointer w-28 h-28 shrink-0 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-full flex items-center justify-center text-white text-3xl font-black shadow-xl overflow-hidden ring-4 ring-surface-card dark:ring-slate-800 transition-transform duration-300 hover:scale-105"
                     >
                       {formData.avatarUrl ? (
                         <img
@@ -353,23 +360,31 @@ const Settings = () => {
                             : "?"}
                         </span>
                       )}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white backdrop-blur-sm">
-                        <LuCamera size={24} />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white backdrop-blur-sm">
+                        <LuCamera size={24} className="mb-1" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Change</span>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="font-black text-lg text-text-main dark:text-white">
+                    
+                    <div className="text-center sm:text-start flex-1">
+                      <h3 className="font-black text-xl text-text-main dark:text-white">
                         {t("settings.picTitle")}
                       </h3>
-                      <p className="text-sm text-text-muted dark:text-text-disabled mt-1">
+                      <p className="text-sm font-medium text-text-muted dark:text-text-disabled mt-2 max-w-md">
                         {t("settings.avatarDesc")}
                       </p>
+                      <button 
+                        onClick={() => fileInputRef.current.click()}
+                        className="mt-4 px-5 py-2 bg-surface-card dark:bg-slate-800 border border-border-default dark:border-slate-700 rounded-xl text-xs font-bold text-text-subtle dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/30 transition-colors shadow-sm"
+                      >
+                        Upload Image
+                      </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                    <div className="space-y-2 md:col-span-2 group">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                         {t("settings.fullName")}
                       </label>
                       <input
@@ -377,11 +392,12 @@ const Settings = () => {
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleChange}
-                        className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                        className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    
+                    <div className="space-y-2 group">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                         {t("settings.phone")}
                       </label>
                       <input
@@ -389,11 +405,12 @@ const Settings = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                        className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                       />
                     </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    
+                    <div className="space-y-2 group">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                         {t("settings.email")}
                       </label>
                       <input
@@ -401,13 +418,13 @@ const Settings = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                        className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                       />
                     </div>
                     
                     {user?.role === "SUPPLIER" && (
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      <div className="space-y-2 md:col-span-2 group">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                           {t("profile.tradeLicense")}
                         </label>
                         <input
@@ -415,14 +432,14 @@ const Settings = () => {
                           name="tradeLicense"
                           value={formData.tradeLicense}
                           onChange={handleChange}
-                          className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                          className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                         />
                       </div>
                     )}
 
                     {(user?.role === "SUPPLIER" || user?.role === "FARMER") && (
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      <div className="space-y-2 md:col-span-2 group">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                           {t("profile.location")}
                         </label>
                         <input
@@ -430,15 +447,15 @@ const Settings = () => {
                           name="location"
                           value={formData.location}
                           onChange={handleChange}
-                          className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                          className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                         />
                       </div>
                     )}
 
                     {user?.role === "FARMER" && (
                       <>
-                        <div className="space-y-2">
-                          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <div className="space-y-2 group">
+                          <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                             {t("profile.farmSize")}
                           </label>
                           <input
@@ -446,11 +463,11 @@ const Settings = () => {
                             name="farmSize"
                             value={formData.farmSize}
                             onChange={handleChange}
-                            className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                            className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <div className="space-y-2 group">
+                          <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                             {t("profile.soilType")}
                           </label>
                           <input
@@ -458,7 +475,7 @@ const Settings = () => {
                             name="soilType"
                             value={formData.soilType}
                             onChange={handleChange}
-                            className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                            className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                           />
                         </div>
                       </>
@@ -466,8 +483,8 @@ const Settings = () => {
 
                     {(user?.role === "AGRO_EXPERT" || user?.pendingRole === "AGRO_EXPERT") && (
                       <>
-                        <div className="space-y-2">
-                          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <div className="space-y-2 group">
+                          <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                             {t("profile.degree")}
                           </label>
                           <input
@@ -475,11 +492,11 @@ const Settings = () => {
                             name="academicDegree"
                             value={formData.academicDegree}
                             onChange={handleChange}
-                            className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                            className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <div className="space-y-2 group">
+                          <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                             {t("profile.experience")}
                           </label>
                           <input
@@ -487,18 +504,18 @@ const Settings = () => {
                             name="experienceYears"
                             value={formData.experienceYears}
                             onChange={handleChange}
-                            className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white"
+                            className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-3.5 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white shadow-sm"
                           />
                         </div>
-                        <div className="space-y-2 md:col-span-2">
-                          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <div className="space-y-2 md:col-span-2 group">
+                          <label className="text-[11px] font-black uppercase tracking-widest text-text-muted dark:text-slate-400 ml-1 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400 transition-colors">
                             {t("admin.bio")}
                           </label>
                           <textarea
                             name="bio"
                             value={formData.bio}
                             onChange={handleChange}
-                            className="w-full bg-surface-secondary dark:bg-slate-900 border border-border-default dark:border-slate-700 px-4 py-3 rounded-xl focus:ring-2 ring-emerald-500/40 outline-none transition-all font-medium text-text-main dark:text-white min-h-[100px] resize-none"
+                            className="w-full bg-surface-card dark:bg-slate-900/50 border-2 border-border-default/50 dark:border-slate-700 px-5 py-4 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-semibold text-text-main dark:text-white min-h-[120px] resize-none shadow-sm"
                           />
                         </div>
                       </>
@@ -708,16 +725,16 @@ const Settings = () => {
           </div>
 
           {/* Footer Action */}
-          <div className="p-6 border-t border-border-default dark:border-slate-700 bg-surface-secondary dark:bg-slate-900/30 flex justify-end">
+          <div className="p-6 border-t border-border-default/50 dark:border-slate-700/50 bg-surface-secondary/50 dark:bg-slate-900/50 flex justify-end">
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-2 px-8 py-3 bg-primary-base text-white font-bold rounded-xl shadow-[0_8px_20px_rgba(16,185,129,0.25)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.35)] active:scale-95 transition-all disabled:opacity-70 disabled:active:scale-100"
+              className="flex items-center gap-2.5 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-[13px] uppercase tracking-widest rounded-full shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 disabled:opacity-70 disabled:hover:translate-y-0"
             >
               {isSaving ? (
-                <ClipLoader color="#ffffff" size={20} />
+                <ClipLoader color="#ffffff" size={18} />
               ) : (
-                <LuCheck size={18} />
+                <LuCheck size={20} strokeWidth={3} />
               )}
               {isSaving ? t("settings.saving") : t("settings.savePref")}
             </button>

@@ -395,6 +395,16 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const uploadProfilePicture = async (file) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    const { data } = await api.post("/auth/me/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    setUser((prev) => ({ ...prev, profilePicture: data.profilePicture }));
+    return data;
+  };
+
   const changePassword = async (currentPassword, newPassword) => {
     const { data } = await api.put("/auth/me/password", { currentPassword, newPassword });
     return data;
@@ -476,6 +486,7 @@ export function AuthProvider({ children }) {
         refreshUser,
         setUser,
         updateProfile,
+        uploadProfilePicture,
         changePassword,
         forgotPassword,
         resetPassword,

@@ -1060,7 +1060,7 @@ export const getPendingUsers = async (req, res) => {
           {
             [Op.or]: [
               { isApproved: false },
-              { role: 'FARMER', status: 'pending_second_approval' }
+              { role: 'FARMER', status: { [Op.in]: ['pending_second_approval', 'pending_sensor'] } }
             ]
           },
           {
@@ -1421,3 +1421,25 @@ export const resetPasswordWithOTP = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const uploadProfilePicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided' });
+    }
+
+    const userId = req.user.id;
+    const profilePictureUrl = req.file.path.replace(/\\/g, '/'); // Normalize path
+
+    await User.update({ profilePicture: profilePictureUrl }, { where: { id: userId } });
+
+    res.json({
+      message: 'Profile picture updated successfully',
+      profilePicture: profilePictureUrl,
+    });
+  } catch (error) {
+    console.error('uploadProfilePicture error:', error);
+    res.status(500).json({ message: 'Server error while updating profile picture' });
+  }
+};
+

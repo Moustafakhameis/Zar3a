@@ -2,7 +2,7 @@
 import { Router } from "express";
 import { body, validationResult } from "express-validator";
 
-import { uploadCV }   from "../middlewares/upload.js";
+import { uploadCV, uploadAvatar }   from "../middlewares/upload.js";
 import authenticate   from "../middlewares/authenticate.js";
 import adminOnly      from "../middlewares/adminOnly.js";
 import { rejectPasswordHash, loginRateLimiter } from "../middlewares/authValidation.js";
@@ -36,6 +36,7 @@ import {
   requestPasswordResetOTP,
   verifyPasswordResetOTP,
   resetPasswordWithOTP,
+  uploadProfilePicture,
 } from "../controllers/auth.controller.js";
 
 const router = Router();
@@ -235,6 +236,14 @@ router.put(
   ],
   validate,
   updateProfile
+);
+
+// POST /auth/me/avatar
+router.post(
+  "/me/avatar",
+  authenticate,
+  uploadAvatar,
+  uploadProfilePicture
 );
 
 // PUT /auth/me/password

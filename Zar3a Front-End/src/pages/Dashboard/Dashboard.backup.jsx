@@ -51,12 +51,10 @@ import { ClipLoader } from "react-spinners";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
-import LiveTicker from "./components/LiveTicker";
+import { useGetFarms, useCreateFarm, useDeleteFarm, useCreateSector, useDeleteSector } from "../../hooks/queries/useFarmQueries";
+import LiveTicker from "./LiveTicker";
 import LiveClock from "../../components/LiveClock/LiveClock";
-import WeatherCard from './components/WeatherCard';
-import { getCropsData } from './constants/crops';
-import { locationDB } from './constants/locations';
-import { useDashboardQueries } from '../../hooks/queries/useDashboardQueries';
+import { useMemo } from "react";
 
 const Dashboard = () => {
   const { t, isArabic } = useLanguage();
@@ -76,37 +74,443 @@ const Dashboard = () => {
       navigate('/');
     }
   }, [user, navigate]);
-  const cropsData = getCropsData(isArabic);
-  const {
-    farmsList,
-    isLoadingFarms,
-    sectors,
-    activeFarmName,
-    setActiveFarmName,
-    activeSectorId,
-    setActiveSectorId,
-    activeSector,
-    updateActiveSector,
-    weather,
-    isWeatherLoading,
-    isWeatherError,
-    data,
-    hardware,
-    setHardware,
-    toggleHardware,
-    handleHardwareToggle,
-    logs,
-    addLog,
-    createFarmMutation,
-    deleteFarmMutation,
-    createSectorMutation,
-    deleteSectorMutation,
-    isLocked
-  } = useDashboardQueries(user, isArabic);
+  const cropsData = {
+    Cotton: {
+      icon: "☁️",
+      min: 50,
+      max: 70,
+      duration: "180 days",
+      nutrients: "Ammonium Nitrate",
+      irrigation: "Every 10-15 days",
+      season: "Summer",
+      yieldTons: 1.5,
+      pricePerTon: 45000,
+      soilPh: "6.0 - 7.5",
+      sunlight: "Full Sun",
+      diseases: "Boll Rot",
+      info: "Requires deep soil preparation.",
+      plantingDates: "March - May",
+      whyPlanted: "Major cash crop in Egypt, known globally for its high-quality long-staple fibers.",
+      difficulty: "Hard",
+      funFact: "Egyptian cotton is considered the finest in the world due to its extra-long staples!",
+      tools: ["Hand trowel", "Pruning shears", "Drip irrigation kit"],
+    },
+    Wheat: {
+      icon: "🌾",
+      min: 40,
+      max: 60,
+      duration: isArabic ? "١٥٠ يوم" : "150 days",
+      nutrients: isArabic ? "يوريا" : "Urea",
+      irrigation: isArabic ? "٤-٥ مرات/موسم" : "4-5 times/season",
+      season: isArabic ? "الشتاء" : "Winter",
+      yieldTons: 3,
+      pricePerTon: 13000,
+      soilPh: "6.0 - 7.0",
+      sunlight: isArabic ? "شمس كاملة" : "Full Sun",
+      diseases: isArabic ? "الصدأ" : "Rust",
+      info: isArabic ? "رطوبة حيوية أثناء الإزهار." : "Critical moisture needed during flowering.",
+      plantingDates: isArabic ? "نوفمبر - ديسمبر" : "November - December",
+      whyPlanted: isArabic ? "محصول أساسي للأمن الغذائي؛ أهم محصول استراتيجي للخبز في مصر." : "Essential food security crop; Egypt's most critical strategic staple for bread.",
+      difficulty: isArabic ? "متوسط" : "Medium",
+      funFact: isArabic ? "القمح كان من أوائل المحاصيل التي زرعها الإنسان قبل أكثر من ١٠٠٠٠ عام!" : "Wheat was one of the first crops ever cultivated by humans, dating back over 10,000 years!",
+      tools: isArabic ? ["آلة بذر", "منجل", "حصادة"] : ["Seed drill", "Sickle", "Harvester"],
+    },
+    "Sugar Cane": {
+      icon: "🎋",
+      min: 70,
+      max: 90,
+      duration: "360 days",
+      nutrients: "Potassium Sulfate",
+      irrigation: "High frequency",
+      season: "Year-round",
+      yieldTons: 40,
+      pricePerTon: 1500,
+      soilPh: "6.0 - 8.5",
+      sunlight: "Full Sun",
+      diseases: "Smut",
+      info: "Requires excellent drainage.",
+      plantingDates: "February - March",
+      whyPlanted: "Primary source of sugar production in Upper Egypt, highly profitable for local farmers.",
+      difficulty: "Medium",
+      funFact: "Sugar cane is a giant grass that can grow up to 20 feet tall!",
+      tools: ["Machete", "Tractor", "Drip irrigation line"],
+    },
+    Tomato: {
+      icon: "🍅",
+      min: 60,
+      max: 80,
+      duration: isArabic ? "٩٠ يوم" : "90 days",
+      nutrients: "NPK 15-15-15",
+      irrigation: isArabic ? "يومياً في الصباح الباكر" : "Daily early morning",
+      season: isArabic ? "كل الفصول" : "All seasons",
+      yieldTons: 20,
+      pricePerTon: 6000,
+      soilPh: "6.0 - 6.8",
+      sunlight: isArabic ? "شمس كاملة" : "Full Sun",
+      diseases: isArabic ? "اللفحة" : "Blight",
+      info: isArabic ? "الرطوبة المستمرة تمنع تشقق الثمار." : "Consistent moisture prevents fruit cracking.",
+      plantingDates: isArabic ? "متعدد (فبراير-مارس، سبتمبر-أكتوبر)" : "Multiple (Feb-Mar, Sep-Oct)",
+      whyPlanted: isArabic ? "طلب محلي مرتفع جداً طوال العام؛ محصول متعدد الاستخدامات للسوق الطازجة والتصنيع." : "Extremely high local demand year-round; versatile crop for fresh market and processing.",
+      difficulty: isArabic ? "معتدل" : "Moderate",
+      funFact: isArabic ? "هل تعلم أن الطماطم من الناحية النباتية تعتبر من التوتيات؟" : "Did you know tomatoes are technically berries?",
+      tools: isArabic ? ["مجرفة يدوية", "مقصات تقليم", "أقفاص طماطم"] : ["Hand trowel", "Pruning shears", "Tomato cages"],
+    },
+    Cucumber: {
+      icon: "🥒",
+      min: 60,
+      max: 85,
+      duration: isArabic ? "٥٠-٧٠ يوم" : "50-70 days",
+      nutrients: isArabic ? "نترات البوتاسيوم" : "Potassium Nitrate",
+      irrigation: isArabic ? "يومياً في الصباح الباكر" : "Daily early morning",
+      season: isArabic ? "متعدد (الربيع، الصيف)" : "Multiple (Spring, Summer)",
+      yieldTons: 8,
+      pricePerTon: 5000,
+      soilPh: "6.0 - 6.8",
+      sunlight: isArabic ? "شمس كاملة" : "Full Sun",
+      diseases: isArabic ? "البياض الدقيقي" : "Powdery Mildew",
+      info: isArabic ? "يتطلب تعريشة لتوفير المساحة" : "Requires trellising to save space.",
+      plantingDates: isArabic ? "فبراير - أبريل" : "February - April",
+      whyPlanted: isArabic ? "محصول سريع النمو ومطلوب بقوة في الأسواق المحلية والمطاعم." : "Fast-growing crop with strong demand in local markets and restaurants.",
+      difficulty: isArabic ? "سهل" : "Easy",
+      funFact: isArabic ? "الخيار يتكون من ٩٥٪ ماء!" : "Cucumbers are 95% water!",
+      tools: isArabic ? ["مقص تقليم", "تعريشة", "قفازات"] : ["Pruning shears", "Trellis", "Gloves"],
+    },
+    Citrus: {
+      icon: "🍊",
+      min: 60,
+      max: 75,
+      duration: "Perennial",
+      nutrients: "Zinc, Iron",
+      irrigation: "Regular cycles",
+      season: "Winter",
+      yieldTons: 15,
+      pricePerTon: 8000,
+      soilPh: "5.5 - 6.5",
+      sunlight: "Full/Partial Sun",
+      diseases: "Citrus Canker",
+      info: "Prefers sandy-loamy Delta soils.",
+      plantingDates: "February - April (Saplings)",
+      whyPlanted: "Major export crop; Egypt is one of the world's leading exporters of oranges.",
+      difficulty: "Hard",
+      funFact: "Citrus trees can live and produce fruit for over 50 years!",
+      tools: ["Pruning saws", "Harvesting bags", "Sprayers"],
+    },
+    Rice: {
+      icon: "🍚",
+      min: 70,
+      max: 90,
+      duration: "120 days",
+      nutrients: "Ammonium Sulfate",
+      irrigation: "Continuous flooding",
+      season: "Summer",
+      yieldTons: 4.2,
+      pricePerTon: 16000,
+      soilPh: "5.5 - 6.5",
+      sunlight: "Full Sun",
+      diseases: "Blast",
+      info: "Requires clayey soils retaining water.",
+      plantingDates: "April - May",
+      whyPlanted: "Crucial summer staple crop that helps reclaim saline soils in the Northern Delta.",
+      difficulty: "Hard",
+      funFact: "Rice provides more than one-fifth of the calories consumed worldwide by humans!",
+      tools: ["Transplanter", "Water pump", "Sickle"],
+    },
+    Maize: {
+      icon: "🌽",
+      min: 55,
+      max: 75,
+      duration: "110 days",
+      nutrients: "Urea & Superphosphate",
+      irrigation: "Every 7-10 days",
+      season: "Summer",
+      yieldTons: 3.5,
+      pricePerTon: 12500,
+      soilPh: "5.8 - 7.0",
+      sunlight: "Full Sun",
+      diseases: "Late Wilt",
+      info: "Highly sensitive to drought during pollination.",
+      plantingDates: "May - June",
+      whyPlanted: "Dual-purpose crop used for human consumption and vital livestock feed.",
+      difficulty: "Easy",
+      funFact: "An average ear of maize has 800 kernels arranged in 16 rows!",
+      tools: ["Planter", "Hoe", "Sprinkler"],
+    },
+    Potato: {
+      icon: "🥔",
+      min: 60,
+      max: 80,
+      duration: "105 days",
+      nutrients: "Potassium Chloride",
+      irrigation: "Every 5-7 days",
+      season: "Winter",
+      yieldTons: 12,
+      pricePerTon: 8000,
+      soilPh: "5.2 - 6.5",
+      sunlight: "Full Sun",
+      diseases: "Late Blight",
+      info: "Prefers well-drained sandy-loam soils.",
+      plantingDates: "Jan-Feb (Summer), Sep-Oct (Winter)",
+      whyPlanted: "High-value export commodity and fundamental local vegetable.",
+      difficulty: "Moderate",
+      funFact: "Potatoes were the first vegetable to be grown in space!",
+      tools: ["Spade", "Hoe", "Potato fork"],
+    },
+    Clover: {
+      icon: "☘️",
+      min: 50,
+      max: 70,
+      duration: "180 days (multi-cut)",
+      nutrients: "Phosphorus",
+      irrigation: "Every 12-15 days",
+      season: "Winter",
+      yieldTons: 35,
+      pricePerTon: 2200,
+      soilPh: "6.0 - 7.5",
+      sunlight: "Full/Partial Sun",
+      diseases: "Root Rot",
+      info: "Primary animal feed crop in Egypt (Berseem).",
+      plantingDates: "September - November",
+      whyPlanted: "The most important forage crop for livestock; excellent for nitrogen fixation in soil.",
+      difficulty: "Easy",
+      funFact: "Don't mistake clover for just livestock feed; its blossoms are the secret behind exceptional honey.",
+      tools: ["Seed spreader", "Scythe", "Rake"],
+    },
+    Onion: {
+      icon: "🧅",
+      min: 45,
+      max: 65,
+      duration: "140 days",
+      nutrients: "NPK 10-10-20",
+      irrigation: "Every 10 days",
+      season: "Winter",
+      yieldTons: 15,
+      pricePerTon: 7500,
+      soilPh: "6.0 - 7.0",
+      sunlight: "Full Sun",
+      diseases: "Downy Mildew",
+      info: "Dry harvest period is crucial for storage.",
+      plantingDates: "August - October",
+      whyPlanted: "Key ingredient in local cuisine and a highly demanded export crop to Europe and Arab nations.",
+      difficulty: "Moderate",
+      funFact: "Onions make you cry because they release a sulfur gas when cut!",
+      tools: ["Hand trowel", "Dibber", "Hoe"],
+    },
+  };
+
+  const locationDB = {
+    "Cairo, Greater Cairo": {
+      lat: 30.0444,
+      lng: 31.2357,
+      bestCrop: "Tomato",
+      region: "Capital",
+    },
+    "Dakahlia, Mansoura": {
+      lat: 31.0364,
+      lng: 31.3801,
+      bestCrop: "Cotton",
+      region: "Delta",
+    },
+    "Minya, Upper Egypt": {
+      lat: 28.1099,
+      lng: 30.7503,
+      bestCrop: "Wheat",
+      region: "Middle Egypt",
+    },
+    "Aswan, Deep South": {
+      lat: 24.0889,
+      lng: 32.8998,
+      bestCrop: "Sugar Cane",
+      region: "South Upper Egypt",
+    },
+    "Alexandria, Coast": {
+      lat: 31.2001,
+      lng: 29.9187,
+      bestCrop: "Wheat",
+      region: "Coastal",
+    },
+    "Sharqia, Delta": {
+      lat: 30.7084,
+      lng: 31.7344,
+      bestCrop: "Rice",
+      region: "Delta",
+    },
+    "Beheira, West Delta": {
+      lat: 30.8436,
+      lng: 30.2974,
+      bestCrop: "Potato",
+      region: "West Delta",
+    },
+    "Fayoum, Oasis": {
+      lat: 29.3074,
+      lng: 30.8441,
+      bestCrop: "Onion",
+      region: "Oasis",
+    },
+    "Gharbia, Central Delta": {
+      lat: 30.8228,
+      lng: 31.0264,
+      bestCrop: "Clover",
+      region: "Central Delta",
+    },
+    "Kafr El Sheikh, North Delta": {
+      lat: 31.2584,
+      lng: 30.9416,
+      bestCrop: "Rice",
+      region: "North Delta",
+    },
+    "Monufia, Delta": {
+      lat: 30.5972,
+      lng: 30.9876,
+      bestCrop: "Wheat",
+      region: "Delta",
+    },
+    "Qalyubia, Delta": {
+      lat: 30.3292,
+      lng: 31.2168,
+      bestCrop: "Maize",
+      region: "Delta",
+    },
+    "Damietta, North Coast": {
+      lat: 31.4175,
+      lng: 31.8111,
+      bestCrop: "Tomato",
+      region: "Coastal",
+    },
+    "Ismailia, Canal": {
+      lat: 30.5965,
+      lng: 32.2715,
+      bestCrop: "Citrus",
+      region: "Canal Zone",
+    },
+    "Port Said, Canal": {
+      lat: 31.2653,
+      lng: 32.3019,
+      bestCrop: "Tomato",
+      region: "Canal Zone",
+    },
+    "Suez, Canal": {
+      lat: 29.9668,
+      lng: 32.5498,
+      bestCrop: "Tomato",
+      region: "Canal Zone",
+    },
+    "Giza, Greater Cairo": {
+      lat: 30.0131,
+      lng: 31.2089,
+      bestCrop: "Potato",
+      region: "Capital",
+    },
+    "Beni Suef, Middle Egypt": {
+      lat: 29.0661,
+      lng: 31.0994,
+      bestCrop: "Onion",
+      region: "Middle Egypt",
+    },
+    "Asyut, Upper Egypt": {
+      lat: 27.1783,
+      lng: 31.1859,
+      bestCrop: "Cotton",
+      region: "Upper Egypt",
+    },
+    "Sohag, Upper Egypt": {
+      lat: 26.5591,
+      lng: 31.6957,
+      bestCrop: "Sugar Cane",
+      region: "Upper Egypt",
+    },
+    "Qena, Upper Egypt": {
+      lat: 26.1551,
+      lng: 32.7160,
+      bestCrop: "Sugar Cane",
+      region: "Upper Egypt",
+    },
+    "Luxor, Upper Egypt": {
+      lat: 25.6872,
+      lng: 32.6396,
+      bestCrop: "Sugar Cane",
+      region: "Upper Egypt",
+    },
+    "New Valley, Western Desert": {
+      lat: 25.4390,
+      lng: 30.5586,
+      bestCrop: "Wheat",
+      region: "Oasis",
+    },
+    "Matrouh, North Coast": {
+      lat: 31.3525,
+      lng: 27.2453,
+      bestCrop: "Wheat",
+      region: "Coastal",
+    },
+    "North Sinai, Sinai": {
+      lat: 30.2824,
+      lng: 33.6845,
+      bestCrop: "Citrus",
+      region: "Sinai",
+    },
+    "South Sinai, Sinai": {
+      lat: 28.9715,
+      lng: 33.6265,
+      bestCrop: "Tomato",
+      region: "Sinai",
+    },
+    "Red Sea, Coast": {
+      lat: 26.9654,
+      lng: 33.8225,
+      bestCrop: "Tomato",
+      region: "Coastal",
+    },
+  };
+
+  const { data: dbFarms, isLoading: isLoadingFarms } = useGetFarms();
+  const createFarmMutation = useCreateFarm();
+  const deleteFarmMutation = useDeleteFarm();
+  const createSectorMutation = useCreateSector();
+  const deleteSectorMutation = useDeleteSector();
+
+  const farmsList = dbFarms || [];
+  const [localSectorOverrides, setLocalSectorOverrides] = useState({});
+
+  const sectors = useMemo(() => {
+    const allSectors = [];
+    farmsList.forEach(farm => {
+      if (farm.Sectors) {
+        farm.Sectors.forEach(sector => {
+          allSectors.push({
+            ...sector,
+            farmName: farm.name,
+            ...(localSectorOverrides[sector.id] || {})
+          });
+        });
+      }
+    });
+    // Sort sectors alphabetically by name so Sector A comes before Sector B
+    allSectors.sort((a, b) => a.name.localeCompare(b.name));
+    return allSectors;
+  }, [farmsList, localSectorOverrides]);
+
+  const [activeFarmName, setActiveFarmName] = useState("");
+  const [activeSectorId, setActiveSectorId] = useState(null);
+
+  useEffect(() => {
+    if (farmsList.length > 0 && !activeFarmName) {
+      setActiveFarmName(farmsList[0].name);
+      if (farmsList[0].Sectors && farmsList[0].Sectors.length > 0) {
+        setActiveSectorId(farmsList[0].Sectors[0].id);
+      }
+    }
+  }, [farmsList, activeFarmName]);
+
+  const activeSector = sectors.find((s) => s.id === activeSectorId) || sectors[0] || { 
+    crop: "Tomato", 
+    isAuto: true, 
+    location: "", 
+    id: null, 
+    name: "No Sector", 
+    farmName: "No Farm" 
+  };
 
   const [searchQuery, setSearchQuery] = useState(activeSector?.location || "");
-  const [activeModalChart, setActiveModalChart] = useState(null);
-  const [activeDashboardChart, setActiveDashboardChart] = useState("moisture");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isLogOpen, setIsLogOpen] = useState(false);
@@ -157,7 +561,7 @@ const Dashboard = () => {
         moisture: 50,
       }
     }, {
-      onSuccess: (newSector) => {
+      onSuccess: () => {
         setIsAddSensorOpen(false);
         setNewSensorForm({
           sensorId: "",
@@ -165,9 +569,6 @@ const Dashboard = () => {
           location: "Cairo, Greater Cairo",
           crop: "Tomato",
         });
-        if (newSector && newSector.id) {
-          setActiveSectorId(newSector.id);
-        }
         addLog(`Sensor ${newSensorForm.sensorId} added to telemetry`, "info");
       }
     });
@@ -180,12 +581,10 @@ const Dashboard = () => {
   const handleAddFarmSubmit = (e) => {
     e.preventDefault();
     if (newFarmName && newFarmName.trim()) {
-      const trimmedName = newFarmName.trim();
-      createFarmMutation.mutate({ name: trimmedName }, {
-        onSuccess: (newFarm) => {
+      createFarmMutation.mutate({ name: newFarmName.trim() }, {
+        onSuccess: () => {
           setIsAddFarmOpen(false);
           setNewFarmName("");
-          setActiveFarmName(trimmedName);
           toast.success(t("dash.farmAdded") || "Farm successfully added!");
         }
       });
@@ -236,6 +635,99 @@ const Dashboard = () => {
   const searchRef = useRef(null);
   const cropDropdownRef = useRef(null);
 
+  const [hardware, setHardware] = useState({
+    pump: false,
+    vent: false,
+    fertilizer: false,
+    ph: false,
+  });
+  const [activeModalChart, setActiveModalChart] = useState(null);
+  const [activeDashboardChart, setActiveDashboardChart] = useState("moisture");
+  const [logs, setLogs] = useState([
+    { time: "09:30 AM", msg: "Mode changed", type: "info" },
+    { time: "09:15 AM", msg: "[MANUAL] PUMP turned ON", type: "action" },
+    { time: "09:00 AM", msg: "Sensor calibration completed", type: "info" },
+    { time: "08:30 AM", msg: "System Booted Successfully", type: "info" },
+  ]);
+  const [data, setData] = useState([
+    { time: "07:00 AM", moisture: 58, ph: 6.2, dosage: 25, consumption: 150, ventState: 0 },
+    { time: "07:15 AM", moisture: 57, ph: 6.2, dosage: 25, consumption: 155, ventState: 1 },
+    { time: "07:30 AM", moisture: 56, ph: 6.3, dosage: 25, consumption: 160, ventState: 1 },
+    { time: "07:45 AM", moisture: 55, ph: 6.3, dosage: 26, consumption: 165, ventState: 0 },
+    { time: "08:00 AM", moisture: 59, ph: 6.4, dosage: 27, consumption: 170, ventState: 1 },
+    { time: "08:15 AM", moisture: 64, ph: 6.4, dosage: 28, consumption: 175, ventState: 1 },
+    { time: "08:30 AM", moisture: 63, ph: 6.5, dosage: 28, consumption: 180, ventState: 1 },
+    { time: "08:45 AM", moisture: 62, ph: 6.5, dosage: 29, consumption: 185, ventState: 0 },
+    { time: "09:00 AM", moisture: 61, ph: 6.6, dosage: 30, consumption: 190, ventState: 0 },
+    { time: "09:15 AM", moisture: 60, ph: 6.6, dosage: 30, consumption: 195, ventState: 1 },
+    { time: "09:30 AM", moisture: 59, ph: 6.5, dosage: 31, consumption: 200, ventState: 1 },
+    { time: "09:45 AM", moisture: 58, ph: 6.4, dosage: 32, consumption: 205, ventState: 0 },
+  ]);
+
+  const [weather, setWeather] = useState({
+    temp: "--",
+    tempMax: "--",
+    tempMin: "--",
+    humidity: "--",
+    windspeed: "--",
+    condition: "Loading...",
+    bestCrop: "Tomato",
+    region: "Egypt",
+  });
+  const [isWeatherLoading, setIsWeatherLoading] = useState(false);
+
+  const getWeatherCondition = (code) => {
+    if (code === 0) return "Clear Sky";
+    if (code >= 1 && code <= 3) return "Partly Cloudy";
+    if (code >= 45 && code <= 48) return "Foggy";
+    if (code >= 51 && code <= 67) return "Rainy";
+    return "Sunny";
+  };
+
+  useEffect(() => {
+    const fetchRealWeather = async () => {
+      const locInfo = locationDB[activeSector.location] || locationDB["Cairo, Greater Cairo"];
+      if (!locInfo) return;
+      setIsWeatherLoading(true);
+      try {
+        const response = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${locInfo.lat}&longitude=${locInfo.lng}&current_weather=true&hourly=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`,
+        );
+        const result = await response.json();
+        
+        // Get current hour for humidity
+        const currentHour = new Date().getHours();
+        const humidity = result.hourly?.relative_humidity_2m[currentHour] || 50;
+        const tempMax = Math.round(result.daily?.temperature_2m_max[0]) || Math.round(result.current_weather.temperature) + 4;
+        const tempMin = Math.round(result.daily?.temperature_2m_min[0]) || Math.round(result.current_weather.temperature) - 5;
+
+        setWeather({
+          temp: Math.round(result.current_weather.temperature),
+          tempMax: tempMax,
+          tempMin: tempMin,
+          humidity: humidity,
+          windspeed: result.current_weather.windspeed,
+          condition: getWeatherCondition(result.current_weather.weathercode),
+          bestCrop: locInfo.bestCrop,
+          region: locInfo.region,
+        });
+      } catch (error) {
+        setWeather({
+          temp: 30,
+          tempMax: 35,
+          tempMin: 22,
+          humidity: 45,
+          windspeed: 12,
+          condition: "Offline",
+          bestCrop: locInfo.bestCrop,
+          region: locInfo.region,
+        });
+      } finally {
+        setIsWeatherLoading(false);
+      }
+    };
+    fetchRealWeather();
+  }, [activeSector.location]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -251,11 +743,151 @@ const Dashboard = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleHardwareToggle = (type) => {
+    if (isLocked) {
+      toast.error("Hardware controls are disabled in Read-Only mode. Please wait for sensor approval.");
+      return;
+    }
+    setHardware((prev) => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        status: prev[type].status === "ON" ? "OFF" : "ON",
+      },
+    }));
+  };
+
+  const addLog = (msg, type) =>
+    setLogs((prev) =>
+      [
+        {
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          msg,
+          type,
+        },
+        ...prev,
+      ].slice(0, 15),
+    );
+  const updateActiveSector = (updates) => {
+    if (!activeSectorId) return;
+    setLocalSectorOverrides(prev => ({
+      ...prev,
+      [activeSectorId]: {
+        ...(prev[activeSectorId] || {}),
+        ...updates
+      }
+    }));
+  };
+
   const handleSelectLocation = (locName) => {
     updateActiveSector({ location: locName });
     setSearchQuery(locName);
     setShowSuggestions(false);
   };
+
+  const toggleHardware = (device) => {
+    if (isLocked) {
+      toast.error("Hardware controls are disabled in Read-Only mode. Please wait for sensor approval.");
+      return;
+    }
+    if (activeSector.isAuto) return;
+    const newState = !hardware[device];
+    setHardware((prev) => ({ ...prev, [device]: newState }));
+    addLog(
+      `[MANUAL] ${device.toUpperCase()} turned ${newState ? "ON" : "OFF"}`,
+      "action",
+    );
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setData((prev) => {
+        const lastVal = prev[prev.length - 1]?.moisture || 50;
+        const lastPh = prev[prev.length - 1]?.ph || 6.5;
+        const lastDosage = prev[prev.length - 1]?.dosage || 20;
+        const lastConsumption = prev[prev.length - 1]?.consumption || 150;
+
+        const safeCropInfo = cropsData[activeSector?.crop] || cropsData["Tomato"];
+        const cropMin = safeCropInfo.min;
+        const [minPhStr, maxPhStr] = safeCropInfo.soilPh.split(" - ");
+        const minPh = parseFloat(minPhStr);
+        const maxPh = parseFloat(maxPhStr);
+
+        let change = 0;
+        let phChange = (Math.random() * 0.2) - 0.1;
+        let dosageChange = hardware.fertilizer ? (Math.random() * 2) : -(Math.random() * 1);
+        let consumptionChange = hardware.pump ? (Math.random() * 10) : (Math.random() * 2);
+        let ventState = hardware.vent ? 1 : 0;
+
+        if (activeSector.isAuto) {
+          if (lastVal < cropMin) {
+            change = 4;
+            setHardware((h) => ({ ...h, pump: true }));
+          } else {
+            change = Math.random() * 4 - 2;
+            setHardware((h) => ({ ...h, pump: false }));
+          }
+          // Auto vent based on temp (simulated via moisture inversely)
+          if (lastVal > cropMin + 15) {
+             setHardware((h) => ({ ...h, vent: true }));
+             ventState = 1;
+          } else {
+             setHardware((h) => ({ ...h, vent: false }));
+             ventState = 0;
+          }
+          // Auto fertilizer if dosage drops
+          if (lastDosage < 15) {
+             setHardware((h) => ({ ...h, fertilizer: true }));
+          } else if (lastDosage > 30) {
+             setHardware((h) => ({ ...h, fertilizer: false }));
+          }
+          // Auto pH modifier
+          if (lastPh < minPh || lastPh > maxPh) {
+             setHardware((h) => ({ ...h, ph: true }));
+             phChange = lastPh < minPh ? 0.2 : -0.2;
+          } else {
+             setHardware((h) => ({ ...h, ph: false }));
+          }
+        } else {
+          if (hardware.pump) change = 5;
+          else change = Math.random() * 4 - 2.5;
+          if (hardware.fertilizer) phChange += 0.05; // Fertilizer makes soil slightly basic or acidic
+          if (hardware.vent) change -= 1; // Venting dries out slightly
+          if (hardware.ph) {
+             // If manual pH mod is ON, try to correct the pH based on the optimal range
+             if (lastPh > maxPh) phChange = -0.3;
+             else if (lastPh < minPh) phChange = 0.3;
+             else phChange = lastPh > 7 ? -0.2 : 0.2; // Default correction
+          }
+        }
+
+        const newVal = Math.round(Math.max(10, Math.min(95, lastVal + change)));
+        const newPh = Math.round(Math.max(4.0, Math.min(9.0, lastPh + phChange)) * 10) / 10;
+        const newDosage = Math.round(Math.max(0, lastDosage + dosageChange));
+        const newConsumption = Math.round(lastConsumption + consumptionChange);
+
+        const nextData = [
+          ...prev,
+          {
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            moisture: newVal,
+            ph: newPh,
+            dosage: newDosage,
+            consumption: newConsumption,
+            ventState,
+          },
+        ];
+        return nextData.length > 12 ? nextData.slice(1) : nextData;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [activeSector.isAuto, activeSector.crop, hardware.pump, hardware.fertilizer, hardware.vent, hardware.ph]);
 
   const currentMoisture = data[data.length - 1]?.moisture || 0;
   const currentPh = data[data.length - 1]?.ph || 7.0;
@@ -305,7 +937,7 @@ const Dashboard = () => {
   };
   const aiRes = analyzeStatus();
 
-
+  const isLocked = user?.role === "FARMER" && user?.status !== "approved";
 
   const [sensorInput, setSensorInput] = useState("");
   const [submitError, setSubmitError] = useState("");
@@ -329,97 +961,67 @@ const Dashboard = () => {
   };
 
   if (isLocked) {
-    const hasSubmittedSensor = Boolean(user?.FarmerProfile?.sensorId);
-    const isPendingSecondApproval = user?.status === "pending_second_approval" || hasSubmittedSensor;
-    
+    const isPendingSecondApproval = user?.status === "pending_second_approval";
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-4 relative overflow-hidden">
-        {/* Dynamic Background Elements */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none mix-blend-screen" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-purple-500/10 blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="min-h-[80vh] flex items-center justify-center px-4 relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-100/30 dark:bg-emerald-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-100/30 dark:bg-blue-500/5 blur-[120px] pointer-events-none" />
         
         <motion.div 
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, type: "spring", bounce: 0.4 }}
-          className="w-full max-w-xl bg-white/5 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 rounded-[2.5rem] p-8 md:p-12 shadow-[0_8px_32px_rgba(0,0,0,0.1)] text-center relative z-10"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-xl bg-surface-card/85 dark:bg-slate-900/80 backdrop-blur-xl border border-border-default dark:border-slate-800 rounded-[2.5rem] p-8 md:p-12 shadow-2xl text-center relative z-10"
         >
-          {/* Animated Icon Container */}
-          <div className="w-24 h-24 bg-linear-to-br from-indigo-500 to-purple-600 rounded-[2rem] flex items-center justify-center text-white text-4xl mx-auto mb-8 shadow-[0_0_40px_rgba(99,102,241,0.4)] border border-white/20 relative">
-            {isPendingSecondApproval ? (
-              <motion.div animate={{ rotate: 360 }} transition={{ duration: 12, repeat: Infinity, ease: "linear" }}>
-                📡
-              </motion.div>
-            ) : (
-              <motion.div initial={{ y: -5 }} animate={{ y: 5 }} transition={{ duration: 2, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}>
-                🔒
-              </motion.div>
-            )}
-            <div className="absolute inset-0 rounded-[2rem] border-2 border-indigo-400/30 animate-ping opacity-20"></div>
+          <div className="w-20 h-20 bg-linear-to-br from-blue-500 to-indigo-600 rounded-[2rem] flex items-center justify-center text-white text-3xl mx-auto mb-8 shadow-lg shadow-indigo-500/20">
+            {isPendingSecondApproval ? "📡" : "🔒"}
           </div>
 
-          <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight mb-4">
-            {isPendingSecondApproval ? "Verification in Progress" : "Dashboard Locked"}
+          <h2 className="text-3xl font-black text-text-main dark:text-white tracking-tight mb-3">
+            {isPendingSecondApproval ? "Sensor Pending Approval" : "Dashboard Locked"}
           </h2>
 
-          <p className="text-slate-600 dark:text-slate-400 text-sm font-medium leading-relaxed mb-10 px-4">
+          <p className="text-text-subtle dark:text-text-disabled text-sm font-medium leading-relaxed mb-8">
             {isPendingSecondApproval 
-              ? `Your Sensor ID (${user?.FarmerProfile?.sensorId || "submitted"}) is currently pending review by an administrator. Your telemetry dashboard will automatically unlock once verified.`
-              : "Welcome to Zar3a! To access your smart telemetry dashboard, please link your IoT sensor by providing its unique ID below."}
+              ? `Your Sensor ID (${user?.FarmerProfile?.sensorId || "submitted"}) is currently pending review by our administrator. Telemetry data will unlock once verified.`
+              : "Please submit your sensor ID to unlock dashboard access"}
           </p>
 
           {!isPendingSecondApproval ? (
-            <form onSubmit={handleSensorSubmit} className="space-y-6 text-left relative">
-              <div className="relative group">
-                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-2 pl-1">Smart Sensor ID</label>
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur-md opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+            <form onSubmit={handleSensorSubmit} className="space-y-4 text-left">
+              <div>
+                <label className="text-[10px] font-black text-text-disabled uppercase tracking-widest block mb-2">Smart Sensor ID</label>
                 <input 
                   type="text"
                   placeholder="e.g. ZAR3A-SENS-XXXX"
                   value={sensorInput}
                   onChange={(e) => setSensorInput(e.target.value)}
-                  className="relative w-full px-5 py-4 rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none font-mono font-bold transition-all shadow-inner placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                  className="w-full px-5 py-4 rounded-2xl border-2 bg-surface-secondary/30 dark:bg-slate-950/50 dark:text-white border-border-default dark:border-slate-800 focus:border-indigo-500 outline-none font-mono font-bold transition-all shadow-inner"
                   disabled={isSubmitting}
                 />
               </div>
               {submitError && (
-                <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-rose-500 font-bold bg-rose-50 dark:bg-rose-950/30 px-3 py-2 rounded-lg border border-rose-100 dark:border-rose-900/50">
-                  {submitError}
-                </motion.p>
+                <p className="text-xs text-red-500 font-semibold">{submitError}</p>
               )}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 hover:bg-[length:200%_auto] hover:bg-right text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_10px_20px_rgba(99,102,241,0.3)] transition-all duration-500 active:scale-95 disabled:opacity-60 disabled:hover:bg-left"
+                className="w-full bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-500/20 transition active:scale-98 disabled:opacity-60"
               >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Linking Sensor...
-                  </span>
-                ) : "Link Sensor"}
+                {isSubmitting ? "Submitting..." : "Submit Sensor ID"}
               </button>
             </form>
           ) : (
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              className="inline-flex items-center justify-center w-full px-6 py-4 bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-black rounded-2xl text-xs uppercase tracking-widest gap-3"
-            >
-              <div className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
-              </div>
-              Waiting for Verification
-            </motion.div>
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 font-bold rounded-2xl text-xs uppercase tracking-widest">
+              Status: Waiting for verification
+            </div>
           )}
 
-          <div className="mt-10 pt-6 border-t border-slate-200/50 dark:border-slate-700/50 flex justify-center items-center gap-6">
-            <Link to="/marketplace" className="text-xs font-black text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors uppercase tracking-wider flex items-center gap-1">
+          <div className="mt-8 pt-6 border-t border-border-default dark:border-slate-800 flex justify-center gap-4">
+            <Link to="/marketplace" className="text-xs font-black text-primary-base hover:underline uppercase tracking-wider">
               Browse Marketplace
             </Link>
-            <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-            <Link to="/profile" className="text-xs font-black text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors uppercase tracking-wider flex items-center gap-1">
+            <span className="text-text-disabled">•</span>
+            <Link to="/profile" className="text-xs font-black text-text-muted hover:underline uppercase tracking-wider">
               Farmer Profile
             </Link>
           </div>
@@ -823,14 +1425,142 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* 🌟 PREMIUM WEATHER CARD 🌟 */}
-        <WeatherCard 
-          t={t} 
-          weather={weather} 
-          isWeatherLoading={isWeatherLoading} 
-          setSelectedAiCrop={setSelectedAiCrop} 
-          cropsData={cropsData} 
-        />
+        {/* 🌟 NEW: PREMIUM WEATHER CARD 🌟 */}
+        <div className="lg:col-span-4 grid grid-cols-1 gap-4">
+          <div className="relative overflow-hidden bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] p-8 text-slate-900 dark:text-white flex flex-col shadow-2xl h-full border border-slate-200 dark:border-white/10 group">
+            
+            {/* Dynamic Animated Background Gradients */}
+            <div className="absolute top-0 right-0 w-[120%] h-[120%] bg-linear-to-br from-indigo-300/40 dark:from-indigo-500/40 via-purple-300/20 dark:via-purple-500/20 to-transparent blur-[80px] -translate-y-1/4 translate-x-1/4 group-hover:scale-110 transition-transform duration-1000 ease-out"></div>
+            <div className="absolute bottom-0 left-0 w-[100%] h-[100%] bg-linear-to-tr from-cyan-300/30 dark:from-cyan-500/30 to-transparent blur-[60px] translate-y-1/4 -translate-x-1/4 group-hover:scale-110 transition-transform duration-1000 ease-out"></div>
+
+            {/* Top Row: Label & Spinner */}
+            <div className="relative z-10 flex justify-between items-center mb-8">
+              <div className="flex items-center gap-2 bg-white/60 dark:bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 dark:border-white/10 shadow-sm">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500 dark:bg-green-400 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)] dark:shadow-[0_0_10px_rgba(74,222,128,1)]"></div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-white/90">
+                  {t("dash.liveClimate")}
+                </p>
+              </div>
+              {isWeatherLoading && (
+                <ClipLoader size={20} color="#10b981" />
+              )}
+            </div>
+
+            {/* Middle Row: Centered Big Temp & Data */}
+            <div className="relative z-10 flex flex-col items-center justify-center mb-auto pt-2 pb-2">
+              
+              {/* Temperature & Weather Condition */}
+              <div className="flex flex-col items-center gap-0">
+                {/* Weather Condition */}
+                <div className="flex items-center gap-2 bg-white/40 dark:bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/60 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.08)] mb-1 transition-transform hover:scale-105 cursor-default">
+                  <LuCloudSun className="text-xl text-yellow-500 dark:text-yellow-300 drop-shadow-md" />
+                  <p className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-[0.15em] drop-shadow-sm">
+                    {t("weather." + weather.condition) || weather.condition}
+                  </p>
+                </div>
+
+                {/* Temperature */}
+                <div className="flex items-start">
+                  <h4 className="text-[6rem] lg:text-[7rem] font-black tracking-tighter leading-none drop-shadow-2xl dark:drop-shadow-[0_15px_35px_rgba(0,0,0,0.4)] text-slate-900 dark:text-white ml-4">
+                    {weather.temp}
+                  </h4>
+                  <span className="text-3xl lg:text-4xl font-black text-slate-400 dark:text-white/40 mt-4 ml-1.5">°C</span>
+                </div>
+              </div>
+
+              {/* Extended Data & Clock Stack */}
+              <div className="flex flex-col items-center gap-5 mt-4 w-full">
+                
+                {/* Time & Date */}
+                <div className="flex flex-col items-center justify-center gap-1">
+                  <LiveClock format="time" className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white leading-none drop-shadow-md" />
+                  <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-indigo-700 dark:text-indigo-300 drop-shadow-sm">
+                    <LiveClock format="weekday" />
+                    <span className="text-slate-400 dark:text-white/30">•</span>
+                    <LiveClock format="date" />
+                  </div>
+                </div>
+
+                {/* Actual Weather Metrics */}
+                <div className="flex items-center justify-center gap-4 bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-2xl px-4 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-fit transition-all hover:scale-[1.02]">
+                  
+                  {/* High/Low */}
+                  <div className="flex flex-col items-center">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/50 mb-1">H / L</p>
+                    <p className="text-sm font-black text-slate-800 dark:text-white drop-shadow-sm whitespace-nowrap">
+                      {weather.tempMax}° <span className="text-slate-400 dark:text-white/40 font-bold mx-0.5">/</span> {weather.tempMin}°
+                    </p>
+                  </div>
+
+                  <div className="w-px h-8 bg-slate-300 dark:bg-white/10"></div>
+
+                  {/* Humidity */}
+                  <div className="flex flex-col items-center">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/50 mb-1">Humidity</p>
+                    <div className="flex items-center gap-1 text-sm font-black text-blue-600 dark:text-blue-400 drop-shadow-sm">
+                      <LuDroplet size={14} />
+                      {weather.humidity}%
+                    </div>
+                  </div>
+
+                  <div className="w-px h-8 bg-slate-300 dark:bg-white/10"></div>
+
+                  {/* Wind */}
+                  <div className="flex flex-col items-center">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/50 mb-1">Wind</p>
+                    <div className="flex items-center gap-1 text-sm font-black text-teal-600 dark:text-teal-400 drop-shadow-sm whitespace-nowrap">
+                      <LuWind size={14} />
+                      {weather.windspeed} <span className="text-[9px] ml-0.5">km/h</span>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+
+            {/* AI Suggestion Banner (Takes up the empty space) */}
+            <div className="relative z-10 w-full mt-12 mb-6">
+              <div 
+                className="group/banner w-full bg-white/40 dark:bg-black/20 hover:bg-white/60 dark:hover:bg-black/40 transition-all cursor-pointer border border-white/60 dark:border-white/10 rounded-[2rem] p-6 backdrop-blur-xl flex flex-row items-center justify-between shadow-xl"
+                onClick={() => setSelectedAiCrop(weather.bestCrop)}
+              >
+                 <div className="flex flex-col">
+                    <div className="flex items-center gap-2 mb-2">
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 dark:text-indigo-300">
+                          ✨ {t("dash.aiSuggested")}
+                       </span>
+                    </div>
+                    <span className="text-4xl font-black text-slate-900 dark:text-white drop-shadow-sm tracking-tight mb-1">
+                      {t("crop." + weather.bestCrop) || weather.bestCrop}
+                    </span>
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                      {t("dash.maxYieldProb")}
+                    </span>
+                 </div>
+                 
+                 <div className="w-20 h-20 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-4xl shadow-inner border-4 border-white/80 dark:border-white/10 group-hover/banner:scale-110 group-hover/banner:-rotate-12 transition-transform duration-500">
+                    {cropsData[weather.bestCrop]?.icon}
+                 </div>
+              </div>
+            </div>
+
+            {/* Bottom Row: Location */}
+            <div className="relative z-10 pt-4 border-t border-slate-300/50 dark:border-white/10 flex justify-between items-end">
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 dark:text-white/50 uppercase tracking-widest mb-1.5">
+                  {t("dash.region")}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <LuMapPin className="text-cyan-600 dark:text-cyan-400" size={16} />
+                  <p className="font-bold text-base text-slate-800 dark:text-white tracking-tight drop-shadow-sm">
+                    {t("reg." + weather.region) || weather.region}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
 

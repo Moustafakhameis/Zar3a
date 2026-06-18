@@ -3,6 +3,11 @@ import axios from "axios";
 // ── Base instance ─────────────────────────────────────────────────────────────
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5002",
+  headers: {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  }
 });
 
 // ── Request interceptor: attach access token ──────────────────────────────────

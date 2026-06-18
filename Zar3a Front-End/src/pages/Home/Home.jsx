@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
-import LiveTicker from "../Dashboard/LiveTicker";
+import LiveTicker from "../Dashboard/components/LiveTicker";
 import {
   LuBot,
   LuActivity,

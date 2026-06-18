@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -23,6 +23,17 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { adminAPI } from "../../API/axiosInstance";
 import { PuffLoader } from "react-spinners";
+import {
+  useAdminStats,
+  useAllUsers,
+  usePendingUsers,
+  usePendingInquiries,
+  useChangeUserRole,
+  useDeleteUser,
+  useApproveUser,
+  useRejectUser,
+  useUpdateInquiryStatus
+} from "../../hooks/api/useAdminQueries";
 
 const CustomSelect = ({ value, onChange, options, className, onOpenChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -133,25 +144,35 @@ const CustomSelect = ({ value, onChange, options, className, onOpenChange }) => 
 
 export default function Admin() {
   const { t } = useLanguage();
-  const {
-    user,
-    loading: authLoading,
-    getPendingUsers,
-    approveUser,
-    rejectUser,
-    getAllUsers,
-    changeUserRole,
-    deleteUserById,
-    getAdminStats,
-  } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
 
-  const [pendingUsers, setPendingUsers] = useState([]);
-  const [inquiries, setInquiries] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [stats, setStats] = useState(null);
+  const { data: stats, isLoading: isStatsLoading } = useAdminStats(isAdmin);
+  const { data: users = [], isLoading: isUsersLoading } = useAllUsers({ limit: 50 }, isAdmin);
+  const { data: rawPendingUsers = [], isLoading: isPendingLoading } = usePendingUsers(isAdmin);
+  const { data: inquiries = [], isLoading: isInquiriesLoading } = usePendingInquiries(isAdmin);
+
+  const pendingUsers = useMemo(() => {
+    const pendingSensors = users.filter(u => u.status === 'pending_second_approval');
+    const mergedMap = new Map();
+    rawPendingUsers.forEach(u => mergedMap.set(u.id, u));
+    pendingSensors.forEach(u => mergedMap.set(u.id, u));
+    const mergedArray = Array.from(mergedMap.values());
+    
+    // Sort by most recent (createdAt descending)
+    return mergedArray.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }, [rawPendingUsers, users]);
+
+  const loading = isStatsLoading || isUsersLoading || isPendingLoading || isInquiriesLoading;
+
+  const changeRoleMutation = useChangeUserRole();
+  const deleteUserMutation = useDeleteUser();
+  const approveUserMutation = useApproveUser();
+  const rejectUserMutation = useRejectUser();
+  const updateInquiryMutation = useUpdateInquiryStatus();
+
   const [openRowId, setOpenRowId] = useState(null);
   const [filters, setFilters] = useState({ role: "", status: "", search: "" });
-  const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -163,117 +184,61 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("users");
 
   useEffect(() => {
-    if (!user) return;
-
-    if (user.role !== "ADMIN") {
+    if (user && !isAdmin) {
       setError(t("admin.noPermission"));
-      setLoading(false);
-      return;
     }
-
-    loadAdminData();
-  }, [user]);
-
-  const loadAdminData = async () => {
-    try {
-      setLoading(true);
-      const [pendingList, userData, adminStats, inquiriesData] = await Promise.all([
-        getPendingUsers(),
-        getAllUsers({ limit: 50 }),
-        getAdminStats(),
-        adminAPI.getInquiries().catch(() => ({ data: { inquiries: [] } }))
-      ]);
-
-      setPendingUsers(pendingList || []);
-      setUsers(userData.users || []);
-      setStats(adminStats?.stats || null);
-      
-      const pendingInquiries = (inquiriesData?.data?.inquiries || []).filter(i => i.status === 'PENDING');
-      setInquiries(pendingInquiries);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Unable to load admin dashboard.");
-      console.error(err);
-    } finally {
-      loadAdminDataFinished();
-    }
-  };
-
-  const loadAdminDataFinished = () => {
-    setLoading(false);
-  };
+  }, [user, isAdmin, t]);
 
   const handleRoleChange = async (userId, newRole) => {
+    setActionLoading(userId);
     try {
-      setActionLoading(userId);
-      setError("");
-      setSuccess("");
-      await changeUserRole(userId, newRole);
-      setUsers((prev) => prev.map((item) => (item.id === userId ? { ...item, role: newRole } : item)));
-      setSuccess("User role updated successfully.");
+      await changeRoleMutation.mutateAsync({ userId, newRole });
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to change user role.");
+      console.error(err);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleDeleteUser = async (userId) => {
+    setActionLoading(userId);
     try {
-      setActionLoading(userId);
-      setError("");
-      setSuccess("");
-      await deleteUserById(userId);
-      setUsers((prev) => prev.filter((item) => item.id !== userId));
-      setSuccess("User deleted successfully.");
+      await deleteUserMutation.mutateAsync(userId);
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to delete user.");
+      console.error(err);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleApprove = async (userId) => {
+    setActionLoading(userId);
     try {
-      setActionLoading(userId);
-      setError("");
-      setSuccess("");
-      await approveUser(userId);
-      const pendingList = await getPendingUsers();
-      setPendingUsers(pendingList || []);
-      setSuccess("User approved successfully.");
+      await approveUserMutation.mutateAsync(userId);
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to approve user.");
+      console.error(err);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleReject = async (userId) => {
+    setActionLoading(userId);
     try {
-      setActionLoading(userId);
-      setError("");
-      setSuccess("");
-      await rejectUser(userId);
-      const pendingList = await getPendingUsers();
-      setPendingUsers(pendingList || []);
-      setSuccess("User request rejected successfully.");
+      await rejectUserMutation.mutateAsync(userId);
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to reject user request.");
+      console.error(err);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleInquiryStatus = async (id, status) => {
+    setActionLoading(`inquiry-${id}`);
     try {
-      setActionLoading(`inquiry-${id}`);
-      setError("");
-      setSuccess("");
-      await adminAPI.updateInquiryStatus(id, status);
-      setInquiries((prev) => prev.filter((i) => i.id !== id));
-      setSuccess(`Inquiry ${status.toLowerCase()} successfully.`);
+      await updateInquiryMutation.mutateAsync({ id, status });
     } catch (err) {
-      setError(err?.response?.data?.message || `Failed to ${status.toLowerCase()} inquiry.`);
+      console.error(err);
     } finally {
       setActionLoading(null);
     }
@@ -576,8 +541,8 @@ export default function Admin() {
 
                 const elements = [];
 
-                // 1. Profile Approval Card (Only show if status is pending)
-                if (item.status === 'pending' || !isFarmer || (!item.FarmerProfile?.sensorId && item.status !== 'pending_second_approval')) {
+                // 1. Profile Approval Card (Only show if status is pending for farmers, or not approved for others)
+                if (item.status === 'pending' || (!isFarmer && !item.isApproved)) {
                   elements.push(
                     <motion.div key={`${item.id}_profile`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-border-default bg-surface-secondary p-5 dark:border-slate-700 dark:bg-slate-900">
                       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -658,12 +623,13 @@ export default function Admin() {
                   );
                 }
 
-                // 2. Sensor ID Card (Show locked if pending, unlocked if pending_second_approval)
-                if (isFarmer && item.FarmerProfile?.sensorId) {
+                // 2. Sensor ID Card (Show locked if pending, waiting if pending_sensor, unlocked if pending_second_approval)
+                if (isFarmer && (item.FarmerProfile?.sensorId || ['pending_second_approval', 'pending_sensor', 'pending'].includes(item.status))) {
                   const isLocked = item.status === 'pending';
+                  const isWaitingForFarmer = item.status === 'pending_sensor';
                   
                   elements.push(
-                    <motion.div key={`${item.id}_sensor`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-3xl border ${isLocked ? 'border-dashed border-border-default bg-surface-secondary/50 opacity-60' : 'border-border-default bg-surface-secondary'} p-5 dark:border-slate-700 ${isLocked ? 'dark:bg-slate-900/50' : 'dark:bg-slate-900'}`}>
+                    <motion.div key={`${item.id}_sensor`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-3xl border ${isLocked || isWaitingForFarmer ? 'border-dashed border-border-default bg-surface-secondary/50 opacity-60' : 'border-border-default bg-surface-secondary'} p-5 dark:border-slate-700 ${isLocked || isWaitingForFarmer ? 'dark:bg-slate-900/50' : 'dark:bg-slate-900'}`}>
                       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div>
                           <div className="flex items-center gap-2">
@@ -671,28 +637,29 @@ export default function Admin() {
                             <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
                               Farmer 🌾
                             </span>
-                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${isLocked ? 'bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400'}`}>
-                              Pending Sensor ID Approval 📡 {isLocked ? '(Locked)' : ''}
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${isLocked || isWaitingForFarmer ? 'bg-slate-100 text-slate-800 dark:bg-slate-800/40 dark:text-slate-400' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400'}`}>
+                              Pending Sensor ID Approval 📡 {isLocked ? '(Locked)' : isWaitingForFarmer ? '(Waiting for Farmer)' : ''}
                             </span>
                           </div>
                           <p className="text-sm text-text-muted dark:text-text-disabled">{item.email} | {item.phone}</p>
                           <div className="mt-3 space-y-1.5 border-t border-border-default pt-3 text-xs text-text-subtle dark:border-slate-800 dark:text-text-disabled">
-                            <p><strong>Sensor ID:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">{item.FarmerProfile.sensorId}</span></p>
+                            <p><strong>Sensor ID:</strong> <span className="bg-primary-light text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">{item.FarmerProfile?.sensorId || "Pending Verification"}</span></p>
                             {isLocked && <p className="italic mt-1">⚠️ This sensor request will unlock after the farmer's profile is approved.</p>}
+                            {isWaitingForFarmer && <p className="italic mt-1">⏳ Waiting for the farmer to submit their Sensor ID.</p>}
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <button 
-                            disabled={isLocked || actionLoading === item.id} 
-                            onClick={() => !isLocked && handleApprove(item.id)}
-                            className={`rounded-2xl bg-emerald-500 px-4 py-2 text-white font-bold text-xs ${isLocked ? 'opacity-30 cursor-not-allowed' : 'transition hover:bg-primary-base disabled:opacity-50'}`}
+                            disabled={isLocked || isWaitingForFarmer || actionLoading === item.id} 
+                            onClick={() => !isLocked && !isWaitingForFarmer && handleApprove(item.id)}
+                            className={`rounded-2xl bg-emerald-500 px-4 py-2 text-white font-bold text-xs ${isLocked || isWaitingForFarmer ? 'opacity-30 cursor-not-allowed' : 'transition hover:bg-primary-base disabled:opacity-50'}`}
                           >
                             {t("admin.approve")}
                           </button>
                           <button 
-                            disabled={isLocked || actionLoading === item.id} 
-                            onClick={() => !isLocked && handleReject(item.id)}
-                            className={`rounded-2xl bg-rose-500 px-4 py-2 text-white font-bold text-xs ${isLocked ? 'opacity-30 cursor-not-allowed' : 'transition hover:bg-rose-600 disabled:opacity-50'}`}
+                            disabled={isLocked || isWaitingForFarmer || actionLoading === item.id} 
+                            onClick={() => !isLocked && !isWaitingForFarmer && handleReject(item.id)}
+                            className={`rounded-2xl bg-rose-500 px-4 py-2 text-white font-bold text-xs ${isLocked || isWaitingForFarmer ? 'opacity-30 cursor-not-allowed' : 'transition hover:bg-rose-600 disabled:opacity-50'}`}
                           >
                             {t("admin.reject")}
                           </button>

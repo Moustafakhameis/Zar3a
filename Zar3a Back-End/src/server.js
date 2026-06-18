@@ -128,6 +128,17 @@ const ensureProductionColumns = async (sequelizeInstance) => {
       console.log("✅ 'lockedUntil' column added.");
     }
 
+    // Check profilePicture column
+    const [profilePicCols] = await sequelizeInstance.query("SHOW COLUMNS FROM `Users` LIKE 'profilePicture';");
+    if (profilePicCols.length === 0) {
+      console.log("Adding 'profilePicture' column to Users...");
+      await sequelizeInstance.query(`
+        ALTER TABLE \`Users\` 
+        ADD COLUMN \`profilePicture\` VARCHAR(255) NULL DEFAULT NULL;
+      `);
+      console.log("✅ 'profilePicture' column added.");
+    }
+
     // Ensure imageUrl column lengths are modified to TEXT to support long base64 and URLs
     const tablesToAlter = [
       { table: 'ExpertListings', column: 'imageUrl' },

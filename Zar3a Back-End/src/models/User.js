@@ -74,6 +74,10 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(255),
     allowNull: true,
   },
+  profilePicture: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
   failedLoginAttempts: {
     type: DataTypes.INTEGER,
     defaultValue: 0,

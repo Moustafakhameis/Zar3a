@@ -93,3 +93,24 @@ export const uploadExpertImage = multer({
   limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB
 }).single("imageFile");
 
+const avatarDir = "uploads/avatars";
+fs.mkdirSync(avatarDir, { recursive: true });
+
+const avatarStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, avatarDir),
+  filename:    (_req, file,  cb) => cb(null, `${uuidv4()}${path.extname(file.originalname)}`),
+});
+
+const avatarFilter = (_req, file, cb) => {
+  const allowed = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".heic", ".heif"];
+  if (allowed.includes(path.extname(file.originalname).toLowerCase()))
+    cb(null, true);
+  else
+    cb(new Error("Only images (png, jpg, jpeg, webp, gif, heic) are accepted"));
+};
+
+export const uploadAvatar = multer({
+  storage: avatarStorage,
+  fileFilter: avatarFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+}).single("avatar");
