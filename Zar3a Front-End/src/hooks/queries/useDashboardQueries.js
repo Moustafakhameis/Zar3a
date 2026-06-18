@@ -4,6 +4,7 @@ import { useWeather } from '../../hooks/api/useWeather';
 import { getCropsData } from '../../pages/Dashboard/constants/crops';
 import { locationDB } from '../../pages/Dashboard/constants/locations';
 import { toast } from 'sonner';
+import { useAlerts } from './useAlerts';
 
 export const useDashboardQueries = (user, isArabic) => {
   // Queries
@@ -28,12 +29,15 @@ export const useDashboardQueries = (user, isArabic) => {
     ph: false,
   });
 
-  const [logs, setLogs] = useState([
-    { time: "09:30 AM", msg: "Mode changed", type: "info" },
-    { time: "09:15 AM", msg: "[MANUAL] PUMP turned ON", type: "action" },
-    { time: "09:00 AM", msg: "Sensor calibration completed", type: "info" },
-    { time: "08:30 AM", msg: "System Booted Successfully", type: "info" },
-  ]);
+  const {
+    alerts,
+    addAlert,
+    markAsRead,
+    markAllAsRead,
+    archiveAlert,
+    unarchiveAlert,
+    unreadCount,
+  } = useAlerts();
 
   const [data, setData] = useState([
     { time: "07:00 AM", moisture: 58, ph: 6.2, dosage: 25, consumption: 150, ventState: 0 },
@@ -101,15 +105,14 @@ export const useDashboardQueries = (user, isArabic) => {
 
   const isLocked = user?.status === "pending" || user?.status === "pending_sensor";
 
-  const addLog = (msg, type) =>
-    setLogs((prev) => [
-      {
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        msg,
-        type,
-      },
-      ...prev,
-    ].slice(0, 15));
+  const addLog = (msg, type) => {
+    // Map legacy addLog calls to addAlert
+    let category = "Information";
+    let title = "System Notification";
+    if (type === "action") category = "Resolved"; // Manual action
+    if (msg.toLowerCase().includes("critical") || msg.toLowerCase().includes("error")) category = "Critical";
+    addAlert(category, title, msg);
+  };
 
   const updateActiveSector = (updates) => {
     if (!activeSectorId) return;
@@ -170,10 +173,12 @@ export const useDashboardQueries = (user, isArabic) => {
 
         if (activeSector.isAuto) {
           if (lastVal < cropMin) {
+            if (change !== 4) addAlert("Critical", "Soil Moisture Below Safe Range", `Sector moisture dropped below ${cropMin}%. Auto-irrigating.`);
             change = 4;
             setHardware((h) => ({ ...h, pump: true }));
           } else {
             change = Math.random() * 4 - 2;
+            if (hardware.pump && lastVal >= cropMin) addAlert("Resolved", "Irrigation Restored", "Moisture levels have reached safe zones.");
             setHardware((h) => ({ ...h, pump: false }));
           }
           if (lastVal > cropMin + 15) {
@@ -189,6 +194,7 @@ export const useDashboardQueries = (user, isArabic) => {
              setHardware((h) => ({ ...h, fertilizer: false }));
           }
           if (lastPh < minPh || lastPh > maxPh) {
+             if (!hardware.ph) addAlert("Warning", "pH Approaching Threshold", `Soil pH is outside the safe range of ${minPh}-${maxPh}. Correcting.`);
              setHardware((h) => ({ ...h, ph: true }));
              phChange = lastPh < minPh ? 0.2 : -0.2;
           } else {
@@ -247,7 +253,12 @@ export const useDashboardQueries = (user, isArabic) => {
     setHardware,
     toggleHardware,
     handleHardwareToggle,
-    logs,
+    alerts,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    archiveAlert,
+    unarchiveAlert,
     addLog,
     createFarmMutation,
     deleteFarmMutation,

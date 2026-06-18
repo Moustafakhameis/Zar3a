@@ -31,6 +31,7 @@ import {
   LuMaximize2,
   LuWrench,
   LuClock,
+  LuCpu
 } from "react-icons/lu";
 import {
   AreaChart,
@@ -57,6 +58,8 @@ import WeatherCard from './components/WeatherCard';
 import { getCropsData } from './constants/crops';
 import { locationDB } from './constants/locations';
 import { useDashboardQueries } from '../../hooks/queries/useDashboardQueries';
+import SensorMonitoringCenter from './components/SensorMonitoringCenter';
+import AlertCenter from './components/AlertCenter/AlertCenter';
 
 const Dashboard = () => {
   const { t, isArabic } = useLanguage();
@@ -95,7 +98,12 @@ const Dashboard = () => {
     setHardware,
     toggleHardware,
     handleHardwareToggle,
-    logs,
+    alerts,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    archiveAlert,
+    unarchiveAlert,
     addLog,
     createFarmMutation,
     deleteFarmMutation,
@@ -104,6 +112,7 @@ const Dashboard = () => {
     isLocked
   } = useDashboardQueries(user, isArabic);
 
+  const [activeDashboardView, setActiveDashboardView] = useState("overview");
   const [searchQuery, setSearchQuery] = useState(activeSector?.location || "");
   const [activeModalChart, setActiveModalChart] = useState(null);
   const [activeDashboardChart, setActiveDashboardChart] = useState("moisture");
@@ -542,19 +551,55 @@ const Dashboard = () => {
           className="relative p-4 bg-surface-secondary dark:bg-slate-800 hover:text-primary-base rounded-full transition-colors hidden md:block shrink-0 self-start mt-2"
         >
           <LuBell size={20} className="dark:text-white" />
-          <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
+          {unreadCount > 0 && (
+            <span className="absolute top-3 right-3 flex h-3 w-3 items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 text-[8px] font-bold text-white items-center justify-center">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            </span>
+          )}
         </button>
       </div>
 
+      {/* --- DASHBOARD VIEW TOGGLE --- */}
+      <div className="flex justify-center mb-6">
+        <div className="flex p-1 bg-surface-secondary dark:bg-slate-800 rounded-full border border-border-default dark:border-slate-700 shadow-sm w-fit">
+          <button 
+            onClick={() => setActiveDashboardView("overview")}
+            className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all ${activeDashboardView === "overview" ? "bg-surface-card dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-md" : "text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-gray-200"}`}
+          >
+            <LuLayoutGrid size={18} /> {isArabic ? "نظرة عامة على المزرعة" : "Farm Overview"}
+          </button>
+          <button 
+            onClick={() => setActiveDashboardView("sensors")}
+            className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all ${activeDashboardView === "sensors" ? "bg-surface-card dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-md" : "text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-gray-200"}`}
+          >
+            <LuCpu size={18} /> {isArabic ? "مركز المراقبة" : "Monitoring Center"}
+          </button>
+        </div>
+      </div>
+
       <AnimatePresence mode="wait">
-        <motion.div
-          key={activeSectorId}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -15 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-          className="flex flex-col gap-8"
-        >
+        {activeDashboardView === "sensors" ? (
+          <motion.div
+            key="sensors-view"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <SensorMonitoringCenter sectors={sectors} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key={`overview-${activeSectorId}`}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex flex-col gap-8"
+          >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-8 flex flex-col gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1037,6 +1082,7 @@ const Dashboard = () => {
         </div>
       </div>
       </motion.div>
+      )}
       </AnimatePresence>
 
       {/* --- CHART EXPAND MODAL --- */}
@@ -1179,77 +1225,17 @@ const Dashboard = () => {
       )}
 
       {/* --- NOTIFICATIONS --- */}
-      <AnimatePresence>
-        {isLogOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsLogOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]"
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="fixed top-0 right-0 h-full w-full max-w-sm bg-surface-card dark:bg-slate-900 shadow-2xl z-[100] p-6 overflow-y-auto border-l border-border-default dark:border-slate-800"
-            >
-              <div className="flex justify-between items-center mb-8 pb-4 border-b border-border-default dark:border-slate-800">
-                <h2 className="text-2xl font-black dark:text-white flex items-center gap-2">
-                  <LuBell className="text-primary-base" /> {t("dash.systemLogs")}
-                </h2>
-                <button
-                  onClick={() => setIsLogOpen(false)}
-                  className="p-2 bg-surface-secondary dark:bg-slate-800 rounded-full hover:text-red-500"
-                >
-                  <LuX size={20} />
-                </button>
-              </div>
-              <div className="space-y-4">
-                {logs.map((log, i) => (
-                  <div
-                    key={i}
-                    className="p-4 bg-surface-secondary dark:bg-slate-800/50 rounded-2xl flex gap-4 items-start border border-border-default dark:border-slate-700/50"
-                  >
-                    <div
-                      className={`p-2 rounded-full mt-1 ${log.type === "action" ? "bg-blue-100 text-blue-600" : "bg-green-100 text-primary-base"}`}
-                    >
-                      {log.type === "action" ? (
-                        <LuSettings2 size={14} />
-                      ) : (
-                        <LuInfo size={14} />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold dark:text-white leading-tight mb-1">
-                        {(() => {
-                          let translatedMsg = log.msg;
-                          if (log.msg === "System Booted Successfully") {
-                            translatedMsg = t("log.boot");
-                          } else if (log.msg === "Mode changed") {
-                            translatedMsg = t("log.mode");
-                          } else if (log.msg.startsWith("[MANUAL]")) {
-                            const device = log.msg.split(" ")[1];
-                            const action = log.msg.includes("ON") ? t("log.manualOn") : t("log.manualOff");
-                            const transDevice = device === "PUMP" ? t("dash.pump") : device === "VENT" ? t("dash.vent") : t("dash.fertilizer");
-                            translatedMsg = `[${t("dash.manual")}] ${transDevice} ${action}`;
-                          }
-                          return translatedMsg;
-                        })()}
-                      </p>
-                      <p className="text-[10px] font-black text-text-disabled uppercase tracking-widest">
-                        {log.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* --- ALERT CENTER --- */}
+      <AlertCenter
+        isOpen={isLogOpen}
+        onClose={() => setIsLogOpen(false)}
+        alerts={alerts}
+        markAsRead={markAsRead}
+        markAllAsRead={markAllAsRead}
+        archiveAlert={archiveAlert}
+        unarchiveAlert={unarchiveAlert}
+        t={t}
+      />
 
       {/* --- CROP PROFILE MODAL --- */}
       <AnimatePresence>

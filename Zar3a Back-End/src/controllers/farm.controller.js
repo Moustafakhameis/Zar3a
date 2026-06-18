@@ -2,8 +2,9 @@ import { Farm, Sector } from '../models/index.js';
 
 export const getFarms = async (req, res) => {
   try {
+    const whereClause = req.user.role === 'ADMIN' ? {} : { userId: req.user.id };
     const farms = await Farm.findAll({
-      where: { userId: req.user.id },
+      where: whereClause,
       include: [Sector]
     });
     res.json(farms);
