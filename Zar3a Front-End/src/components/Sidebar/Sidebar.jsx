@@ -103,28 +103,62 @@ const Sidebar = ({ isOpen, onClose }) => {
     exit: { x: "-100%" }
   };
 
-  // Create a reusable internal component for the sidebar content
-  const SidebarContent = () => (
+  // Create a reusable internal JSX element for the sidebar content
+  const sidebarContent = (
     <>
       {/* Menu Items */}
       <div className="p-4 flex-1 space-y-2 overflow-y-auto">
-        <p className="px-4 text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">{t("nav.mainMenu")}</p>
-        {menuItems.map((item) => (
-          <NavLink
+        <motion.p 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          transition={{ delay: 0.1 }}
+          className="px-4 text-xs font-semibold text-text-muted uppercase tracking-wider mb-2"
+        >
+          {t("nav.mainMenu")}
+        </motion.p>
+        {menuItems.map((item, i) => (
+          <motion.div
             key={item.path}
-            to={item.path}
-            onClick={isMobile ? onClose : undefined}
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-xl transition-all ${
-                isActive
-                  ? "bg-primary-light dark:bg-emerald-900/20 text-primary-base dark:text-emerald-400 font-bold shadow-sm"
-                  : "text-text-subtle dark:text-text-disabled hover:bg-surface-secondary dark:hover:bg-slate-800 hover:text-primary-hover"
-              }`
-            }
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 + 0.1, duration: 0.3, ease: "easeOut" }}
+            whileHover={{ x: 6, transition: { type: "spring", stiffness: 400, damping: 25 } }}
+            whileTap={{ scale: 0.98 }}
           >
-            <span className="text-xl shrink-0">{item.icon}</span>
-            <span>{item.label}</span>
-          </NavLink>
+            <NavLink
+              to={item.path}
+              onClick={isMobile ? onClose : undefined}
+              className="relative block"
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeSidebarIndicator"
+                      className="absolute inset-0 bg-primary-light dark:bg-emerald-900/30 rounded-xl"
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <div
+                    className={`relative z-10 flex items-center gap-3 p-3 rounded-xl transition-colors duration-200 ${
+                      isActive
+                        ? "text-primary-base dark:text-emerald-400 font-bold"
+                        : "text-text-subtle dark:text-text-disabled hover:bg-surface-secondary/50 dark:hover:bg-slate-800/50 hover:text-primary-hover"
+                    }`}
+                  >
+                    <motion.span 
+                      className="text-xl shrink-0"
+                      whileHover={{ scale: 1.15 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    >
+                      {item.icon}
+                    </motion.span>
+                    <span>{item.label}</span>
+                  </div>
+                </>
+              )}
+            </NavLink>
+          </motion.div>
         ))}
       </div>
 
@@ -132,58 +166,141 @@ const Sidebar = ({ isOpen, onClose }) => {
       <div className="p-4 border-t border-border-default dark:border-slate-800 space-y-1">
         {/* My Profile - Mobile Only */}
         {isMobile && user && profileLink && (
-          <NavLink
-            to={profileLink}
-            onClick={onClose}
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-xl transition-all ${
-                isActive ? "bg-primary-light dark:bg-emerald-900/20 text-primary-base font-bold" : "text-text-subtle dark:text-text-disabled hover:bg-surface-secondary dark:hover:bg-slate-800"
-              }`
-            }
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            whileHover={{ x: 6, transition: { type: "spring", stiffness: 400, damping: 25 } }}
+            whileTap={{ scale: 0.98 }}
           >
-            <FcManager className="text-2xl shrink-0" />
-            <span>{t("nav.myProfile")}</span>
-          </NavLink>
+            <NavLink
+              to={profileLink}
+              onClick={onClose}
+              className="relative block"
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeSidebarIndicator"
+                      className="absolute inset-0 bg-primary-light dark:bg-emerald-900/30 rounded-xl"
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <div
+                    className={`relative z-10 flex items-center gap-3 p-3 rounded-xl transition-colors duration-200 ${
+                      isActive ? "text-primary-base font-bold" : "text-text-subtle dark:text-text-disabled hover:bg-surface-secondary/50 dark:hover:bg-slate-800/50"
+                    }`}
+                  >
+                    <motion.span whileHover={{ scale: 1.15 }} transition={{ type: "spring", stiffness: 400, damping: 17 }} className="text-2xl shrink-0">
+                      <FcManager />
+                    </motion.span>
+                    <span>{t("nav.myProfile")}</span>
+                  </div>
+                </>
+              )}
+            </NavLink>
+          </motion.div>
         )}
 
         {/* Settings (Desktop + Mobile) */}
         {user?.role && (
-          <NavLink
-            to="/settings"
-            onClick={isMobile ? onClose : undefined}
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-xl transition-all ${
-                isActive ? "bg-primary-light dark:bg-emerald-900/20 text-primary-base font-bold" : "text-text-subtle dark:text-text-disabled hover:bg-surface-secondary dark:hover:bg-slate-800"
-              }`
-            }
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            whileHover={{ x: 6, transition: { type: "spring", stiffness: 400, damping: 25 } }}
+            whileTap={{ scale: 0.98 }}
           >
-            <FcSettings className="text-2xl shrink-0" />
-            <span>{t("nav.settings")}</span>
-          </NavLink>
+            <NavLink
+              to="/settings"
+              onClick={isMobile ? onClose : undefined}
+              className="relative block"
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeSidebarIndicator"
+                      className="absolute inset-0 bg-primary-light dark:bg-emerald-900/30 rounded-xl"
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <div
+                    className={`relative z-10 flex items-center gap-3 p-3 rounded-xl transition-colors duration-200 ${
+                      isActive ? "text-primary-base font-bold" : "text-text-subtle dark:text-text-disabled hover:bg-surface-secondary/50 dark:hover:bg-slate-800/50"
+                    }`}
+                  >
+                    <motion.span whileHover={{ rotate: 90 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="text-2xl shrink-0">
+                      <FcSettings />
+                    </motion.span>
+                    <span>{t("nav.settings")}</span>
+                  </div>
+                </>
+              )}
+            </NavLink>
+          </motion.div>
         )}
 
         {/* Logout/Sign In - Mobile Only */}
         {isMobile && (
           user ? (
-            <button
-              onClick={() => {
-                logout();
-                onClose();
-              }}
-              className="w-full flex items-center gap-3 p-3 rounded-xl text-status-danger dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all text-start font-bold cursor-pointer"
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <FcExport className="text-2xl shrink-0" />
-              <span>{t("nav.logout")}</span>
-            </button>
+              <button
+                onClick={() => {
+                  logout();
+                  onClose();
+                }}
+                className="w-full flex items-center gap-3 p-3 rounded-xl text-status-danger dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-300 text-start font-bold cursor-pointer"
+              >
+                <motion.span whileHover={{ x: 5 }} transition={{ duration: 0.3 }} className="text-2xl shrink-0">
+                  <FcExport />
+                </motion.span>
+                <span>{t("nav.logout")}</span>
+              </button>
+            </motion.div>
           ) : (
-            <NavLink
-              to="/login"
-              onClick={onClose}
-              className="flex items-center gap-3 p-3 rounded-xl text-text-subtle dark:text-slate-300 hover:bg-surface-secondary dark:hover:bg-slate-800 transition-all font-bold"
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <FcManager className="text-2xl shrink-0" />
-              <span>{t("nav.signIn")}</span>
-            </NavLink>
+              <NavLink
+                to="/login"
+                onClick={onClose}
+                className="relative block"
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeSidebarIndicator"
+                        className="absolute inset-0 bg-primary-light dark:bg-emerald-900/30 rounded-xl"
+                        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    <div
+                      className={`relative z-10 flex items-center gap-3 p-3 rounded-xl transition-colors duration-200 ${
+                        isActive ? "text-primary-base font-bold" : "text-text-subtle dark:text-slate-300 hover:bg-surface-secondary/50 dark:hover:bg-slate-800/50"
+                      }`}
+                    >
+                      <motion.span whileHover={{ scale: 1.1 }} transition={{ duration: 0.3 }} className="text-2xl shrink-0">
+                        <FcManager />
+                      </motion.span>
+                      <span>{t("nav.signIn")}</span>
+                    </div>
+                  </>
+                )}
+              </NavLink>
+            </motion.div>
           )
         )}
       </div>
@@ -214,8 +331,8 @@ const Sidebar = ({ isOpen, onClose }) => {
             </button>
             </div>
             
-            {/* Inner Content Component (Same for both) */}
-            <SidebarContent />
+            {/* Inner Content JSX */}
+            {sidebarContent}
           </motion.aside>
         )}
       </AnimatePresence>
@@ -229,7 +346,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         >
           {/* Fixed width container prevents contents from text-wrapping and lagging the browser while the parent aside shrinks */}
           <div className="w-64 h-full flex flex-col">
-            <SidebarContent />
+            {sidebarContent}
           </div>
         </aside>
       )}
