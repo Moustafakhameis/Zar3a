@@ -15,6 +15,7 @@ import {
   LuLogOut,
   LuChevronDown,
   LuLanguages,
+  LuLeaf,
 } from "react-icons/lu";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -151,13 +152,17 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
             {isSidebarOpen ? <LuX size={20} className="sm:w-[22px] sm:h-[22px]" /> : <LuMenu size={20} className="sm:w-[22px] sm:h-[22px]" />}
           </button>
 
-          <Link to="/" className="group flex items-center gap-2 sm:gap-3" onClick={handleLinkClick}>
-            <div className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary-light dark:bg-emerald-900/20 rounded-xl sm:rounded-2xl overflow-hidden border border-primary-light dark:border-emerald-800 transition-transform group-hover:scale-105">
-              <img src={Logo} alt="Logo" className="w-full h-full object-contain transform scale-125" />
+          <Link to="/" className="group flex items-center gap-3 sm:gap-4" onClick={handleLinkClick}>
+            <div className="relative flex items-center justify-center h-10 sm:h-12 w-auto transition-transform duration-300 group-hover:scale-105">
+              <img src={Logo} alt="Zar3a Logo" className="h-full w-auto object-contain drop-shadow-md dark:drop-shadow-[0_0_18px_rgba(16,185,129,0.9)] dark:brightness-150 dark:saturate-150" />
             </div>
-            <div className="flex flex-col hidden sm:flex">
-              <span className="text-xl md:text-2xl font-black text-text-main dark:text-white tracking-tighter leading-none uppercase">Zar3a</span>
-              <span className="hidden sm:block text-[9px] font-bold text-primary-base dark:text-emerald-400 uppercase tracking-widest mt-1">{t("nav.smartAgri")}</span>
+            <div className="flex flex-col hidden sm:flex justify-center">
+              <span className="text-2xl md:text-[28px] font-black font-['Outfit'] text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 dark:from-emerald-400 dark:via-teal-300 dark:to-emerald-400 bg-[length:200%_auto] animate-gradient tracking-tight leading-none uppercase drop-shadow-sm dark:drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">
+                Zar3a
+              </span>
+              <span className="hidden sm:block text-[10px] font-bold font-['Outfit'] text-slate-500 dark:text-slate-400 uppercase tracking-[0.25em] mt-1.5 dark:drop-shadow-[0_0_5px_rgba(148,163,184,0.3)]">
+                {t("nav.smartAgri")}
+              </span>
             </div>
           </Link>
 
