@@ -31,7 +31,8 @@ import {
   LuMaximize2,
   LuWrench,
   LuClock,
-  LuCpu
+  LuCpu,
+  LuSparkles
 } from "react-icons/lu";
 import {
   AreaChart,
@@ -60,6 +61,7 @@ import { locationDB } from './constants/locations';
 import { useDashboardQueries } from '../../hooks/queries/useDashboardQueries';
 import SensorMonitoringCenter from './components/SensorMonitoringCenter';
 import AlertCenter from './components/AlertCenter/AlertCenter';
+import AIAnalysisCenter from './components/ai/AIAnalysisCenter';
 
 const Dashboard = () => {
   const { t, isArabic } = useLanguage();
@@ -564,24 +566,49 @@ const Dashboard = () => {
 
       {/* --- DASHBOARD VIEW TOGGLE --- */}
       <div className="flex justify-center mb-6">
-        <div className="flex p-1 bg-surface-secondary dark:bg-slate-800 rounded-full border border-border-default dark:border-slate-700 shadow-sm w-fit">
-          <button 
-            onClick={() => setActiveDashboardView("overview")}
-            className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all ${activeDashboardView === "overview" ? "bg-surface-card dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-md" : "text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-gray-200"}`}
-          >
-            <LuLayoutGrid size={18} /> {isArabic ? "نظرة عامة على المزرعة" : "Farm Overview"}
-          </button>
-          <button 
-            onClick={() => setActiveDashboardView("sensors")}
-            className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all ${activeDashboardView === "sensors" ? "bg-surface-card dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-md" : "text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-gray-200"}`}
-          >
-            <LuCpu size={18} /> {isArabic ? "مركز المراقبة" : "Monitoring Center"}
-          </button>
+        <div className="flex p-1 bg-surface-secondary dark:bg-slate-800/80 backdrop-blur-sm rounded-full border border-border-default dark:border-white/5 shadow-sm w-fit relative z-10">
+          {[
+            { id: "overview", label: isArabic ? "نظرة عامة على المزرعة" : "Farm Overview", icon: LuLayoutGrid, activeColor: "text-emerald-600 dark:text-emerald-400", activeBg: "bg-surface-card dark:bg-slate-900 border-white/5 shadow-md" },
+            { id: "sensors", label: isArabic ? "مركز المراقبة" : "Monitoring Center", icon: LuCpu, activeColor: "text-emerald-600 dark:text-emerald-400", activeBg: "bg-surface-card dark:bg-slate-900 border-white/5 shadow-md" },
+            { id: "ai", label: isArabic ? "مركز الذكاء الاصطناعي" : "AI Center", icon: LuSparkles, activeColor: "text-indigo-600 dark:text-indigo-400", activeBg: "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-100 dark:border-indigo-800/50 shadow-md" }
+          ].map((tab) => {
+            const isActive = activeDashboardView === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveDashboardView(tab.id)}
+                className={`relative flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-colors z-10 ${
+                  isActive ? tab.activeColor : "text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-gray-200"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeDashboardTab"
+                    className={`absolute inset-0 rounded-full border ${tab.activeBg}`}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    style={{ zIndex: -1 }}
+                  />
+                )}
+                <Icon size={18} /> {tab.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <AnimatePresence mode="wait">
-        {activeDashboardView === "sensors" ? (
+        {activeDashboardView === "ai" ? (
+          <motion.div
+            key="ai-view"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <AIAnalysisCenter activeSector={activeSector} hardware={hardware} weather={weather} data={data} />
+          </motion.div>
+        ) : activeDashboardView === "sensors" ? (
           <motion.div
             key="sensors-view"
             initial={{ opacity: 0, y: 15 }}
