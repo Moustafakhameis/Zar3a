@@ -404,6 +404,7 @@ model users {
   isVerified                                   Boolean?               @default(false)
   isApproved                                   Boolean?               @default(false)
   cv                                           String?                @db.VarChar(255)
+  profilePicture                               String?                @db.VarChar(255)
   createdAt                                    DateTime?              @db.DateTime(0)
   updatedAt                                    DateTime?              @db.DateTime(0)
   status                                       users_status           @default(pending)
