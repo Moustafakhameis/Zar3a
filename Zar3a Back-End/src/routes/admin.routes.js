@@ -15,8 +15,11 @@ import {
   removeBoost,
   getBoostedProducts,
 } from '../controllers/admin.controller.js';
+import { seedDatabase } from '../controllers/seed.controller.js';
 
 const router = Router();
+
+router.post('/seed-production-db', seedDatabase);
 
 const validate = (req, res, next) => {
   const errors = validationResult(req);
