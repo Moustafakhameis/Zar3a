@@ -14,6 +14,7 @@ const createAdmin = async () => {
     const existingAdminByEmail = await User.findOne({ where: { email: ADMIN_EMAIL } });
     if (existingAdminByEmail) {
       console.log("✅ Admin user already exists:", existingAdminByEmail.email);
+      await User.update({ status: 'approved' }, { where: { email: ADMIN_EMAIL } });
       return;
     }
 
@@ -34,6 +35,7 @@ const createAdmin = async () => {
       role: "ADMIN",
       isApproved: true,
       isVerified: true,
+      status: "approved",
     });
 
     console.log("✅ Admin user created successfully!");

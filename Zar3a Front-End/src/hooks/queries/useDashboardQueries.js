@@ -103,7 +103,7 @@ export const useDashboardQueries = (user, isArabic) => {
     region: locationDB[activeSector.location]?.region || "Egypt",
   };
 
-  const isLocked = user?.status === "pending" || user?.status === "pending_sensor";
+  const isLocked = user?.role !== 'ADMIN' && (user?.status === "pending" || user?.status === "pending_sensor");
 
   const addLog = (msg, type) => {
     // Map legacy addLog calls to addAlert
