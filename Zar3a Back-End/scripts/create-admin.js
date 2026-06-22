@@ -3,9 +3,9 @@ import "dotenv/config";
 import { User } from "../src/models/index.js";
 import { hashPassword } from "../src/utils/auth.js";
 
-const ADMIN_EMAIL = "admin@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@zar3a.com";
 const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 
 const createAdmin = async () => {
   try {
