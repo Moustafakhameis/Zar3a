@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "start": "node scripts/seed-production-db.js && node src/server.js",
     "build": "prisma generate && prisma db push --accept-data-loss && node scripts/create-admin.js",
     "db:migrate": "npx prisma migrate dev",
     "db:push": "npx prisma db push",
