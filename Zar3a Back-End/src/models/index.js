@@ -115,4 +115,12 @@ AuditLog.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(PasswordHistory, { foreignKey: 'userId', onDelete: 'CASCADE' });
 PasswordHistory.belongsTo(User, { foreignKey: 'userId' });
 
+// IMPORTANT: Force all Sequelize table names to be completely lowercase.
+// This is required because Prisma creates lowercase tables ('users', 'products') 
+// but Sequelize by default expects uppercase/mixed-case ('Users', 'Products').
+// On Linux (production), MySQL is case-sensitive, which causes ER_NO_SUCH_TABLE errors.
+for (const modelName in sequelize.models) {
+  sequelize.models[modelName].tableName = sequelize.models[modelName].tableName.toLowerCase();
+}
+
 export { sequelize, User, FarmerProfile, AgroExpertProfile, SupplierProfile, BuyerProfile, RefreshToken, VerificationToken, PasswordResetOTP, Product, ExpertListing, Notification, ChatMessage, OrderTracking, Inquiry, Order, OrderItem, Cart, ProductReview, Transaction, AuditLog, PasswordHistory, Farm, Sector };
