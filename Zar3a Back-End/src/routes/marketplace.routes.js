@@ -166,7 +166,7 @@ router.post(
 // PUT /marketplace/products/:productId/reviews/:reviewId
 // Edit own review (authenticated)
 router.put(
-  '/marketplace/products/:productId/reviews/:reviewId',
+  '/products/:productId/reviews/:reviewId',
   authenticate,
   [
     body('rating').optional().isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
