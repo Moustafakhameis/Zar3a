@@ -1,6 +1,9 @@
 # Backend Dockerfile
 FROM node:20-alpine
 
+# Install OpenSSL for Prisma to work on Alpine
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 # Copy package files
