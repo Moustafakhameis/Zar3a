@@ -668,7 +668,7 @@ export const login = async (req, res) => {
     console.error("[login] Unhandled error — message:", err.message);
     console.error("[login] Unhandled error — stack:", err.stack);
     console.error("[login] Unhandled error — full object:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: `Server error: ${err.message}` });
   }
 };
 
