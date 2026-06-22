@@ -1,6 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
 import { sequelize } from "./models/index.js";
 import authRoutes from "./routes/auth.routes.js";
 import marketplaceRoutes from "./routes/marketplace.routes.js";
@@ -12,6 +15,25 @@ import ordersRoutes from "./routes/orders.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import farmRoutes from "./routes/farm.routes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Ensure upload directories exist
+const uploadDirs = [
+  '../uploads/avatars',
+  '../uploads/products',
+  '../uploads/experts',
+  '../uploads/cv',
+  '../uploads/chat'
+];
+
+uploadDirs.forEach(dir => {
+  const dirPath = path.join(__dirname, dir);
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+});
 
 const app = express();
 const PORT = process.env.PORT || 5002;
