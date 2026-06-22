@@ -1122,14 +1122,15 @@ const Dashboard = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setActiveModalChart(null)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]"
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999]"
               />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="fixed top-[100px] left-1/2 -translate-x-1/2 w-11/12 max-w-5xl max-h-[calc(100vh-120px)] bg-surface-card dark:bg-slate-900 rounded-[3.5rem] shadow-2xl z-[100] border border-border-default dark:border-slate-800 overflow-y-auto flex flex-col"
-              >
+              <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 pointer-events-none">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  className="w-[95vw] md:w-[90vw] h-[90vh] md:h-[85vh] max-w-7xl pointer-events-auto bg-surface-card dark:bg-slate-900 rounded-[3.5rem] shadow-2xl border border-border-default dark:border-slate-800 overflow-y-auto flex flex-col relative"
+                >
                 <div className="p-10 md:p-12 pb-4 flex justify-between items-start">
                   <div>
                     <h3 className="text-3xl font-black dark:text-white tracking-tight">
@@ -1188,7 +1189,7 @@ const Dashboard = () => {
                     ✕
                   </button>
                 </div>
-                <div className="p-10 md:p-12 pt-4 h-[60vh] min-h-[400px]">
+                <div className="p-10 md:p-12 pt-4 flex-1 min-h-[400px]">
                   <ResponsiveContainer width="99%" height="100%" minHeight={400} debounce={50}>
                     {activeModalChart === 'moisture' ? (
                       <AreaChart data={data}>
@@ -1245,6 +1246,7 @@ const Dashboard = () => {
                   </ResponsiveContainer>
                 </div>
               </motion.div>
+              </div>
             </>
           )}
         </AnimatePresence>,

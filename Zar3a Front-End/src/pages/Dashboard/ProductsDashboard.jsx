@@ -288,10 +288,8 @@ export default function ProductsDashboard() {
         prev.map((p) => (p.id === editingProduct.id ? { ...p, ...updatedProduct } : p))
       );
 
-      setEditSuccess("Product updated successfully!");
-      setTimeout(() => {
-        handleCloseEditModal();
-      }, 1500);
+      toast.success(t("prodDash.editSuccess") || "Product updated successfully!");
+      handleCloseEditModal();
     } catch (err) {
       console.error(err);
       setEditError(err?.response?.data?.message || "Failed to update product.");
@@ -774,7 +772,7 @@ export default function ProductsDashboard() {
               initial={{ y: 50, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 50, opacity: 0, scale: 0.95 }}
-              className="bg-surface-card dark:bg-slate-900 w-full max-w-2xl rounded-[3.5rem] p-8 md:p-10 relative shadow-2xl z-10 overflow-y-auto max-h-[90vh] custom-scrollbar text-left"
+              className="bg-surface-card dark:bg-slate-900 w-full max-w-3xl rounded-[3.5rem] p-8 md:p-12 relative shadow-2xl z-10 overflow-y-auto max-h-[90vh] custom-scrollbar text-left"
             >
               <button
                 type="button"
@@ -855,35 +853,35 @@ export default function ProductsDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-text-disabled uppercase tracking-widest mb-1.5">{t("prodDash.status") || "Status"}</label>
-                    <select
-                      name="status"
+                    <CustomSelect
+                      label={t("prodDash.status") || "Status"}
+                      icon={LuLayoutGrid}
                       value={editForm.status}
-                      onChange={handleEditFormChange}
-                      className="w-full bg-surface-secondary dark:bg-slate-800 border border-border-default dark:border-slate-700/50 rounded-2xl px-4 py-3.5 text-xs font-bold dark:text-white outline-none focus:border-green-500 transition-colors"
-                    >
-                      <option value="AVAILABLE">AVAILABLE</option>
-                      <option value="SOLD">SOLD</option>
-                      <option value="DELETED">DELETED</option>
-                    </select>
+                      onChange={(value) => handleEditFormChange({ target: { name: 'status', value } })}
+                      options={[
+                        { label: 'AVAILABLE', value: 'AVAILABLE' },
+                        { label: 'SOLD', value: 'SOLD' },
+                        { label: 'DELETED', value: 'DELETED' }
+                      ]}
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-text-disabled uppercase tracking-widest mb-1.5">{t("prodDash.category") || "Category"}</label>
-                  <select
-                    name="category"
+                  <CustomSelect
+                    label={t("prodDash.category") || "Category"}
+                    icon={LuLayoutGrid}
                     value={editForm.category}
-                    onChange={handleEditFormChange}
-                    className="w-full bg-surface-secondary dark:bg-slate-800 border border-border-default dark:border-slate-700/50 rounded-2xl px-4 py-3.5 text-xs font-bold dark:text-white outline-none focus:border-green-500 transition-colors"
-                  >
-                    <option value="SEEDS">SEEDS</option>
-                    <option value="FERTILIZERS">FERTILIZERS</option>
-                    <option value="TOOLS">TOOLS</option>
-                    <option value="PRODUCE">PRODUCE</option>
-                    <option value="EQUIPMENT">EQUIPMENT</option>
-                    <option value="OTHER">OTHER</option>
-                  </select>
+                    onChange={(value) => handleEditFormChange({ target: { name: 'category', value } })}
+                    options={[
+                      { label: 'SEEDS', value: 'SEEDS' },
+                      { label: 'FERTILIZERS', value: 'FERTILIZERS' },
+                      { label: 'TOOLS', value: 'TOOLS' },
+                      { label: 'PRODUCE', value: 'PRODUCE' },
+                      { label: 'EQUIPMENT', value: 'EQUIPMENT' },
+                      { label: 'OTHER', value: 'OTHER' }
+                    ]}
+                  />
                 </div>
 
                 <div>
@@ -914,7 +912,7 @@ export default function ProductsDashboard() {
                         value={editForm.imageUrl}
                         onChange={(e) => { handleEditFormChange(e); setEditImageFile(null); setEditImagePreview(""); }}
                         placeholder="Paste External Image URL"
-                        className="w-full bg-surface-secondary dark:bg-slate-800 border border-border-default dark:border-slate-700/50 rounded-2xl px-4 py-3.5 text-xs font-bold dark:text-white outline-none focus:border-green-500 transition-colors"
+                        className="w-full bg-surface-secondary dark:bg-slate-800 border border-border-default dark:border-slate-700/50 rounded-2xl px-4 py-3.5 text-xs font-bold dark:text-white outline-none focus:border-green-500 transition-colors truncate"
                       />
                       <div className="relative h-12 flex items-center justify-center border-2 border-dashed border-border-default dark:border-slate-700 rounded-2xl hover:bg-surface-secondary dark:hover:bg-slate-800/50 transition">
                         <span className="absolute text-[10px] font-bold text-text-disabled pointer-events-none">
