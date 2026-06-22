@@ -404,7 +404,6 @@ model users {
   isVerified                                   Boolean?               @default(false)
   isApproved                                   Boolean?               @default(false)
   cv                                           String?                @db.VarChar(255)
-  profilePicture                               String?                @db.VarChar(255)
   createdAt                                    DateTime?              @db.DateTime(0)
   updatedAt                                    DateTime?              @db.DateTime(0)
   status                                       users_status           @default(pending)
@@ -412,6 +411,7 @@ model users {
   subscriptionExpiresAt                        DateTime?              @db.DateTime(0)
   failedLoginAttempts                          Int                    @default(0)
   lockedUntil                                  DateTime?              @db.DateTime(0)
+  profilePicture                               String?                @db.VarChar(255)
   agroexpertprofiles                           agroexpertprofiles?
   auditlogs                                    auditlogs[]
   buyerprofiles                                buyerprofiles?
@@ -420,6 +420,7 @@ model users {
   chatmessages_chatmessages_receiverIdTousers  chatmessages[]         @relation("chatmessages_receiverIdTousers")
   expertlistings                               expertlistings[]
   farmerprofiles                               farmerprofiles?
+  farms                                        farms[]
   inquiries                                    inquiries[]
   notifications_notifications_userIdTousers    notifications[]        @relation("notifications_userIdTousers")
   notifications_notifications_createdByTousers notifications[]        @relation("notifications_createdByTousers")
@@ -448,6 +449,34 @@ model verificationtokens {
   users     users                   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "verificationtokens_ibfk_1")
 
   @@index([userId], map: "userId")
+}
+
+model farms {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(255)
+  userId    Int
+  createdAt DateTime  @db.DateTime(0)
+  updatedAt DateTime  @db.DateTime(0)
+  users     users     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "farms_ibfk_1")
+  sectors   sectors[]
+
+  @@index([userId], map: "userId")
+}
+
+model sectors {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  farmId    Int
+  sensorId  String   @db.VarChar(255)
+  location  String?  @db.VarChar(255)
+  crop      String?  @db.VarChar(255)
+  isAuto    Boolean? @default(true)
+  moisture  Int?     @default(50)
+  createdAt DateTime @db.DateTime(0)
+  updatedAt DateTime @db.DateTime(0)
+  farms     farms    @relation(fields: [farmId], references: [id], onDelete: Cascade, map: "sectors_ibfk_1")
+
+  @@index([farmId], map: "farmId")
 }
 
 enum orders_status {
