@@ -230,6 +230,7 @@ const Marketplace = () => {
   const [isMounted, setIsMounted] = useState(false);
     
   useEffect(() => {
+    setIsMounted(true);
     if (activeTab === "sensors" && user && !["FARMER", "BUYER", "ADMIN"].includes(user.role)) {
       setActiveTab("shop");
     }
