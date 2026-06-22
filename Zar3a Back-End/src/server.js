@@ -195,16 +195,21 @@ const startServer = async () => {
     // Programmatically ensure production columns are present before sync check
     await ensureProductionColumns(sequelize);
 
-    // We synchronize tables but avoid alter: true on MySQL to prevent key/index bloat (ER_TOO_MANY_KEYS)
-    await sequelize.sync();
-    console.log("✅ Database connected & synced");
+    // We synchronize tables but avoid alter: true on MySQL to prevent key/index bloat
+    try {
+      await sequelize.sync();
+      console.log("✅ Database connected & synced");
+    } catch (syncError) {
+      console.error("⚠️ Warning: Sequelize sync encountered an issue, but continuing...", syncError.message);
+    }
 
     app.listen(PORT, () => {
       console.log(`\n🌱 Zar3a API is running (Refactored v2.0.0)`);
       console.log(`    Local  →  http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("❌ Failed to start server:", error);
+    console.error("❌ Fatal error during server boot:", error);
+    process.exit(1);
   }
 };
 startServer();
