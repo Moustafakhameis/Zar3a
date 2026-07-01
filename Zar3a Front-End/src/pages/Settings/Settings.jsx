@@ -19,7 +19,7 @@ import { ClipLoader } from "react-spinners";
 const Settings = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const { user, updateProfile, uploadProfilePicture, changePassword, refreshUser } = useAuth();
+  const { user, updateProfile, uploadProfilePicture, deleteProfilePicture, changePassword, refreshUser } = useAuth();
   const { t } = useLanguage();
 
   const tabs = [
@@ -373,13 +373,30 @@ const Settings = () => {
                       <p className="text-sm font-medium text-text-muted dark:text-text-disabled mt-2 max-w-md">
                         {t("settings.avatarDesc")}
                       </p>
-                      <button 
-                        onClick={() => fileInputRef.current.click()}
-                        className="mt-4 px-5 py-2 bg-surface-card dark:bg-slate-800 border border-border-default dark:border-slate-700 rounded-xl text-xs font-bold text-text-subtle dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/30 transition-colors shadow-sm"
-                      >
-                        Upload Image
-                      </button>
-                    </div>
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        <button 
+                          onClick={() => fileInputRef.current.click()}
+                          className="px-5 py-2 bg-surface-card dark:bg-slate-800 border border-border-default dark:border-slate-700 rounded-xl text-xs font-bold text-text-subtle dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/30 transition-colors shadow-sm"
+                        >
+                          Upload Image
+                        </button>
+                        {formData.avatarUrl && (
+                          <button 
+                            onClick={async () => {
+                              try {
+                                await deleteProfilePicture();
+                                setFormData((prev) => ({ ...prev, avatarUrl: null }));
+                                showToast("Profile picture removed successfully!");
+                              } catch (error) {
+                                showToast("Failed to remove profile picture");
+                              }
+                            }}
+                            className="px-5 py-2 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors shadow-sm"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">

@@ -81,8 +81,16 @@ export default function AdminProfile() {
           <div className="absolute top-0 right-0 -mt-12 -mr-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
           
           <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 text-center sm:text-start">
-            <div className="w-20 h-20 bg-primary-base rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-emerald-500/20">
-              {profile?.fullName?.charAt(0)}
+            <div className="w-20 h-20 bg-primary-base rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-emerald-500/20 overflow-hidden">
+              {profile?.profilePicture ? (
+                <img 
+                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/${profile.profilePicture.replace(/^\//, '')}`} 
+                  alt="Avatar" 
+                  className="w-full h-full object-cover" 
+                />
+              ) : (
+                profile?.fullName?.charAt(0)
+              )}
             </div>
             <div className="space-y-1.5 flex-1">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-xs uppercase tracking-wider">

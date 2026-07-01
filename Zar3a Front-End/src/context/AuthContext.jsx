@@ -405,6 +405,12 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const deleteProfilePicture = async () => {
+    const { data } = await api.delete("/auth/me/avatar");
+    setUser((prev) => ({ ...prev, profilePicture: null }));
+    return data;
+  };
+
   const changePassword = async (currentPassword, newPassword) => {
     const { data } = await api.put("/auth/me/password", { currentPassword, newPassword });
     return data;
@@ -487,6 +493,7 @@ export function AuthProvider({ children }) {
         setUser,
         updateProfile,
         uploadProfilePicture,
+        deleteProfilePicture,
         changePassword,
         forgotPassword,
         resetPassword,

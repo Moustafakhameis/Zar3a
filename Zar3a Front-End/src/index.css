@@ -54,6 +54,7 @@
 
   --animate-ticker: ticker 22s linear infinite;
   --animate-gradient: gradient 3s ease infinite;
+  --animate-shimmer: shimmer 2s infinite;
 
   @keyframes ticker {
     0% { transform: translateX(0); }
@@ -64,6 +65,10 @@
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  }
+
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
   }
 }
 
