@@ -254,7 +254,7 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
                 <div className="relative">
                   {user.profilePicture ? (
                     <img
-                      src={`http://localhost:5002/${user.profilePicture}`}
+                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/${user.profilePicture.replace(/^\//, '')}`}
                       alt="Avatar"
                       className="w-8 h-8 rounded-full object-cover border-2 border-emerald-500/20"
                     />

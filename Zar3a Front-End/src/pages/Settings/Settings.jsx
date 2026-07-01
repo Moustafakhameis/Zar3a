@@ -68,7 +68,7 @@ const Settings = () => {
       fullName: user.fullName || "",
       email: user.email || "",
       phone: user.phone || "",
-      avatarUrl: user.profilePicture ? `http://localhost:5002/${user.profilePicture}` : null,
+      avatarUrl: user.profilePicture ? `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/${user.profilePicture.replace(/^\//, '')}` : null,
       tradeLicense: user.SupplierProfile?.tradeLicense || "",
       location: user.SupplierProfile?.location || user.FarmerProfile?.location || "",
       farmSize: user.FarmerProfile?.farmSize || "",
