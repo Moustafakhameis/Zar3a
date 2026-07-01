@@ -37,6 +37,7 @@ import {
   verifyPasswordResetOTP,
   resetPasswordWithOTP,
   uploadProfilePicture,
+  removeProfilePicture,
 } from "../controllers/auth.controller.js";
 
 const router = Router();
@@ -245,6 +246,9 @@ router.post(
   uploadAvatar,
   uploadProfilePicture
 );
+
+// DELETE /auth/me/avatar
+router.delete("/me/avatar", authenticate, removeProfilePicture);
 
 // PUT /auth/me/password
 router.put(

@@ -1443,3 +1443,13 @@ export const uploadProfilePicture = async (req, res) => {
   }
 };
 
+export const removeProfilePicture = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await User.update({ profilePicture: null }, { where: { id: userId } });
+    res.json({ message: 'Profile picture removed successfully' });
+  } catch (error) {
+    console.error('removeProfilePicture error:', error);
+    res.status(500).json({ message: 'Server error while removing profile picture' });
+  }
+};
