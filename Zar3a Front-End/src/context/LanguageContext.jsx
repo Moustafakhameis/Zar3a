@@ -602,6 +602,7 @@ const translations = {
   "prodDash.searchPlaceholder": { en: "Search products by title, category, region...", ar: "البحث عن المنتجات بالاسم، الفئة، المنطقة..." },
   "prodDash.loading":       { en: "Loading products...",      ar: "جاري تحميل المنتجات..." },
   "prodDash.confirmDelete": { en: "Are you sure you want to delete this product?", ar: "هل أنت متأكد من حذف هذا المنتج؟" },
+  "prodDash.editSuccess":   { en: "Product updated successfully.", ar: "تم تحديث المنتج بنجاح." },
   "prodDash.deleteSuccess": { en: "Product deleted successfully.", ar: "تم حذف المنتج بنجاح." },
   "prodDash.loadFailed":    { en: "Failed to retrieve marketplace products.", ar: "فشل استرداد منتجات السوق." },
   "prodDash.deleteFailed":    { en: "Failed to delete product.", ar: "فشل حذف المنتج." },
