@@ -663,6 +663,34 @@ export default function ProductsDashboard() {
                         </span>
                       </div>
 
+                      {/* Product Image */}
+                      {(() => {
+                        let productImageUrl = "";
+                        if (product.imageUrl) {
+                          productImageUrl = product.imageUrl.startsWith("http") 
+                            ? product.imageUrl 
+                            : `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}${product.imageUrl.startsWith("/") ? "" : "/"}${product.imageUrl}`;
+                        }
+                        
+                        return (
+                          <div className="w-full h-40 bg-surface-secondary dark:bg-slate-800 rounded-2xl mb-4 overflow-hidden flex items-center justify-center">
+                            {productImageUrl ? (
+                              <img 
+                                src={productImageUrl} 
+                                alt={product.title} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = "https://placehold.co/600x400/eeeeee/999999?text=No+Image";
+                                }}
+                              />
+                            ) : (
+                              <span className="text-4xl">🛒</span>
+                            )}
+                          </div>
+                        );
+                      })()}
+
                       {/* Title & Desc */}
                       <h3 className="text-xl font-black text-text-main dark:text-white group-hover:text-primary-base transition-colors line-clamp-1">
                         {product.title}
