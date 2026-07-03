@@ -1,20 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import Groq from "groq-sdk";
+import { aiAPI } from "../../api/axiosInstance";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { LuSend, LuBot, LuUser, LuSprout, LuSparkles } from "react-icons/lu";
 import { useLanguage } from "../../context/LanguageContext";
-
-// 🔑 الـ API Key من متغيرات البيئة
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-
-let groq = null;
-if (GROQ_API_KEY) {
-  groq = new Groq({
-    apiKey: GROQ_API_KEY,
-    dangerouslyAllowBrowser: true
-  });
-}
 
 const AIAssistant = () => {
   const { t, lang } = useLanguage();
@@ -91,49 +80,21 @@ const AIAssistant = () => {
     setInputText("");
     setIsTyping(true);
 
-    if (!groq) {
-      setTimeout(() => {
-        const aiText = getMockAIResponse(userMsg);
-        setMessages(prev => [...prev, { id: Date.now() + 1, sender: "ai", text: aiText }]);
-        setIsTyping(false);
-      }, 1000);
-      return;
-    }
-
     try {
-      const chatCompletion = await groq.chat.completions.create({
-        messages: [
-          {
-            role: "system",
-            // 🧠 العقل المدبر: أوامر ثنائية اللغة وتنسيق احترافي
-            content: `You are an expert agricultural consultant for the 'Zar3a' project (BIS Faculty, Helwan University, Egypt). 
-            
-            CRITICAL LANGUAGE RULE:
-            You MUST respond in the EXACT SAME LANGUAGE the user uses. 
-            - If the user asks in English, reply ONLY in English.
-            - If the user asks in Arabic, reply ONLY in Arabic.
-            
-            Formatting Rules:
-            1. Be professional, accurate, and academic.
-            2. Use Markdown styling (### for main headings).
-            3. Use bullet points (- or *) for steps and solutions.
-            4. Keep paragraphs concise and use relevant emojis (🌿, 💧, 🍅).`
-          },
-          {
-            role: "user",
-            content: userMsg
-          }
-        ],
-        model: "llama-3.3-70b-versatile",
-        temperature: 0.5,
-      });
+      const history = messages.map(m => ({
+        role: m.sender === "user" ? "user" : "assistant",
+        content: m.text
+      }));
 
-      const aiText = chatCompletion.choices[0]?.message?.content || "عذراً، لم أتمكن من المعالجة.";
+      const response = await aiAPI.chat(userMsg, history);
+      const aiText = response.data?.reply || "عذراً، لم أتمكن من المعالجة.";
+      
       setMessages(prev => [...prev, { id: Date.now() + 1, sender: "ai", text: aiText }]);
 
     } catch (error) {
-      console.error("Groq AI Error:", error);
-      setMessages(prev => [...prev, { id: Date.now() + 1, sender: "ai", text: "⚠️ **خطأ في الاتصال**\n\nيوجد ضغط حالياً على خوادم الذكاء الاصطناعي. يرجى المحاولة بعد قليل." }]);
+      console.error("AI Assistant Error:", error);
+      const errorMsg = error.response?.data?.error || "⚠️ **خطأ في الاتصال**\n\nيوجد ضغط حالياً على خوادم الذكاء الاصطناعي. يرجى المحاولة بعد قليل.";
+      setMessages(prev => [...prev, { id: Date.now() + 1, sender: "ai", text: errorMsg }]);
     } finally {
       setIsTyping(false);
     }
@@ -197,7 +158,7 @@ const AIAssistant = () => {
                     <p className="font-medium break-words whitespace-pre-wrap" style={{ overflowWrap: 'anywhere' }}>{msg.text}</p>
                   ) : (
                     <div className="markdown-body font-medium text-slate-700 dark:text-slate-200 break-words whitespace-pre-wrap [&>h3]:text-xl [&>h3]:font-black [&>h3]:text-emerald-700 dark:[&>h3]:text-emerald-400 [&>h3]:mb-4 [&>h3]:mt-2 [&>ul]:list-disc [&>ul]:mx-5 [&>ul]:mb-4 [&>ul]:space-y-2 [&>ul>li]:pl-1 [&>ol]:list-decimal [&>ol]:mx-5 [&>ol]:mb-4 [&>ol]:space-y-2 [&>p]:mb-4 last:[&>p]:mb-0 [&>strong]:text-text-main dark:[&>strong]:text-white [&>strong]:font-bold [&>hr]:border-border-default dark:[&>hr]:border-slate-700 [&>hr]:my-4" style={{ overflowWrap: 'anywhere' }}>
-                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      <ReactMarkdown>{msg.text.replace(/☐/g, '').replace(/\[ \]/g, '').replace(/\[x\]/gi, '').replace(/☑/g, '')}</ReactMarkdown>
                     </div>
                   )}
                 </div>
@@ -255,6 +216,8 @@ const AIAssistant = () => {
           </motion.div>
         )}
 
+        {/* Scroll Spacer to prevent cutoff */}
+        <div className="h-6 shrink-0"></div>
       </div>
 
       {/* 🚀 Glass Input Section */}

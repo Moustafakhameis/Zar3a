@@ -15,6 +15,7 @@ import ordersRoutes from "./routes/orders.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import farmRoutes from "./routes/farm.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,6 +63,7 @@ app.use("/payments", paymentRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/cart", cartRoutes);
 app.use("/farms", farmRoutes);
+app.use("/api/chat", aiRoutes);
 
 app.get("/", (_req, res) => {
   const brevoKey = process.env.BREVO_API_KEY || 

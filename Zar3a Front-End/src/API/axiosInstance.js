@@ -207,4 +207,13 @@ export const farmsAPI = {
   deleteSector: (sectorId) => api.delete(`/farms/sectors/${sectorId}`),
 };
 
+/**
+ * ─────────────────────────────────────────────────────────
+ * AI ASSISTANT API
+ * ─────────────────────────────────────────────────────────
+ */
+export const aiAPI = {
+  chat: (message, history) => api.post('/api/chat', { message, history }),
+};
+
 export default api;

@@ -299,7 +299,7 @@ const translations = {
 
   // ── AI Assistant ─────────────────────────────────────────────────────────────
   "ai.title":         { en: "AI Farming Assistant",   ar: "مساعد زرعة الذكي" },
-  "ai.subtitle":      { en: "Powered by Groq LLaMA",  ar: "مدعوم بـ Groq LLaMA" },
+  "ai.subtitle":      { en: "Powered by Groq AI",  ar: "مدعوم بـ Groq AI" },
   "ai.send":          { en: "Send",                   ar: "إرسال" },
   "ai.placeholder":   { en: "Ask about crops, diseases, fertilizers...", ar: "اسأل عن المحاصيل والأمراض والأسمدة..." },
   "ai.typing":        { en: "Analyzing...",            ar: "جاري التحليل..." },
@@ -766,7 +766,7 @@ const translations = {
   "sub.feature.autoSchedules": { en: "Automated schedules", ar: "جداول ري وتسميد مؤتمتة" },
   "sub.feature.analyticsDashboard": { en: "Analytics dashboard", ar: "لوحة تحكم التحليلات" },
   "sub.feature.unlimitedSensors": { en: "Unlimited sensor connections", ar: "اتصال غير محدود بالمستشعرات" },
-  "sub.feature.aiDetail": { en: "AI crop diagnosis (Groq LLaMA) — Arabic & English", ar: "تشخيص المحاصيل بالذكاء الاصطناعي (Groq LLaMA) - عربي وإنجليزي" },
+  "sub.feature.aiDetail": { en: "AI crop diagnosis (Groq AI) — Arabic & English", ar: "تشخيص المحاصيل بالذكاء الاصطناعي (Groq AI) - عربي وإنجليزي" },
   "sub.feature.wateringSchedules": { en: "Automated watering & fertilization schedules", ar: "مواعيد ري وتسميد تلقائية" },
   "sub.feature.analyticsSales": { en: "Analytics dashboard — sales, yield & charts", ar: "لوحة تحكم التحليلات - المبيعات، المحصول، والرسوم" },
   "sub.feature.unlimitedHistory": { en: "Historical data logs (unlimited)", ar: "سجلات بيانات تاريخية غير محدودة" },
