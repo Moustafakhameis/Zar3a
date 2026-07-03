@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { aiAPI } from "../../api/axiosInstance";
+import { aiAPI } from "../../API/axiosInstance";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { LuSend, LuBot, LuUser, LuSprout, LuSparkles } from "react-icons/lu";

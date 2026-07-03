@@ -48,10 +48,7 @@ const translations = {
   "prodDash.unit":          { en: "Unit",                    ar: "الوحدة" },
   "prodDash.description":   { en: "Description",             ar: "الوصف" },
   "prodDash.productImage":  { en: "Product Image",           ar: "صورة المنتج" },
-  "prodDash.status":        { en: "Status",                  ar: "الحالة" },
-  "prodDash.category":      { en: "Category",                ar: "الفئة" },
-  "prodDash.price":         { en: "Price",                   ar: "السعر" },
-  "prodDash.region":        { en: "Region",                  ar: "المنطقة" },
+
   "nav.mainMenu":           { en: "Main Menu",               ar: "القائمة الرئيسية" },
   "nav.chat":               { en: "Chat",                    ar: "المحادثات" },
   "lang.toggle":            { en: "عربي",                   ar: "English" },
