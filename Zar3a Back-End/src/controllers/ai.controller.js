@@ -1,8 +1,13 @@
 import Groq from 'groq-sdk';
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+let groq = null;
+try {
+  groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
+} catch (err) {
+  console.warn("⚠️ [AI] Groq client initialization failed:", err.message);
+}
 
 const DEFAULT_MODEL = 'llama3-8b-8192';
 
@@ -30,6 +35,10 @@ const fetchGroqChatCompletion = async (messages, model, retries = 2) => {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Groq API Timeout')), 30000) // 30 seconds
       );
+
+      if (!groq) {
+        throw new Error("Groq API client is not initialized. Check GROQ_API_KEY in environment variables.");
+      }
 
       const apiCallPromise = groq.chat.completions.create({
         messages,
